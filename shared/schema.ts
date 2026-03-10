@@ -1,18 +1,130 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
+export type LayerType =
+  | 'elevation'
+  | 'landcover'
+  | 'surface_water'
+  | 'rivers'
+  | 'forest_canopy'
+  | 'population'
+  | 'built_density';
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+export interface GeoBounds {
+  minLng: number;
+  minLat: number;
+  maxLng: number;
+  maxLat: number;
+}
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export interface LayerMetadata {
+  source: string;
+  resolution: number;
+  fetchedAt: string;
+  processingTime?: number;
+}
+
+export interface LandcoverData {
+  cityLocode: string;
+  bounds: GeoBounds;
+  classes: {
+    builtUp: number;
+    trees: number;
+    shrubland: number;
+    grassland: number;
+    cropland: number;
+    bareVegetation: number;
+    water: number;
+    wetland: number;
+    mangroves: number;
+    moss: number;
+    snowIce: number;
+  };
+  geoJson?: any;
+}
+
+export interface BoundaryData {
+  cityLocode: string;
+  cityName: string;
+  centroid: [number, number];
+  bbox: [number, number, number, number];
+  boundaryGeoJson: any;
+}
+
+export interface GridData {
+  totalCells: number;
+  cellSizeMeters: number;
+  geoJson: any;
+}
+
+export interface ZoneData {
+  totalZones: number;
+  geoJson: any;
+}
+
+export interface ElevationData {
+  elevationData: {
+    width: number;
+    height: number;
+    cellSize: number;
+    minElevation: number;
+    maxElevation: number;
+  };
+  contours: any;
+}
+
+export interface RiversData {
+  majorRivers: string[];
+  totalLengthKm: number;
+  geoJson: any;
+}
+
+export interface SurfaceWaterData {
+  occurrence: {
+    permanent: number;
+    seasonal: number;
+  };
+  geoJson: any;
+}
+
+export interface ForestData {
+  canopyCover: {
+    mean: number;
+    min: number;
+    max: number;
+  };
+  geoJson: any;
+}
+
+export interface PopulationData {
+  geoJson: any;
+}
+
+export interface InterventionCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  applicableTypologies: string[];
+}
+
+export interface InterventionType {
+  id: string;
+  category: string;
+  name: string;
+  description: string;
+  osmAssetTypes: string[];
+  typicalScale: { min: number; max: number; unit: string };
+  costRange: { min: number; max: number; unit: string };
+  impacts: { flood: string; heat: string; landslide: string };
+  implementationNotes: string;
+  maintenanceRequirements: string;
+  timeToImplement: { min: number; max: number; unit: string };
+  cobenefits: string[];
+}
+
+export interface InterventionsData {
+  version: string;
+  categories: Record<string, InterventionCategory>;
+  interventions: InterventionType[];
+}
