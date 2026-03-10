@@ -1,5 +1,4 @@
 import {
-  MapPinned,
   CloudRain,
   Flame,
   Mountain,
@@ -9,6 +8,7 @@ import {
   Trees,
   Map as MapIcon,
   Grid3X3,
+  MapPinned,
   Leaf,
   AlertTriangle,
 } from "lucide-react";
@@ -35,7 +35,6 @@ export interface LayerState extends LayerConfig {
 }
 
 export const LAYER_CONFIGS: LayerConfig[] = [
-  { id: "intervention_zones", name: "Intervention Zones", icon: MapPinned, color: "#10b981", source: "geojson", group: "analysis", available: true },
   { id: "grid_flood", name: "Flood Risk", icon: CloudRain, color: "#3b82f6", source: "geojson", group: "analysis", available: true },
   { id: "grid_heat", name: "Heat Risk", icon: Flame, color: "#ef4444", source: "geojson", group: "analysis", available: true },
   { id: "grid_landslide", name: "Landslide Risk", icon: Mountain, color: "#a16207", source: "geojson", group: "analysis", available: true },

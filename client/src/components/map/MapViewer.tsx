@@ -9,15 +9,11 @@ import {
   getLandslideColor,
   getPopulationColor,
   getBuildingColor,
-  TYPOLOGY_COLORS,
   LANDCOVER_COLORS,
 } from "@/data/colors";
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
 import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
-import ZonePriorityPanel from "./ZonePriorityPanel";
-import ZoneDetailPanel from "./ZoneDetailPanel";
-import type { InterventionsData } from "@shared/schema";
 
 export default function MapViewer() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -36,30 +32,9 @@ export default function MapViewer() {
     }))
   );
 
-  const [zones, setZones] = useState<any[]>([]);
-  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
-  const [showZonePanel, setShowZonePanel] = useState(true);
-  const [zonesVisible, setZonesVisible] = useState(true);
-  const [interventions, setInterventions] = useState<InterventionsData | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [dataStatus, setDataStatus] = useState("");
   const [mapReady, setMapReady] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/geospatial/interventions")
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => data && setInterventions(data))
-      .catch(() => {});
-
-    loadLayerData("intervention_zones")
-      .then((data) => {
-        if (data?.geoJson?.features) {
-          setZones(data.geoJson.features.map((f: any) => f.properties));
-          dataCache.current.set("intervention_zones", data);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -162,54 +137,6 @@ export default function MapViewer() {
       if (!data) return null;
 
       switch (layerId) {
-        case "intervention_zones": {
-          const geoJson = data.geoJson || data;
-          if (!geoJson?.features) return null;
-
-          const maxRisk = Math.max(
-            ...geoJson.features.map((f: any) => {
-              const p = f.properties;
-              return (p.meanFlood + p.meanHeat + p.meanLandslide) / 3;
-            }),
-            0.01
-          );
-
-          return L.geoJSON(geoJson, {
-            style: (feature: any) => {
-              const p = feature?.properties;
-              const typology = p?.typologyLabel || "LOW";
-              const color = TYPOLOGY_COLORS[typology] || "#6b7280";
-              const risk = ((p?.meanFlood || 0) + (p?.meanHeat || 0) + (p?.meanLandslide || 0)) / 3;
-              const normalized = risk / maxRisk;
-              return {
-                color,
-                weight: 1 + normalized * 2,
-                fillColor: color,
-                fillOpacity: 0.08 + normalized * 0.57,
-                opacity: 0.8,
-              };
-            },
-            onEachFeature: (feature: any, layer: L.Layer) => {
-              const p = feature.properties;
-              const html = `
-                <div style="font-family: system-ui; font-size: 12px; max-width: 220px;">
-                  <div style="font-weight: 600; margin-bottom: 4px;">${p.name}</div>
-                  <div style="color: #9ca3af; font-size: 10px;">
-                    Typology: ${p.typologyLabel?.replace(/_/g, "/")}<br/>
-                    Intervention: ${p.interventionType?.replace(/_/g, " ")}<br/>
-                    Flood: ${(p.meanFlood * 100).toFixed(0)}% · Heat: ${(p.meanHeat * 100).toFixed(0)}% · Landslide: ${(p.meanLandslide * 100).toFixed(0)}%<br/>
-                    Area: ${p.areaKm2} km²
-                  </div>
-                </div>
-              `;
-              (layer as any).bindTooltip(html, { sticky: true });
-              (layer as any).on("click", () => {
-                setSelectedZoneId(p.zoneId);
-              });
-            },
-          });
-        }
-
         case "grid_flood":
         case "grid_heat":
         case "grid_landslide":
@@ -458,12 +385,6 @@ export default function MapViewer() {
               )
             );
           }
-
-          if (layerId === "intervention_zones" && data.geoJson?.features) {
-            setZones(
-              data.geoJson.features.map((f: any) => f.properties)
-            );
-          }
         } else {
           setLayers((prev) =>
             prev.map((l) =>
@@ -495,24 +416,7 @@ export default function MapViewer() {
 
       if (result.success) {
         setDataStatus("Data fetched successfully! Toggle layers to view.");
-
-        const intResponse = await fetch("/api/geospatial/interventions");
-        if (intResponse.ok) {
-          const intData = await intResponse.json();
-          setInterventions(intData);
-        }
-
         dataCache.current.clear();
-
-        try {
-          const zonesData = await loadLayerData("intervention_zones");
-          if (zonesData?.geoJson?.features) {
-            setZones(zonesData.geoJson.features.map((f: any) => f.properties));
-            dataCache.current.set("intervention_zones", zonesData);
-          }
-        } catch (e) {
-          console.error("Failed to load zones after fetch:", e);
-        }
       } else {
         setDataStatus(`Error: ${result.message}`);
       }
@@ -522,32 +426,6 @@ export default function MapViewer() {
       setIsFetching(false);
     }
   }, []);
-
-  const selectedZone = zones.find((z) => z.zoneId === selectedZoneId);
-
-  const handleToggleZonesVisibility = useCallback(() => {
-    setZonesVisible((prev) => {
-      const newVal = !prev;
-      if (newVal) {
-        const layerState = layers.find((l) => l.id === "intervention_zones");
-        if (layerState && !layerState.enabled) {
-          toggleLayer("intervention_zones");
-        }
-      } else {
-        const existingLayer = layerRefsMap.current.get("intervention_zones");
-        if (existingLayer && mapRef.current) {
-          mapRef.current.removeLayer(existingLayer);
-          layerRefsMap.current.delete("intervention_zones");
-          setLayers((prev) =>
-            prev.map((l) =>
-              l.id === "intervention_zones" ? { ...l, enabled: false } : l
-            )
-          );
-        }
-      }
-      return newVal;
-    });
-  }, [layers, toggleLayer]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-zinc-950 dark">
@@ -566,25 +444,6 @@ export default function MapViewer() {
         />
 
         <EvidenceDrawer layers={layers} onToggleLayer={toggleLayer} />
-
-        {showZonePanel && zones.length > 0 && (
-          <ZonePriorityPanel
-            zones={zones}
-            selectedZoneId={selectedZoneId}
-            onSelectZone={setSelectedZoneId}
-            zonesVisible={zonesVisible}
-            onToggleZonesVisibility={handleToggleZonesVisibility}
-            onClose={() => setShowZonePanel(false)}
-          />
-        )}
-
-        {selectedZone && (
-          <ZoneDetailPanel
-            zone={selectedZone}
-            interventions={interventions}
-            onClose={() => setSelectedZoneId(null)}
-          />
-        )}
 
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-[2000]">

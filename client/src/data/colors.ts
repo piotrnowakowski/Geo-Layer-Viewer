@@ -40,23 +40,6 @@ export function getBuildingColor(density: number): string {
   return '#ffedd5';
 }
 
-export const TYPOLOGY_COLORS: Record<string, string> = {
-  FLOOD: '#3b82f6',
-  HEAT: '#ef4444',
-  LANDSLIDE: '#a16207',
-  FLOOD_HEAT: '#8b5cf6',
-  FLOOD_LANDSLIDE: '#0891b2',
-  HEAT_LANDSLIDE: '#db2777',
-  LOW: '#10b981',
-};
-
-export const INTERVENTION_COLORS: Record<string, string> = {
-  sponge_network: '#3b82f6',
-  cooling_network: '#ef4444',
-  slope_stabilization: '#a16207',
-  multi_benefit: '#10b981',
-};
-
 export const LANDCOVER_COLORS: Record<string, string> = {
   trees: '#228B22',
   builtUp: '#DC143C',

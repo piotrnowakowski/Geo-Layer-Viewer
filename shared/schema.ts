@@ -56,11 +56,6 @@ export interface GridData {
   geoJson: any;
 }
 
-export interface ZoneData {
-  totalZones: number;
-  geoJson: any;
-}
-
 export interface ElevationData {
   elevationData: {
     width: number;
@@ -97,34 +92,4 @@ export interface ForestData {
 
 export interface PopulationData {
   geoJson: any;
-}
-
-export interface InterventionCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-  applicableTypologies: string[];
-}
-
-export interface InterventionType {
-  id: string;
-  category: string;
-  name: string;
-  description: string;
-  osmAssetTypes: string[];
-  typicalScale: { min: number; max: number; unit: string };
-  costRange: { min: number; max: number; unit: string };
-  impacts: { flood: string; heat: string; landslide: string };
-  implementationNotes: string;
-  maintenanceRequirements: string;
-  timeToImplement: { min: number; max: number; unit: string };
-  cobenefits: string[];
-}
-
-export interface InterventionsData {
-  version: string;
-  categories: Record<string, InterventionCategory>;
-  interventions: InterventionType[];
 }

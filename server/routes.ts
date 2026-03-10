@@ -13,14 +13,10 @@ import {
   computeLandcoverMetrics,
   computePopulationMetrics,
   computeCompositeScores,
-  clusterZones,
 } from "./services/gridService";
-import { interventionsData } from "./services/interventionsData";
 import type { GeoBounds } from "@shared/schema";
 import fs from "fs";
 import path from "path";
-
-const dataCache = new Map<string, any>();
 
 const OEF_TILE_LAYERS: Record<string, string> = {
   dynamic_world:
@@ -291,27 +287,6 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/geospatial/zones", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-zones.json");
-      if (cached) return res.json(cached);
-
-      const gridData = loadCachedData("porto-alegre-grid.json");
-      if (!gridData?.geoJson) return res.status(400).json({ message: "Grid not computed yet" });
-
-      const zones = clusterZones(gridData.geoJson);
-      saveSampleData("porto-alegre-zones.json", zones);
-      res.json(zones);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/interventions", (_req, res) => {
-    saveSampleData("interventions.json", interventionsData);
-    res.json(interventionsData);
-  });
-
   app.post("/api/geospatial/fetch-all", async (_req, res) => {
     try {
       const steps: string[] = [];
@@ -383,19 +358,6 @@ export async function registerRoutes(
       } else {
         steps.push("Grid loaded from cache");
       }
-
-      let zones = loadCachedData("porto-alegre-zones.json");
-      if (!zones) {
-        steps.push("Clustering intervention zones...");
-        zones = clusterZones(gridData.geoJson);
-        saveSampleData("porto-alegre-zones.json", zones);
-        steps.push("Zones computed and cached");
-      } else {
-        steps.push("Zones loaded from cache");
-      }
-
-      saveSampleData("interventions.json", interventionsData);
-      steps.push("Interventions data saved");
 
       res.json({ success: true, steps });
     } catch (error: any) {
