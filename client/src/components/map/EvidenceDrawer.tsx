@@ -26,6 +26,7 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
     <div
       data-testid="evidence-drawer"
       className={cn(
+        "site-explorer-panel",
         "absolute bottom-0 left-0 z-[1001]",
         "w-[75%] max-w-[800px]",
         "bg-zinc-900/95 backdrop-blur-sm",
@@ -47,7 +48,8 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
           {activeCount > 0 && (
             <span
               data-testid="badge-active-layers"
-              className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600/30 text-blue-400 font-medium"
+              className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+              style={{ backgroundColor: 'rgba(0, 31, 168, 0.3)', color: '#6B8CFF' }}
             >
               {activeCount} active
             </span>
@@ -109,13 +111,13 @@ function LayerButton({
         "relative flex flex-col items-center gap-1 p-1.5 rounded-lg border transition-all duration-150",
         "text-center min-h-[56px] justify-center",
         layer.enabled
-          ? "border-blue-500/50 text-white"
+          ? "text-white"
           : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300",
         !isAvailable && "opacity-40 cursor-not-allowed hover:border-zinc-700 hover:text-zinc-400"
       )}
       style={
         layer.enabled
-          ? { backgroundColor: `${layer.color}20` }
+          ? { backgroundColor: `${layer.color}20`, borderColor: 'rgba(0, 31, 168, 0.5)' }
           : undefined
       }
     >

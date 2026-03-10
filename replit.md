@@ -90,6 +90,16 @@ client/public/sample-data/ — Cached real data
 - **Environment** (5): Elevation, Land Cover, Water Bodies, Rivers, Forest
 - **OEF Geospatial** (10): Dynamic World (tiles), Slope, Flow Accumulation, Canopy Cover, Flood/Heat Hazard, Exposure, Cooling Capacity, Composite Risk, NbS Opportunity Zones (most unavailable — tiles not yet on S3)
 
+## Design System
+- **CityCatalyst design system** from Open Earth Foundation
+- **Font**: Poppins (Google Fonts, weights 300-700)
+- **Primary blue**: `hsl(224, 100%, 33%)` = `#001fa8` — same in both light and dark mode
+- **Dark mode**: Always on via `document.documentElement.classList.add("dark")` in main.tsx
+- **CityCatalystTab**: Bottom-left corner tab with `#3B63C4` background, linking to citycatalyst.openearth.dev
+- **site-explorer-panel CSS**: Applied to EvidenceDrawer for pointer-events isolation on Leaflet overlays
+- **Color tokens**: Aligned with CityCatalyst spec (primary, secondary, muted, accent, destructive, success)
+- Custom scrollbar, fade-in animation, leaflet dark controls all styled per design system
+
 ## Key Design Decisions
 - Dark theme with CartoDB Dark Matter basemap
 - Bottom evidence drawer for layer toggles (grouped by category)

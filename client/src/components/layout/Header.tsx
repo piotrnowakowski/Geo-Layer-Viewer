@@ -19,7 +19,7 @@ export default function Header({ isLoading, dataStatus, onFetchData }: HeaderPro
     >
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Leaf className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -41,7 +41,7 @@ export default function Header({ isLoading, dataStatus, onFetchData }: HeaderPro
           disabled={isLoading}
           className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
-            "bg-emerald-600 hover:bg-emerald-500 text-white",
+            "bg-primary hover:bg-primary/90 text-primary-foreground",
             "transition-colors duration-150",
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}

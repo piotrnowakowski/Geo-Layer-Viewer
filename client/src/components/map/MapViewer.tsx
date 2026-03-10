@@ -14,6 +14,7 @@ import {
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
 import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
+import CityCatalystTab from "../layout/CityCatalystTab";
 
 export default function MapViewer() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -427,11 +428,12 @@ export default function MapViewer() {
         />
 
         <EvidenceDrawer layers={layers} onToggleLayer={toggleLayer} />
+        <CityCatalystTab />
 
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-[2000]">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-sm text-zinc-400">Initializing map...</p>
             </div>
           </div>
