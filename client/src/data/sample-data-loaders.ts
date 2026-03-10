@@ -41,11 +41,9 @@ export async function loadLayerData(layerId: string): Promise<any> {
     surface_water: "/sample-data/porto-alegre-surface-water.json",
     rivers: "/sample-data/porto-alegre-rivers.json",
     forest: "/sample-data/porto-alegre-forest.json",
-    population: "/sample-data/porto-alegre-population.json",
     grid_flood: "/sample-data/porto-alegre-grid.json",
     grid_heat: "/sample-data/porto-alegre-grid.json",
     grid_landslide: "/sample-data/porto-alegre-grid.json",
-    grid_population: "/sample-data/porto-alegre-grid.json",
     grid_buildings: "/sample-data/porto-alegre-grid.json",
   };
 
@@ -55,11 +53,9 @@ export async function loadLayerData(layerId: string): Promise<any> {
     surface_water: "/api/geospatial/surface-water",
     rivers: "/api/geospatial/rivers",
     forest: "/api/geospatial/forest",
-    population: "/api/geospatial/population",
     grid_flood: "/api/geospatial/grid",
     grid_heat: "/api/geospatial/grid",
     grid_landslide: "/api/geospatial/grid",
-    grid_population: "/api/geospatial/grid",
     grid_buildings: "/api/geospatial/grid",
   };
 

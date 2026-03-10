@@ -5,14 +5,14 @@ import { getRiversData } from "./services/riversService";
 import { getSurfaceWaterData } from "./services/surfaceWaterService";
 import { getForestCanopyData } from "./services/forestService";
 import { getLandcoverData } from "./services/worldcoverService";
-import { getPopulationData } from "./services/populationService";
+import { getBuildingData } from "./services/buildingService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import {
   generateGrid,
   computeRiverMetrics,
   computeWaterMetrics,
   computeLandcoverMetrics,
-  computePopulationMetrics,
+  computeBuildingMetrics,
   computeCompositeScores,
 } from "./services/gridService";
 import type { GeoBounds } from "@shared/schema";
@@ -69,8 +69,8 @@ function buildGrid(bounds: GeoBounds): any {
   const landcover = loadCachedData("porto-alegre-landcover.json");
   if (landcover?.geoJson) computeLandcoverMetrics(grid, landcover.geoJson);
 
-  const population = loadCachedData("porto-alegre-population.json");
-  if (population?.geoJson) computePopulationMetrics(grid, population.geoJson);
+  const buildings = loadCachedData("porto-alegre-buildings.json");
+  if (buildings) computeBuildingMetrics(grid, buildings);
 
   const elevation = loadCachedData("porto-alegre-elevation.json");
   if (elevation) computeElevationMetrics(grid, elevation, bounds);
@@ -230,17 +230,17 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/geospatial/population", async (_req, res) => {
+  app.get("/api/geospatial/buildings", async (_req, res) => {
     try {
-      const cached = loadCachedData("porto-alegre-population.json");
+      const cached = loadCachedData("porto-alegre-buildings.json");
       if (cached) return res.json(cached);
 
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
       const bounds = getBoundsFromBoundary(boundary);
-      const data = await getPopulationData("BR-POA", bounds);
-      saveSampleData("porto-alegre-population.json", data);
+      const data = await getBuildingData("BR-POA", bounds);
+      saveSampleData("porto-alegre-buildings.json", data);
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -249,8 +249,11 @@ export async function registerRoutes(
 
   app.get("/api/geospatial/grid", async (_req, res) => {
     try {
+      const hasBuildings = !!loadCachedData("porto-alegre-buildings.json");
+      const hasElevation = !!loadCachedData("porto-alegre-elevation.json");
+
       const cached = loadCachedData("porto-alegre-grid.json");
-      if (cached) return res.json(cached);
+      if (cached && hasBuildings && hasElevation) return res.json(cached);
 
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
@@ -264,7 +267,9 @@ export async function registerRoutes(
         geoJson: grid,
       };
 
-      saveSampleData("porto-alegre-grid.json", data);
+      if (hasBuildings && hasElevation) {
+        saveSampleData("porto-alegre-grid.json", data);
+      }
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -291,7 +296,6 @@ export async function registerRoutes(
         { name: "rivers", file: "porto-alegre-rivers.json", fn: () => getRiversData("BR-POA", bounds) },
         { name: "surface-water", file: "porto-alegre-surface-water.json", fn: () => getSurfaceWaterData("BR-POA", bounds) },
         { name: "forest", file: "porto-alegre-forest.json", fn: () => getForestCanopyData("BR-POA", bounds) },
-        { name: "population", file: "porto-alegre-population.json", fn: () => getPopulationData("BR-POA", bounds) },
         { name: "landcover", file: "porto-alegre-landcover.json", fn: () => getLandcoverData("BR-POA", bounds) },
       ];
 
@@ -312,6 +316,20 @@ export async function registerRoutes(
         }
       }
 
+      let buildingData = loadCachedData("porto-alegre-buildings.json");
+      if (!buildingData) {
+        steps.push("Fetching real building footprints from OSM...");
+        try {
+          buildingData = await getBuildingData("BR-POA", bounds);
+          saveSampleData("porto-alegre-buildings.json", buildingData);
+          steps.push(`Buildings fetched: ${buildingData.totalBuildings} real footprints`);
+        } catch (err: any) {
+          steps.push(`Buildings failed: ${err.message} (skipping)`);
+        }
+      } else {
+        steps.push("Buildings loaded from cache");
+      }
+
       let elevationData = loadCachedData("porto-alegre-elevation.json");
       if (!elevationData) {
         steps.push("Fetching elevation from Copernicus DEM S3...");
@@ -326,13 +344,21 @@ export async function registerRoutes(
         steps.push("Elevation loaded from cache");
       }
 
+      const hasBuildings = !!loadCachedData("porto-alegre-buildings.json");
+      const hasElevation = !!loadCachedData("porto-alegre-elevation.json");
+      const allDepsReady = hasBuildings && hasElevation;
+
       let gridData = loadCachedData("porto-alegre-grid.json");
-      if (!gridData) {
+      if (!gridData || !allDepsReady) {
         steps.push("Computing analysis grid from real data...");
         const grid = buildGrid(bounds);
         gridData = { totalCells: grid.features.length, cellSizeMeters: 1000, geoJson: grid };
-        saveSampleData("porto-alegre-grid.json", gridData);
-        steps.push("Grid computed and cached");
+        if (allDepsReady) {
+          saveSampleData("porto-alegre-grid.json", gridData);
+          steps.push("Grid computed and cached (all dependencies present)");
+        } else {
+          steps.push("Grid computed but not cached (missing dependencies)");
+        }
       } else {
         steps.push("Grid loaded from cache");
       }

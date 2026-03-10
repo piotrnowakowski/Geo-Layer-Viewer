@@ -19,7 +19,6 @@ export function generateGrid(bounds: GeoBounds, cellSizeKm: number = 1): any {
             flow_accumulation: 0,
             canopy_pct: 0,
             impervious_pct: 0,
-            pop_density: 0,
             building_density: 0,
             river_proximity: 1,
             water_proximity: 1,
@@ -149,11 +148,15 @@ export function computeLandcoverMetrics(grid: any, landcoverGeoJson: any): void 
   }
 }
 
-export function computePopulationMetrics(grid: any, popGeoJson: any): void {
-  if (!popGeoJson?.features?.length) return;
+export function computeBuildingMetrics(grid: any, buildingData: any): void {
+  if (!buildingData?.centroids?.length) return;
 
   const cellSizeDeg = 1 / 111.32;
   const halfCell = cellSizeDeg / 2;
+  const cellAreaKm2 = (cellSizeDeg * 111.32) * (cellSizeDeg * 111.32 * Math.cos(-30.03 * Math.PI / 180));
+
+  let maxCount = 0;
+  const cellCounts: number[] = [];
 
   for (const cell of grid.features) {
     const [cx, cy] = cell.properties.centroid;
@@ -162,19 +165,24 @@ export function computePopulationMetrics(grid: any, popGeoJson: any): void {
     const cellMinLat = cy - halfCell;
     const cellMaxLat = cy + halfCell;
 
-    let residentialCoverage = 0;
     let buildingCount = 0;
-
-    for (const feature of popGeoJson.features) {
-      const overlap = computeOverlapFraction(feature, cellMinLng, cellMaxLng, cellMinLat, cellMaxLat);
-      if (overlap > 0) {
-        residentialCoverage += overlap;
+    for (const b of buildingData.centroids) {
+      if (b.lng >= cellMinLng && b.lng <= cellMaxLng &&
+          b.lat >= cellMinLat && b.lat <= cellMaxLat) {
         buildingCount++;
       }
     }
 
-    cell.properties.metrics.pop_density = Math.min(residentialCoverage, 1);
-    cell.properties.metrics.building_density = Math.min(buildingCount / 20, 1);
+    cellCounts.push(buildingCount);
+    if (buildingCount > maxCount) maxCount = buildingCount;
+  }
+
+  for (let i = 0; i < grid.features.length; i++) {
+    const count = cellCounts[i];
+    const density = maxCount > 0 ? count / maxCount : 0;
+    grid.features[i].properties.metrics.building_density = density;
+    grid.features[i].properties.metrics.building_count = count;
+    grid.features[i].properties.metrics.buildings_per_km2 = Math.round(count / cellAreaKm2);
   }
 }
 
@@ -240,8 +248,7 @@ export function computeCompositeScores(grid: any): void {
     m.heat_score = clamp(
       m.impervious_pct * 0.3 +
       (1 - m.canopy_pct) * 0.25 +
-      m.building_density * 0.25 +
-      m.pop_density * 0.2
+      m.building_density * 0.45
     );
 
     m.landslide_score = clamp(
