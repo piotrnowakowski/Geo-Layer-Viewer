@@ -1,8 +1,11 @@
+import { Link } from "wouter";
+import { Database } from "lucide-react";
+
 export default function Header() {
   return (
     <header
       data-testid="header"
-      className="h-14 flex items-center px-4 z-[1002] relative"
+      className="h-14 flex items-center justify-between px-4 z-[1002] relative"
       style={{ backgroundColor: "#001fa8" }}
     >
       <div className="flex items-center gap-3">
@@ -26,6 +29,16 @@ export default function Header() {
           Project Preparation Data Layers
         </span>
       </div>
+
+      <Link href="/data">
+        <a
+          data-testid="link-data-page"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors"
+        >
+          <Database className="w-3.5 h-3.5" />
+          Data
+        </a>
+      </Link>
     </header>
   );
 }
