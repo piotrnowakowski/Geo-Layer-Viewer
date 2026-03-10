@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Layers, ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LAYER_CONFIGS, LAYER_GROUPS, type LayerState } from "@/data/layer-configs";
+import { LAYER_GROUPS, type LayerState } from "@/data/layer-configs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EvidenceDrawerProps {

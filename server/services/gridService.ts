@@ -75,25 +75,26 @@ export function computeRiverMetrics(grid: any, riversGeoJson: any): void {
       const dist = Math.sqrt((cx - rx) ** 2 + (cy - ry) ** 2) * 111.32;
       if (dist < minDist) minDist = dist;
     }
-    cell.properties.metrics.river_proximity = Math.min(minDist / 10, 1);
+    cell.properties.metrics.river_proximity = Math.min(minDist / 3, 1);
   }
 }
 
 export function computeWaterMetrics(grid: any, waterGeoJson: any): void {
   if (!waterGeoJson?.features?.length) return;
 
-  const waterCentroids: [number, number][] = [];
+  const waterPoints: [number, number][] = [];
   for (const feature of waterGeoJson.features) {
     if (feature.geometry?.coordinates) {
-      const coords = feature.geometry.type === "Polygon"
-        ? feature.geometry.coordinates[0]
-        : feature.geometry.type === "MultiPolygon"
-          ? feature.geometry.coordinates[0][0]
-          : [];
-      if (coords.length > 0) {
-        const cx = coords.reduce((s: number, c: number[]) => s + c[0], 0) / coords.length;
-        const cy = coords.reduce((s: number, c: number[]) => s + c[1], 0) / coords.length;
-        waterCentroids.push([cx, cy]);
+      let rings: number[][] = [];
+      if (feature.geometry.type === "Polygon") {
+        rings = feature.geometry.coordinates[0];
+      } else if (feature.geometry.type === "MultiPolygon") {
+        for (const poly of feature.geometry.coordinates) {
+          rings = rings.concat(poly[0]);
+        }
+      }
+      for (let i = 0; i < rings.length; i += Math.max(1, Math.floor(rings.length / 20))) {
+        waterPoints.push([rings[i][0], rings[i][1]]);
       }
     }
   }
@@ -101,11 +102,11 @@ export function computeWaterMetrics(grid: any, waterGeoJson: any): void {
   for (const cell of grid.features) {
     const [cx, cy] = cell.properties.centroid;
     let minDist = Infinity;
-    for (const [wx, wy] of waterCentroids) {
+    for (const [wx, wy] of waterPoints) {
       const dist = Math.sqrt((cx - wx) ** 2 + (cy - wy) ** 2) * 111.32;
       if (dist < minDist) minDist = dist;
     }
-    cell.properties.metrics.water_proximity = Math.min(minDist / 10, 1);
+    cell.properties.metrics.water_proximity = Math.min(minDist / 5, 1);
   }
 }
 
@@ -274,11 +275,16 @@ export function computeCompositeScores(grid: any): void {
   for (const cell of grid.features) {
     const m = cell.properties.metrics;
 
+    const lowElevation = m.elevation_mean >= 0
+      ? clamp(1 - (m.elevation_mean / 300))
+      : 1;
+
     m.flood_score = clamp(
-      (1 - m.river_proximity) * 0.35 +
-      m.impervious_pct * 0.25 +
-      m.flow_accumulation * 0.2 +
-      (1 - m.water_proximity) * 0.2
+      (1 - m.river_proximity) * 0.30 +
+      (1 - m.water_proximity) * 0.25 +
+      lowElevation * 0.25 +
+      m.impervious_pct * 0.10 +
+      m.flow_accumulation * 0.10
     );
 
     m.heat_score = clamp(

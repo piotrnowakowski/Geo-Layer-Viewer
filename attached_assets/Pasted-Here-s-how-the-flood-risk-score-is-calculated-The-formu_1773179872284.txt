@@ -1,0 +1,31 @@
+Here's how the flood risk score is calculated. The formula lives in computeCompositeScores() and takes 7 input parameters, each weighted:
+
+Flood Score Formula
+flood_score = 0.25 × flowAccumPct
+            + 0.15 × depressionPct
+            + 0.20 × riverProx
+            + 0.10 × waterProx
+            + 0.15 × lowLying
+            + 0.10 × imperv
+            + 0.05 × flatness
+The result is a value between 0 and 1, rounded to 2 decimal places.
+
+The 7 Parameters
+Parameter	Weight	What it measures	How it's computed
+flowAccumPct	25%	How much water flows into this cell	From DEM-derived flow accumulation grid. Each cell's accumulation value divided by the max across all cells. Higher = more upstream drainage converges here
+riverProx	20%	Proximity to rivers	Distance from cell centroid to nearest river LineString (meters), then rank-inverted across all cells. Closer to river = higher score
+lowLying	15%	How low the terrain is relative to surroundings	Elevation from contour intersections, then rank-inverted. Lower elevation = higher score (percentile-based)
+depressionPct	15%	Whether the cell sits in a topographic depression	Binary (0 or 1) from the DEM depression analysis. A depression is a point where water pools with no outflow
+imperv	10%	Impervious surface coverage	Percentage of the cell covered by built-up/residential/commercial/industrial land. More pavement = more runoff = higher flood risk
+waterProx	10%	Proximity to surface water bodies (lakes, lagoons)	Same approach as riverProx but for polygon water features instead of river lines
+flatness	5%	How flat the terrain is	Derived from slope: max(0, 1 - slope/50). Flatter terrain drains slower, so flat = higher risk. If no slope data, defaults to 0.5
+Data Sources
+Each parameter comes from a different geospatial dataset:
+
+flowAccumPct, depressionPct — DEM (Digital Elevation Model) raster analysis with flow accumulation and depression detection
+riverProx — OpenStreetMap river features (LineString geometries)
+lowLying — Elevation contour data (from Copernicus/SRTM)
+imperv — Landcover classification (OSM land use + Dynamic World built-up) and building density raster
+waterProx — Surface water polygons (lakes, lagoons from OSM)
+flatness — Slope derived from elevation range within each grid cell
+All values are normalized to a 0-1 range before being combined, so the final flood score is also 0-1. A cell with score 0.8+ is at high flood risk.
