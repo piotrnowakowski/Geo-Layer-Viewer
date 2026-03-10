@@ -271,21 +271,178 @@ function getOuterRing(feature: any): number[][] | null {
   return null;
 }
 
-export function computeCompositeScores(grid: any): void {
+export function computeFlowAccumulation(grid: any, elevationData: any): void {
+  const samples = elevationData?.rasterSamples;
+  if (!samples || samples.length === 0) return;
+
+  const lats = samples.map((s: any) => s.lat);
+  const lngs = samples.map((s: any) => s.lng);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+
+  const uniqueLats = [...new Set(lats.map((l: number) => Math.round(l * 10000) / 10000))].sort((a: number, b: number) => a - b);
+  const uniqueLngs = [...new Set(lngs.map((l: number) => Math.round(l * 10000) / 10000))].sort((a: number, b: number) => a - b);
+
+  const rows = uniqueLats.length;
+  const cols = uniqueLngs.length;
+  const latStep = rows > 1 ? (maxLat - minLat) / (rows - 1) : 0.003;
+  const lngStep = cols > 1 ? (maxLng - minLng) / (cols - 1) : 0.003;
+
+  const dem = new Float32Array(rows * cols).fill(-9999);
+  for (const s of samples) {
+    const r = Math.round((maxLat - s.lat) / latStep);
+    const c = Math.round((s.lng - minLng) / lngStep);
+    if (r >= 0 && r < rows && c >= 0 && c < cols) {
+      dem[r * cols + c] = s.elev;
+    }
+  }
+
+  const d8Offsets: [number, number][] = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1],           [0, 1],
+    [1, -1],  [1, 0],  [1, 1],
+  ];
+  const d8Dist = [1.414, 1, 1.414, 1, 1, 1.414, 1, 1.414];
+
+  const flowDir = new Int8Array(rows * cols).fill(-1);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const elev = dem[r * cols + c];
+      if (elev <= -9000) continue;
+      let maxDrop = 0;
+      let bestDir = -1;
+      for (let d = 0; d < 8; d++) {
+        const nr = r + d8Offsets[d][0];
+        const nc = c + d8Offsets[d][1];
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+        const nElev = dem[nr * cols + nc];
+        if (nElev <= -9000) continue;
+        const drop = (elev - nElev) / d8Dist[d];
+        if (drop > maxDrop) {
+          maxDrop = drop;
+          bestDir = d;
+        }
+      }
+      flowDir[r * cols + c] = bestDir;
+    }
+  }
+
+  const accumulation = new Float32Array(rows * cols).fill(1);
+
+  const sortedCells: [number, number][] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (dem[r * cols + c] > -9000) {
+        sortedCells.push([r, c]);
+      }
+    }
+  }
+  sortedCells.sort((a, b) => dem[b[0] * cols + b[1]] - dem[a[0] * cols + a[1]]);
+
+  for (const [r, c] of sortedCells) {
+    const idx = r * cols + c;
+    const dir = flowDir[idx];
+    if (dir >= 0) {
+      const nr = r + d8Offsets[dir][0];
+      const nc = c + d8Offsets[dir][1];
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        accumulation[nr * cols + nc] += accumulation[idx];
+      }
+    }
+  }
+
+  const depression = new Uint8Array(rows * cols).fill(0);
+  for (let r = 1; r < rows - 1; r++) {
+    for (let c = 1; c < cols - 1; c++) {
+      const elev = dem[r * cols + c];
+      if (elev <= -9000) continue;
+      if (flowDir[r * cols + c] === -1) {
+        let isDepression = true;
+        for (const [dr, dc] of d8Offsets) {
+          const ne = dem[(r + dr) * cols + (c + dc)];
+          if (ne <= -9000) { isDepression = false; break; }
+        }
+        if (isDepression) depression[r * cols + c] = 1;
+      }
+    }
+  }
+
+  let maxAccum = 0;
+  for (let i = 0; i < accumulation.length; i++) {
+    if (dem[i] > -9000 && accumulation[i] > maxAccum) maxAccum = accumulation[i];
+  }
+
+  const cellSizeDeg = 1 / 111.32;
+  const halfCell = cellSizeDeg / 2;
+
   for (const cell of grid.features) {
-    const m = cell.properties.metrics;
+    const [cx, cy] = cell.properties.centroid;
+    const cellMinLng = cx - halfCell;
+    const cellMaxLng = cx + halfCell;
+    const cellMinLat = cy - halfCell;
+    const cellMaxLat = cy + halfCell;
 
-    const lowElevation = m.elevation_mean >= 0
-      ? clamp(1 - (m.elevation_mean / 300))
-      : 1;
+    let totalAccum = 0;
+    let depressionCount = 0;
+    let sampleCount = 0;
 
-    m.flood_score = clamp(
-      (1 - m.river_proximity) * 0.30 +
-      (1 - m.water_proximity) * 0.25 +
-      lowElevation * 0.25 +
-      m.impervious_pct * 0.10 +
-      m.flow_accumulation * 0.10
-    );
+    const rMin = Math.max(0, Math.floor((maxLat - cellMaxLat) / latStep));
+    const rMax = Math.min(rows - 1, Math.ceil((maxLat - cellMinLat) / latStep));
+    const cMin = Math.max(0, Math.floor((cellMinLng - minLng) / lngStep));
+    const cMax = Math.min(cols - 1, Math.ceil((cellMaxLng - minLng) / lngStep));
+
+    for (let r = rMin; r <= rMax; r++) {
+      for (let c = cMin; c <= cMax; c++) {
+        if (dem[r * cols + c] <= -9000) continue;
+        totalAccum += accumulation[r * cols + c];
+        if (depression[r * cols + c]) depressionCount++;
+        sampleCount++;
+      }
+    }
+
+    if (sampleCount > 0 && maxAccum > 0) {
+      cell.properties.metrics.flow_accumulation = clamp(totalAccum / sampleCount / maxAccum);
+    }
+    cell.properties.metrics.depression_pct = sampleCount > 0 ? depressionCount / sampleCount : 0;
+
+    const slopeDeg = cell.properties.metrics.slope_mean * 45;
+    cell.properties.metrics.flatness = slopeDeg > 0 ? Math.max(0, 1 - slopeDeg / 50) : 0.5;
+  }
+}
+
+export function computeCompositeScores(grid: any): void {
+  const cells = grid.features;
+
+  const riverDists = cells.map((c: any) => c.properties.metrics.river_proximity);
+  const waterDists = cells.map((c: any) => c.properties.metrics.water_proximity);
+  const elevations = cells.map((c: any) => c.properties.metrics.elevation_mean);
+
+  const riverRanks = rankInvert(riverDists);
+  const waterRanks = rankInvert(waterDists);
+  const elevRanks = rankInvert(elevations);
+
+  for (let i = 0; i < cells.length; i++) {
+    const m = cells[i].properties.metrics;
+
+    const flowAccumPct = m.flow_accumulation;
+    const depressionPct = m.depression_pct || 0;
+    const riverProx = riverRanks[i];
+    const waterProx = waterRanks[i];
+    const lowLying = elevRanks[i];
+    const imperv = m.impervious_pct;
+    const flatness = m.flatness ?? 0.5;
+
+    m.flood_score = Math.round(clamp(
+      flowAccumPct * 0.25 +
+      depressionPct * 0.15 +
+      riverProx * 0.20 +
+      waterProx * 0.10 +
+      lowLying * 0.15 +
+      imperv * 0.10 +
+      flatness * 0.05
+    ) * 100) / 100;
 
     m.heat_score = clamp(
       m.impervious_pct * 0.3 +
@@ -303,6 +460,17 @@ export function computeCompositeScores(grid: any): void {
 
     m.composite_risk = (m.flood_score + m.heat_score + m.landslide_score) / 3;
   }
+}
+
+function rankInvert(values: number[]): number[] {
+  const indexed = values.map((v, i) => ({ v, i }));
+  indexed.sort((a, b) => a.v - b.v);
+  const ranks = new Array(values.length);
+  const n = values.length;
+  for (let r = 0; r < n; r++) {
+    ranks[indexed[r].i] = 1 - r / (n - 1);
+  }
+  return ranks;
 }
 
 function clamp(value: number): number {

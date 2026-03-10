@@ -15,6 +15,7 @@ import {
   computeLandcoverMetrics,
   computeBuildingMetrics,
   computePopulationMetrics,
+  computeFlowAccumulation,
   computeCompositeScores,
 } from "./services/gridService";
 import type { GeoBounds } from "@shared/schema";
@@ -78,7 +79,10 @@ function buildGrid(bounds: GeoBounds): any {
   if (population) computePopulationMetrics(grid, population);
 
   const elevation = loadCachedData("porto-alegre-elevation.json");
-  if (elevation) computeElevationMetrics(grid, elevation, bounds);
+  if (elevation) {
+    computeElevationMetrics(grid, elevation, bounds);
+    computeFlowAccumulation(grid, elevation);
+  }
 
   computeCompositeScores(grid);
 
