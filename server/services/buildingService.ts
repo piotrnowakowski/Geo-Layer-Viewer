@@ -57,9 +57,7 @@ export async function getBuildingData(
   cityLocode: string,
   bounds: GeoBounds
 ): Promise<BuildingData> {
-  const reduced = reduceBox(bounds, 0.25);
-
-  const chunks = splitBoundsGrid(reduced, 4, 4);
+  const chunks = splitBoundsGrid(bounds, 6, 6);
   const allCentroids: BuildingCentroid[] = [];
 
   for (let i = 0; i < chunks.length; i++) {
@@ -73,7 +71,7 @@ export async function getBuildingData(
     }
 
     if (i < chunks.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 
@@ -82,6 +80,6 @@ export async function getBuildingData(
   return {
     centroids: allCentroids,
     totalBuildings: allCentroids.length,
-    queriedBounds: reduced,
+    queriedBounds: bounds,
   };
 }

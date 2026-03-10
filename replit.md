@@ -12,7 +12,7 @@ A standalone geospatial evidence layer viewer for Nature-Based Solutions (NbS) p
 ## Data Sources
 - **City boundaries**: OpenStreetMap Nominatim API
 - **Rivers, water bodies, forest, land cover**: OSM Overpass API (with retry logic via overpassHelper)
-- **Buildings**: 346,250 real building footprint centroids from OSM Overpass API (4×4 chunk grid with rate limit handling)
+- **Buildings**: 517,367 real building footprint centroids from OSM Overpass API (6×6 chunk grid covering full city bounds)
 - **Population**: WorldPop 2020 Constrained 100m resolution GeoTIFF for Brazil — 45,251 populated pixels covering Porto Alegre, ~2.1M total population
 - **Elevation/terrain**: Copernicus DEM 30m from S3 — real GeoTIFF tiles parsed with `geotiff` package
 - **OEF tile layers**: geo-test-api.s3.us-east-1.amazonaws.com (Dynamic World land use tiles)
@@ -72,7 +72,7 @@ client/public/sample-data/ — Cached real data
 - **impervious_pct**: Bounding-box overlap fraction of OSM builtUp polygons within cell
 - **pop_density**: WorldPop 2020 population sum per cell, normalized by maximum (776 cells with data, ~17,975 people in densest cell)
 - **population**: Raw population count per cell from WorldPop
-- **building_density**: OSM building count per cell, normalized by maximum (324 cells, 5,187 buildings in densest cell)
+- **building_density**: OSM building count per cell, normalized by maximum (750 cells with data, full city coverage)
 - **building_count**: Raw building count per cell
 - **buildings_per_km2**: Buildings per square kilometer (range: 2–5,991)
 - **flood_score**: f(river_proximity, impervious_pct, flow_accumulation, water_proximity)
@@ -106,7 +106,7 @@ client/public/sample-data/ — Cached real data
 - Layer data cached in Map<string, any> ref for instant toggle on/off
 - Data loaded from cached JSON files first, API fallback only if files missing
 - Overpass queries use bbox reduction (0.15-0.25 of full bounds) to avoid timeouts
-- Building fetch uses 4×4 chunk grid with 3s delays between chunks to handle rate limits
+- Building fetch uses 6×6 chunk grid with 2s delays between chunks to cover full city bounds
 - WorldPop GeoTIFF downloaded once (~131MB) and cached locally; only Porto Alegre window extracted
 - No intervention zones or NbS recommendations — users do their own analysis
 
