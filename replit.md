@@ -12,15 +12,15 @@ A standalone geospatial evidence layer viewer for Nature-Based Solutions (NbS) p
 ## Data Sources
 - **City boundaries**: OpenStreetMap Nominatim API
 - **Rivers, water bodies, forest, land cover, population**: OSM Overpass API (with retry logic via overpassHelper)
-- **Elevation/terrain**: Copernicus DEM S3 (stubbed — complex GeoTIFF parsing needed)
+- **Elevation/terrain**: Copernicus DEM 30m from S3 (`copernicus-dem-30m.s3.eu-central-1.amazonaws.com`) — real GeoTIFF tiles parsed with `geotiff` package, contours generated via marching squares, DEM raster values sampled directly at cell resolution
 - **OEF tile layers**: geo-test-api.s3.us-east-1.amazonaws.com (Dynamic World land use tiles)
-- **Grid analysis**: Computed from real river, water, landcover, forest, and population data
+- **Grid analysis**: Computed from real spatial overlap with OSM rivers, water, landcover, forest, population data + Copernicus DEM elevation/slope
 
 ## Tech Stack
 - **Frontend**: React 18, TypeScript, Vite, Leaflet, @turf/turf, TanStack Query, Tailwind CSS, shadcn/ui
 - **Backend**: Express, TypeScript
 - **Map**: Leaflet with CartoDB Dark Matter basemap
-- **Packages**: leaflet, @types/leaflet, @turf/turf, osmtogeojson
+- **Packages**: leaflet, @types/leaflet, @turf/turf, osmtogeojson, geotiff
 
 ## Architecture
 ```
@@ -39,7 +39,7 @@ client/src/
     Home.tsx               — Renders MapViewer
 
 server/
-  routes.ts                — API endpoints (boundary, rivers, water, forest, landcover, population, grid, tiles, fetch-all)
+  routes.ts                — API endpoints (boundary, rivers, water, forest, landcover, population, elevation, grid, tiles, fetch-all)
   services/
     osmService.ts          — Nominatim boundary fetching
     riversService.ts       — Overpass waterway queries
@@ -47,16 +47,29 @@ server/
     forestService.ts       — Overpass forest/wood queries
     worldcoverService.ts   — Overpass landcover queries
     populationService.ts   — Overpass residential area queries
-    gridService.ts         — Grid generation + metric computation + composite scoring
+    copernicusService.ts   — Copernicus DEM S3 tile fetching, GeoTIFF parsing, contour generation, raster sampling, per-cell elevation/slope computation
+    gridService.ts         — Grid generation + real spatial overlap metrics + composite scoring
     overpassHelper.ts      — Retry logic + bbox reduction + fallback endpoints for Overpass API
 
 shared/schema.ts           — TypeScript interfaces for all data types
 
-client/public/sample-data/ — Cached real data (~4.4MB total)
+client/public/sample-data/ — Cached real data
   porto-alegre-boundary.json, porto-alegre-rivers.json, porto-alegre-surface-water.json,
   porto-alegre-forest.json, porto-alegre-landcover.json, porto-alegre-population.json,
-  porto-alegre-grid.json
+  porto-alegre-elevation.json (contours + raster samples from Copernicus DEM),
+  porto-alegre-grid.json (1216 cells with real metrics)
 ```
+
+## Grid Metrics (all from real data)
+- **elevation_mean**: Direct DEM raster sampling (Copernicus 30m), averaged across samples within each cell
+- **slope_mean**: Computed from elevation range within each cell using DEM raster samples
+- **river_proximity**: Euclidean distance to nearest OSM river coordinate, normalized to [0,1]
+- **water_proximity**: Distance to nearest OSM water body centroid, normalized
+- **canopy_pct**: Bounding-box overlap fraction of OSM tree polygons within cell
+- **impervious_pct**: Bounding-box overlap fraction of OSM builtUp polygons within cell
+- **pop_density**: Cumulative overlap coverage of OSM residential polygons within cell
+- **building_density**: Count of overlapping residential features per cell, normalized
+- **flood_score, heat_score, landslide_score, composite_risk**: Weighted composites of above real metrics
 
 ## Layer System (20 layers)
 - **Risk Analysis** (5): Flood Risk, Heat Risk, Landslide Risk, Population Density, Building Density

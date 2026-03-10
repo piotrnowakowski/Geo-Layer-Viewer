@@ -6,6 +6,7 @@ import { getSurfaceWaterData } from "./services/surfaceWaterService";
 import { getForestCanopyData } from "./services/forestService";
 import { getLandcoverData } from "./services/worldcoverService";
 import { getPopulationData } from "./services/populationService";
+import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import {
   generateGrid,
   computeRiverMetrics,
@@ -45,6 +46,38 @@ function loadCachedData(filename: string): any | null {
     }
   }
   return null;
+}
+
+function getBoundsFromBoundary(boundary: any): GeoBounds {
+  return {
+    minLat: boundary.bbox[0],
+    minLng: boundary.bbox[1],
+    maxLat: boundary.bbox[2],
+    maxLng: boundary.bbox[3],
+  };
+}
+
+function buildGrid(bounds: GeoBounds): any {
+  const grid = generateGrid(bounds, 1);
+
+  const rivers = loadCachedData("porto-alegre-rivers.json");
+  if (rivers?.geoJson) computeRiverMetrics(grid, rivers.geoJson);
+
+  const water = loadCachedData("porto-alegre-surface-water.json");
+  if (water?.geoJson) computeWaterMetrics(grid, water.geoJson);
+
+  const landcover = loadCachedData("porto-alegre-landcover.json");
+  if (landcover?.geoJson) computeLandcoverMetrics(grid, landcover.geoJson);
+
+  const population = loadCachedData("porto-alegre-population.json");
+  if (population?.geoJson) computePopulationMetrics(grid, population.geoJson);
+
+  const elevation = loadCachedData("porto-alegre-elevation.json");
+  if (elevation) computeElevationMetrics(grid, elevation, bounds);
+
+  computeCompositeScores(grid);
+
+  return grid;
 }
 
 export async function registerRoutes(
@@ -104,16 +137,12 @@ export async function registerRoutes(
       const cached = loadCachedData("porto-alegre-elevation.json");
       if (cached) return res.json(cached);
 
-      const data = {
-        elevationData: {
-          width: 0,
-          height: 0,
-          cellSize: 30,
-          minElevation: 0,
-          maxElevation: 300,
-        },
-        contours: { type: "FeatureCollection", features: [] },
-      };
+      const boundary = loadCachedData("porto-alegre-boundary.json");
+      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
+
+      const bounds = getBoundsFromBoundary(boundary);
+      const data = await getElevationData(bounds);
+      saveSampleData("porto-alegre-elevation.json", data);
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -141,12 +170,7 @@ export async function registerRoutes(
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
+      const bounds = getBoundsFromBoundary(boundary);
       const data = await getRiversData("BR-POA", bounds);
       saveSampleData("porto-alegre-rivers.json", data);
       res.json(data);
@@ -163,12 +187,7 @@ export async function registerRoutes(
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
+      const bounds = getBoundsFromBoundary(boundary);
       const data = await getSurfaceWaterData("BR-POA", bounds);
       saveSampleData("porto-alegre-surface-water.json", data);
       res.json(data);
@@ -185,12 +204,7 @@ export async function registerRoutes(
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
+      const bounds = getBoundsFromBoundary(boundary);
       const data = await getForestCanopyData("BR-POA", bounds);
       saveSampleData("porto-alegre-forest.json", data);
       res.json(data);
@@ -207,12 +221,7 @@ export async function registerRoutes(
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
+      const bounds = getBoundsFromBoundary(boundary);
       const data = await getLandcoverData("BR-POA", bounds);
       saveSampleData("porto-alegre-landcover.json", data);
       res.json(data);
@@ -229,12 +238,7 @@ export async function registerRoutes(
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
+      const bounds = getBoundsFromBoundary(boundary);
       const data = await getPopulationData("BR-POA", bounds);
       saveSampleData("porto-alegre-population.json", data);
       res.json(data);
@@ -251,28 +255,8 @@ export async function registerRoutes(
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
-
-      const grid = generateGrid(bounds, 1);
-
-      const rivers = loadCachedData("porto-alegre-rivers.json");
-      if (rivers?.geoJson) computeRiverMetrics(grid, rivers.geoJson);
-
-      const water = loadCachedData("porto-alegre-surface-water.json");
-      if (water?.geoJson) computeWaterMetrics(grid, water.geoJson);
-
-      const landcover = loadCachedData("porto-alegre-landcover.json");
-      if (landcover?.geoJson) computeLandcoverMetrics(grid, landcover.geoJson);
-
-      const population = loadCachedData("porto-alegre-population.json");
-      if (population?.geoJson) computePopulationMetrics(grid, population.geoJson);
-
-      computeCompositeScores(grid);
+      const bounds = getBoundsFromBoundary(boundary);
+      const grid = buildGrid(bounds);
 
       const data = {
         totalCells: grid.features.length,
@@ -301,12 +285,7 @@ export async function registerRoutes(
         steps.push("Boundary loaded from cache");
       }
 
-      const bounds: GeoBounds = {
-        minLat: boundary.bbox[0],
-        minLng: boundary.bbox[1],
-        maxLat: boundary.bbox[2],
-        maxLng: boundary.bbox[3],
-      };
+      const bounds = getBoundsFromBoundary(boundary);
 
       const fetchTasks = [
         { name: "rivers", file: "porto-alegre-rivers.json", fn: () => getRiversData("BR-POA", bounds) },
@@ -333,25 +312,24 @@ export async function registerRoutes(
         }
       }
 
+      let elevationData = loadCachedData("porto-alegre-elevation.json");
+      if (!elevationData) {
+        steps.push("Fetching elevation from Copernicus DEM S3...");
+        try {
+          elevationData = await getElevationData(bounds);
+          saveSampleData("porto-alegre-elevation.json", elevationData);
+          steps.push(`Elevation fetched: ${elevationData.contours?.features?.length || 0} contour features`);
+        } catch (err: any) {
+          steps.push(`Elevation failed: ${err.message} (skipping)`);
+        }
+      } else {
+        steps.push("Elevation loaded from cache");
+      }
+
       let gridData = loadCachedData("porto-alegre-grid.json");
       if (!gridData) {
-        steps.push("Computing analysis grid...");
-        const grid = generateGrid(bounds, 1);
-
-        const rivers = loadCachedData("porto-alegre-rivers.json");
-        if (rivers?.geoJson) computeRiverMetrics(grid, rivers.geoJson);
-
-        const water = loadCachedData("porto-alegre-surface-water.json");
-        if (water?.geoJson) computeWaterMetrics(grid, water.geoJson);
-
-        const landcover = loadCachedData("porto-alegre-landcover.json");
-        if (landcover?.geoJson) computeLandcoverMetrics(grid, landcover.geoJson);
-
-        const population = loadCachedData("porto-alegre-population.json");
-        if (population?.geoJson) computePopulationMetrics(grid, population.geoJson);
-
-        computeCompositeScores(grid);
-
+        steps.push("Computing analysis grid from real data...");
+        const grid = buildGrid(bounds);
         gridData = { totalCells: grid.features.length, cellSizeMeters: 1000, geoJson: grid };
         saveSampleData("porto-alegre-grid.json", gridData);
         steps.push("Grid computed and cached");

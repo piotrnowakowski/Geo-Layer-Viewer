@@ -121,48 +121,109 @@ export function computeLandcoverMetrics(grid: any, landcoverGeoJson: any): void 
     if (cls === "trees") treeFeatures.push(feature);
   }
 
+  const cellSizeDeg = 1 / 111.32;
+  const halfCell = cellSizeDeg / 2;
+
   for (const cell of grid.features) {
     const [cx, cy] = cell.properties.centroid;
-    let nearBuilt = false;
-    let nearTrees = false;
+    const cellMinLng = cx - halfCell;
+    const cellMaxLng = cx + halfCell;
+    const cellMinLat = cy - halfCell;
+    const cellMaxLat = cy + halfCell;
+
+    let builtArea = 0;
+    let treeArea = 0;
 
     for (const bf of builtFeatures) {
-      if (isPointNearFeature(cx, cy, bf, 0.01)) {
-        nearBuilt = true;
-        break;
-      }
-    }
-    for (const tf of treeFeatures) {
-      if (isPointNearFeature(cx, cy, tf, 0.01)) {
-        nearTrees = true;
-        break;
-      }
+      const overlap = computeOverlapFraction(bf, cellMinLng, cellMaxLng, cellMinLat, cellMaxLat);
+      builtArea += overlap;
     }
 
-    const cellHash = hashCoord(cx, cy);
-    cell.properties.metrics.impervious_pct = nearBuilt ? 0.3 + cellHash * 0.5 : cellHash * 0.15;
-    cell.properties.metrics.canopy_pct = nearTrees ? 0.2 + (1 - cellHash) * 0.5 : (1 - cellHash) * 0.1;
+    for (const tf of treeFeatures) {
+      const overlap = computeOverlapFraction(tf, cellMinLng, cellMaxLng, cellMinLat, cellMaxLat);
+      treeArea += overlap;
+    }
+
+    cell.properties.metrics.impervious_pct = Math.min(builtArea, 1);
+    cell.properties.metrics.canopy_pct = Math.min(treeArea, 1);
   }
 }
 
 export function computePopulationMetrics(grid: any, popGeoJson: any): void {
   if (!popGeoJson?.features?.length) return;
 
+  const cellSizeDeg = 1 / 111.32;
+  const halfCell = cellSizeDeg / 2;
+
   for (const cell of grid.features) {
     const [cx, cy] = cell.properties.centroid;
-    let nearResidential = false;
+    const cellMinLng = cx - halfCell;
+    const cellMaxLng = cx + halfCell;
+    const cellMinLat = cy - halfCell;
+    const cellMaxLat = cy + halfCell;
+
+    let residentialCoverage = 0;
+    let buildingCount = 0;
 
     for (const feature of popGeoJson.features) {
-      if (isPointNearFeature(cx, cy, feature, 0.01)) {
-        nearResidential = true;
-        break;
+      const overlap = computeOverlapFraction(feature, cellMinLng, cellMaxLng, cellMinLat, cellMaxLat);
+      if (overlap > 0) {
+        residentialCoverage += overlap;
+        buildingCount++;
       }
     }
 
-    const cellHash = hashCoord(cx, cy);
-    cell.properties.metrics.pop_density = nearResidential ? 0.1 + cellHash * 0.6 : cellHash * 0.05;
-    cell.properties.metrics.building_density = nearResidential ? 0.1 + (1 - cellHash) * 0.5 : (1 - cellHash) * 0.05;
+    cell.properties.metrics.pop_density = Math.min(residentialCoverage, 1);
+    cell.properties.metrics.building_density = Math.min(buildingCount / 20, 1);
   }
+}
+
+function computeOverlapFraction(
+  feature: any,
+  cellMinLng: number,
+  cellMaxLng: number,
+  cellMinLat: number,
+  cellMaxLat: number
+): number {
+  const coords = getOuterRing(feature);
+  if (!coords || coords.length === 0) return 0;
+
+  let fMinLng = Infinity, fMaxLng = -Infinity;
+  let fMinLat = Infinity, fMaxLat = -Infinity;
+  for (const c of coords) {
+    if (c[0] < fMinLng) fMinLng = c[0];
+    if (c[0] > fMaxLng) fMaxLng = c[0];
+    if (c[1] < fMinLat) fMinLat = c[1];
+    if (c[1] > fMaxLat) fMaxLat = c[1];
+  }
+
+  if (fMaxLng < cellMinLng || fMinLng > cellMaxLng ||
+      fMaxLat < cellMinLat || fMinLat > cellMaxLat) {
+    return 0;
+  }
+
+  const overlapMinLng = Math.max(fMinLng, cellMinLng);
+  const overlapMaxLng = Math.min(fMaxLng, cellMaxLng);
+  const overlapMinLat = Math.max(fMinLat, cellMinLat);
+  const overlapMaxLat = Math.min(fMaxLat, cellMaxLat);
+
+  const overlapArea = (overlapMaxLng - overlapMinLng) * (overlapMaxLat - overlapMinLat);
+  const cellArea = (cellMaxLng - cellMinLng) * (cellMaxLat - cellMinLat);
+
+  if (cellArea <= 0) return 0;
+
+  const featureArea = (fMaxLng - fMinLng) * (fMaxLat - fMinLat);
+  const featureFill = Math.min(featureArea / cellArea, 1);
+
+  return (overlapArea / cellArea) * Math.min(featureFill, 1);
+}
+
+function getOuterRing(feature: any): number[][] | null {
+  if (!feature?.geometry?.coordinates) return null;
+  const geom = feature.geometry;
+  if (geom.type === "Polygon") return geom.coordinates[0];
+  if (geom.type === "MultiPolygon") return geom.coordinates[0]?.[0];
+  return null;
 }
 
 export function computeCompositeScores(grid: any): void {
@@ -196,25 +257,4 @@ export function computeCompositeScores(grid: any): void {
 
 function clamp(value: number): number {
   return Math.max(0, Math.min(1, value));
-}
-
-function hashCoord(x: number, y: number): number {
-  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-  return n - Math.floor(n);
-}
-
-function isPointNearFeature(px: number, py: number, feature: any, threshold: number): boolean {
-  if (!feature.geometry?.coordinates) return false;
-  const coords = feature.geometry.type === "Polygon"
-    ? feature.geometry.coordinates[0]
-    : feature.geometry.type === "MultiPolygon"
-      ? feature.geometry.coordinates[0][0]
-      : [];
-
-  for (const coord of coords) {
-    if (Math.abs(coord[0] - px) < threshold && Math.abs(coord[1] - py) < threshold) {
-      return true;
-    }
-  }
-  return false;
 }
