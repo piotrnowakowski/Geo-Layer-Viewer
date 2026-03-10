@@ -32,14 +32,15 @@ client/src/
       MapViewer.tsx        — Core Leaflet map + layer management + data fetching
       EvidenceDrawer.tsx   — Bottom panel with 20 layer toggle buttons (3 groups)
     layout/
-      Header.tsx           — App header with Fetch Real Data button
+      Header.tsx           — App header with branding
+      CityCatalystTab.tsx   — Bottom-left return-to-CityCatalyst tab
   data/
     layer-configs.ts       — 20 layer definitions (id, name, icon, color, source, group, availability)
     colors.ts              — Color scales for flood/heat/landslide/population/building + landcover colors
     sample-data-loaders.ts — Load from cached JSON files first, then fallback to API
 
 server/
-  routes.ts                — API endpoints (boundary, rivers, water, forest, landcover, buildings, population, elevation, grid, tiles, fetch-all)
+  routes.ts                — API endpoints (boundary, rivers, water, forest, landcover, buildings, population, elevation, grid, tiles)
   services/
     osmService.ts          — Nominatim boundary fetching
     riversService.ts       — Overpass waterway queries
@@ -118,5 +119,5 @@ client/public/sample-data/ — Cached real data
 
 ## Running
 - `npm run dev` starts Express backend + Vite frontend on port 5000
-- All cached data loads instantly on page load
-- "Fetch Real Data" button triggers sequential API calls for fresh data
+- All data loads instantly from cached JSON files — no manual fetch needed
+- Individual API endpoints still available as fallbacks if cached files are missing

@@ -33,8 +33,6 @@ export default function MapViewer() {
     }))
   );
 
-  const [isFetching, setIsFetching] = useState(false);
-  const [dataStatus, setDataStatus] = useState("");
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
@@ -114,7 +112,6 @@ export default function MapViewer() {
 
         mapRef.current = map;
         setMapReady(true);
-        setDataStatus("Map loaded — click Fetch Real Data to load layers");
       }
     };
 
@@ -388,36 +385,9 @@ export default function MapViewer() {
     [layers, createLayerFromData]
   );
 
-  const handleFetchData = useCallback(async () => {
-    setIsFetching(true);
-    setDataStatus("Fetching real data from APIs...");
-
-    try {
-      const response = await fetch("/api/geospatial/fetch-all", {
-        method: "POST",
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        setDataStatus("Data fetched successfully! Toggle layers to view.");
-        dataCache.current.clear();
-      } else {
-        setDataStatus(`Error: ${result.message}`);
-      }
-    } catch (error: any) {
-      setDataStatus(`Fetch failed: ${error.message}`);
-    } finally {
-      setIsFetching(false);
-    }
-  }, []);
-
   return (
     <div className="h-screen w-screen flex flex-col bg-zinc-950 dark">
-      <Header
-        isLoading={isFetching}
-        dataStatus={dataStatus}
-        onFetchData={handleFetchData}
-      />
+      <Header />
 
       <div className="flex-1 relative overflow-hidden">
         <div
