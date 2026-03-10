@@ -38,6 +38,7 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "grid_flood", name: "Flood Risk", icon: CloudRain, color: "#3b82f6", source: "geojson", group: "analysis", available: true },
   { id: "grid_heat", name: "Heat Risk", icon: Flame, color: "#ef4444", source: "geojson", group: "analysis", available: true },
   { id: "grid_landslide", name: "Landslide Risk", icon: Mountain, color: "#a16207", source: "geojson", group: "analysis", available: true },
+  { id: "grid_population", name: "Population Density", icon: Users, color: "#8b5cf6", source: "geojson", group: "analysis", available: true },
   { id: "grid_buildings", name: "Building Density", icon: Building2, color: "#f97316", source: "geojson", group: "analysis", available: true },
 
   { id: "elevation", name: "Elevation", icon: Mountain, color: "#c9a87c", source: "geojson", group: "environment", available: true },

@@ -6,6 +6,7 @@ import { getSurfaceWaterData } from "./services/surfaceWaterService";
 import { getForestCanopyData } from "./services/forestService";
 import { getLandcoverData } from "./services/worldcoverService";
 import { getBuildingData } from "./services/buildingService";
+import { getPopulationData } from "./services/worldpopService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import {
   generateGrid,
@@ -13,6 +14,7 @@ import {
   computeWaterMetrics,
   computeLandcoverMetrics,
   computeBuildingMetrics,
+  computePopulationMetrics,
   computeCompositeScores,
 } from "./services/gridService";
 import type { GeoBounds } from "@shared/schema";
@@ -71,6 +73,9 @@ function buildGrid(bounds: GeoBounds): any {
 
   const buildings = loadCachedData("porto-alegre-buildings.json");
   if (buildings) computeBuildingMetrics(grid, buildings);
+
+  const population = loadCachedData("porto-alegre-population.json");
+  if (population) computePopulationMetrics(grid, population);
 
   const elevation = loadCachedData("porto-alegre-elevation.json");
   if (elevation) computeElevationMetrics(grid, elevation, bounds);
@@ -247,13 +252,32 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/geospatial/population", async (_req, res) => {
+    try {
+      const cached = loadCachedData("porto-alegre-population.json");
+      if (cached) return res.json(cached);
+
+      const boundary = loadCachedData("porto-alegre-boundary.json");
+      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
+
+      const bounds = getBoundsFromBoundary(boundary);
+      const data = await getPopulationData(bounds);
+      saveSampleData("porto-alegre-population.json", data);
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/geospatial/grid", async (_req, res) => {
     try {
       const hasBuildings = !!loadCachedData("porto-alegre-buildings.json");
       const hasElevation = !!loadCachedData("porto-alegre-elevation.json");
+      const hasPopulation = !!loadCachedData("porto-alegre-population.json");
+      const allDeps = hasBuildings && hasElevation && hasPopulation;
 
       const cached = loadCachedData("porto-alegre-grid.json");
-      if (cached && hasBuildings && hasElevation) return res.json(cached);
+      if (cached && allDeps) return res.json(cached);
 
       const boundary = loadCachedData("porto-alegre-boundary.json");
       if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
@@ -267,7 +291,7 @@ export async function registerRoutes(
         geoJson: grid,
       };
 
-      if (hasBuildings && hasElevation) {
+      if (allDeps) {
         saveSampleData("porto-alegre-grid.json", data);
       }
       res.json(data);
@@ -344,9 +368,24 @@ export async function registerRoutes(
         steps.push("Elevation loaded from cache");
       }
 
+      let popData = loadCachedData("porto-alegre-population.json");
+      if (!popData) {
+        steps.push("Fetching population density from WorldPop...");
+        try {
+          popData = await getPopulationData(bounds);
+          saveSampleData("porto-alegre-population.json", popData);
+          steps.push(`Population fetched: ${popData.samples?.length} pixels, ~${popData.totalPopulation?.toLocaleString()} people`);
+        } catch (err: any) {
+          steps.push(`Population failed: ${err.message} (skipping)`);
+        }
+      } else {
+        steps.push("Population loaded from cache");
+      }
+
       const hasBuildings = !!loadCachedData("porto-alegre-buildings.json");
       const hasElevation = !!loadCachedData("porto-alegre-elevation.json");
-      const allDepsReady = hasBuildings && hasElevation;
+      const hasPopulation = !!loadCachedData("porto-alegre-population.json");
+      const allDepsReady = hasBuildings && hasElevation && hasPopulation;
 
       let gridData = loadCachedData("porto-alegre-grid.json");
       if (!gridData || !allDepsReady) {

@@ -7,6 +7,7 @@ import {
   getFloodColor,
   getHeatColor,
   getLandslideColor,
+  getPopulationColor,
   getBuildingColor,
   LANDCOVER_COLORS,
 } from "@/data/colors";
@@ -139,6 +140,7 @@ export default function MapViewer() {
         case "grid_flood":
         case "grid_heat":
         case "grid_landslide":
+        case "grid_population":
         case "grid_buildings": {
           const geoJson = data.geoJson || data;
           if (!geoJson?.features) return null;
@@ -147,6 +149,7 @@ export default function MapViewer() {
             grid_flood: "flood_score",
             grid_heat: "heat_score",
             grid_landslide: "landslide_score",
+            grid_population: "pop_density",
             grid_buildings: "building_density",
           };
 
@@ -154,6 +157,7 @@ export default function MapViewer() {
             grid_flood: getFloodColor,
             grid_heat: getHeatColor,
             grid_landslide: getLandslideColor,
+            grid_population: getPopulationColor,
             grid_buildings: getBuildingColor,
           };
 

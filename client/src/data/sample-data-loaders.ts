@@ -44,6 +44,7 @@ export async function loadLayerData(layerId: string): Promise<any> {
     grid_flood: "/sample-data/porto-alegre-grid.json",
     grid_heat: "/sample-data/porto-alegre-grid.json",
     grid_landslide: "/sample-data/porto-alegre-grid.json",
+    grid_population: "/sample-data/porto-alegre-grid.json",
     grid_buildings: "/sample-data/porto-alegre-grid.json",
   };
 
@@ -56,6 +57,7 @@ export async function loadLayerData(layerId: string): Promise<any> {
     grid_flood: "/api/geospatial/grid",
     grid_heat: "/api/geospatial/grid",
     grid_landslide: "/api/geospatial/grid",
+    grid_population: "/api/geospatial/grid",
     grid_buildings: "/api/geospatial/grid",
   };
 

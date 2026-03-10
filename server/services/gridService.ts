@@ -19,6 +19,7 @@ export function generateGrid(bounds: GeoBounds, cellSizeKm: number = 1): any {
             flow_accumulation: 0,
             canopy_pct: 0,
             impervious_pct: 0,
+            pop_density: 0,
             building_density: 0,
             river_proximity: 1,
             water_proximity: 1,
@@ -186,6 +187,41 @@ export function computeBuildingMetrics(grid: any, buildingData: any): void {
   }
 }
 
+export function computePopulationMetrics(grid: any, popData: any): void {
+  if (!popData?.samples?.length) return;
+
+  const cellSizeDeg = 1 / 111.32;
+  const halfCell = cellSizeDeg / 2;
+
+  let maxPop = 0;
+  const cellPops: number[] = [];
+
+  for (const cell of grid.features) {
+    const [cx, cy] = cell.properties.centroid;
+    const cellMinLng = cx - halfCell;
+    const cellMaxLng = cx + halfCell;
+    const cellMinLat = cy - halfCell;
+    const cellMaxLat = cy + halfCell;
+
+    let totalPop = 0;
+    for (const s of popData.samples) {
+      if (s.lng >= cellMinLng && s.lng <= cellMaxLng &&
+          s.lat >= cellMinLat && s.lat <= cellMaxLat) {
+        totalPop += s.pop;
+      }
+    }
+
+    cellPops.push(totalPop);
+    if (totalPop > maxPop) maxPop = totalPop;
+  }
+
+  for (let i = 0; i < grid.features.length; i++) {
+    const pop = cellPops[i];
+    grid.features[i].properties.metrics.pop_density = maxPop > 0 ? pop / maxPop : 0;
+    grid.features[i].properties.metrics.population = Math.round(pop);
+  }
+}
+
 function computeOverlapFraction(
   feature: any,
   cellMinLng: number,
@@ -248,7 +284,8 @@ export function computeCompositeScores(grid: any): void {
     m.heat_score = clamp(
       m.impervious_pct * 0.3 +
       (1 - m.canopy_pct) * 0.25 +
-      m.building_density * 0.45
+      m.building_density * 0.25 +
+      m.pop_density * 0.2
     );
 
     m.landslide_score = clamp(
