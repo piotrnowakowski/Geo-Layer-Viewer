@@ -40,6 +40,24 @@ export function getBuildingColor(density: number): string {
   return '#ffedd5';
 }
 
+export function getSolarColor(pvout: number): string {
+  if (pvout >= 4.2) return '#b45309';
+  if (pvout >= 4.1) return '#d97706';
+  if (pvout >= 4.0) return '#f59e0b';
+  if (pvout >= 3.9) return '#fbbf24';
+  if (pvout >= 3.8) return '#fcd34d';
+  return '#fef3c7';
+}
+
+export function getPovertyColor(rate: number): string {
+  if (rate >= 0.15) return '#581c87';
+  if (rate >= 0.10) return '#7e22ce';
+  if (rate >= 0.06) return '#a855f7';
+  if (rate >= 0.03) return '#c084fc';
+  if (rate > 0) return '#d8b4fe';
+  return '#f3e8ff';
+}
+
 export const LANDCOVER_COLORS: Record<string, string> = {
   trees: '#228B22',
   builtUp: '#DC143C',

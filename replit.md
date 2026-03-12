@@ -15,7 +15,11 @@ A standalone geospatial evidence layer viewer for Nature-Based Solutions (NbS) p
 - **Buildings**: 517,367 real building footprint centroids from OSM Overpass API (6×6 chunk grid covering full city bounds)
 - **Population**: WorldPop 2020 Constrained 100m resolution GeoTIFF for Brazil — 45,251 populated pixels covering Porto Alegre, ~2.1M total population
 - **Elevation/terrain**: Copernicus DEM 30m from S3 — real GeoTIFF tiles parsed with `geotiff` package
-- **OEF tile layers**: geo-test-api.s3.us-east-1.amazonaws.com (Dynamic World land use tiles)
+- **OEF tile layers**: geo-test-api.s3.us-east-1.amazonaws.com (Dynamic World land use tiles, Solar PV tiles)
+- **GTFS transit**: EPTC Porto Alegre bus stops (5,909 Points) and route shapes (762 LineStrings) from S3 GeoJSON
+- **Solar Atlas**: Global Solar Atlas v2 neighbourhood-level PVOUT/GHI/DNI (99 polygons) from S3 GeoJSON + visual tile layer
+- **IBGE Census**: Brazilian Census 2010 indicators at neighbourhood level (99 polygons: poverty_rate, income, infrastructure) from S3 GeoJSON
+- **IBGE Settlements**: Informal settlement boundaries (125 polygons) from S3 GeoJSON
 - **Grid analysis**: Computed from real spatial overlap with all above data sources
 
 ## Tech Stack
@@ -30,13 +34,13 @@ client/src/
   components/
     map/
       MapViewer.tsx        — Core Leaflet map + layer management + data fetching
-      EvidenceDrawer.tsx   — Bottom panel with 20 layer toggle buttons (3 groups)
+      EvidenceDrawer.tsx   — Bottom panel with 26 layer toggle buttons (5 groups)
     layout/
       Header.tsx           — App header with branding
       CityCatalystTab.tsx   — Bottom-left return-to-CityCatalyst tab
   data/
-    layer-configs.ts       — 20 layer definitions (id, name, icon, color, source, group, availability)
-    colors.ts              — Color scales for flood/heat/landslide/population/building + landcover colors
+    layer-configs.ts       — 26 layer definitions (id, name, icon, color, source, group, availability)
+    colors.ts              — Color scales for flood/heat/landslide/population/building/solar/poverty + landcover colors
     sample-data-loaders.ts — Load from cached JSON files first, then fallback to API
 
 server/
@@ -61,6 +65,11 @@ client/public/sample-data/ — Cached real data
   porto-alegre-population.json (WorldPop 100m raster samples),
   porto-alegre-elevation.json (contours + raster samples from Copernicus DEM),
   porto-alegre-grid.json (1216 cells with real metrics),
+  porto-alegre-transit-stops.json (5,909 GTFS bus stops from EPTC),
+  porto-alegre-transit-routes.json (762 GTFS route shapes from EPTC),
+  porto-alegre-solar-neighbourhoods.json (99 neighbourhood solar PV polygons),
+  porto-alegre-ibge-indicators.json (99 neighbourhood census indicators),
+  porto-alegre-ibge-settlements.json (125 informal settlement polygons),
   worldpop_bra_2020.tif (131MB, gitignored — downloaded on first population fetch)
 ```
 
@@ -86,10 +95,12 @@ client/public/sample-data/ — Cached real data
 - Both GET /api/geospatial/grid and POST /api/geospatial/fetch-all enforce this gating
 - If dependencies are missing, grid is computed but not persisted
 
-## Layer System (20 layers)
+## Layer System (26 layers, 5 groups)
 - **Risk Analysis** (5): Flood Risk, Heat Risk, Landslide Risk, Population Density, Building Density
-- **Environment** (5): Elevation, Land Cover, Water Bodies, Rivers, Forest
-- **OEF Geospatial** (10): Dynamic World (tiles), Slope, Flow Accumulation, Canopy Cover, Flood/Heat Hazard, Exposure, Cooling Capacity, Composite Risk, NbS Opportunity Zones (most unavailable — tiles not yet on S3)
+- **Environment** (6): Elevation, Land Cover, Water Bodies, Rivers, Forest, Solar Potential
+- **Transport** (2): Bus Routes, Bus Stops
+- **Social & Demographics** (2): Census Indicators, Informal Settlements
+- **OEF Geospatial** (11): Dynamic World (tiles), Solar PV Tiles, Slope, Flow Accumulation, Canopy Cover, Flood/Heat Hazard, Exposure, Cooling Capacity, Composite Risk, NbS Opportunity Zones (most unavailable — tiles not yet on S3)
 
 ## Design System
 - **CityCatalyst design system** from Open Earth Foundation

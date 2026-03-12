@@ -8,6 +8,8 @@ import {
   getLandslideColor,
   getPopulationColor,
   getBuildingColor,
+  getSolarColor,
+  getPovertyColor,
   LANDCOVER_COLORS,
 } from "@/data/colors";
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
@@ -268,6 +270,148 @@ export default function MapViewer() {
             onEachFeature: (feature: any, layer: L.Layer) => {
               const name = feature.properties?.name || "Forest area";
               (layer as any).bindTooltip(name, { sticky: true });
+            },
+          });
+        }
+
+        case "transit_stops": {
+          const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            pointToLayer: (_feature: any, latlng: L.LatLng) => {
+              return L.circleMarker(latlng, {
+                radius: 3,
+                fillColor: "#14b8a6",
+                color: "#0d9488",
+                weight: 1,
+                opacity: 0.9,
+                fillOpacity: 0.7,
+              });
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const name = p.stop_name || p.name || "Bus stop";
+              const code = p.stop_code ? ` (${p.stop_code})` : "";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong>${code}
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "transit_routes": {
+          const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: {
+              color: "#06b6d4",
+              weight: 1.5,
+              opacity: 0.5,
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const shapeId = p.shape_id || p.id || "Route";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>Route</strong>: ${shapeId}
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "solar_potential": {
+          const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: (feature: any) => {
+              const pvout = feature?.properties?.PVOUT_mean || 0;
+              const color = getSolarColor(pvout);
+              return {
+                color,
+                fillColor: color,
+                fillOpacity: 0.55,
+                weight: 1,
+                opacity: 0.8,
+              };
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const name = p.neighbourhood_name || p.name || "Neighbourhood";
+              const pvout = p.PVOUT_mean?.toFixed(2) || "N/A";
+              const ghi = p.GHI_mean?.toFixed(0) || "N/A";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong><br/>
+                  PV Output: ${pvout} kWh/kWp/day<br/>
+                  GHI: ${ghi} kWh/m\u00b2/year
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "ibge_census": {
+          const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: (feature: any) => {
+              const rate = feature?.properties?.poverty_rate || 0;
+              const color = getPovertyColor(rate);
+              return {
+                color,
+                fillColor: color,
+                fillOpacity: 0.55,
+                weight: 1,
+                opacity: 0.8,
+              };
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const name = p.neighbourhood_name || p.name || "Neighbourhood";
+              const pop = p.population_total?.toLocaleString() || "N/A";
+              const poverty = p.poverty_rate != null ? (p.poverty_rate * 100).toFixed(1) + "%" : "N/A";
+              const water = p.pct_piped_water != null ? (p.pct_piped_water * 100).toFixed(1) + "%" : "N/A";
+              const density = p.pop_density_km2?.toFixed(0) || "N/A";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong><br/>
+                  Population: ${pop}<br/>
+                  Poverty rate: ${poverty}<br/>
+                  Piped water: ${water}<br/>
+                  Density: ${density}/km\u00b2
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "ibge_settlements": {
+          const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: {
+              color: "#f43f5e",
+              fillColor: "#e11d48",
+              fillOpacity: 0.45,
+              weight: 1.5,
+              opacity: 0.8,
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const name = p.settlement_name || p.name || "Informal settlement";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong>
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
             },
           });
         }

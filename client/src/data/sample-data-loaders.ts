@@ -46,6 +46,11 @@ export async function loadLayerData(layerId: string): Promise<any> {
     grid_landslide: "/sample-data/porto-alegre-grid.json",
     grid_population: "/sample-data/porto-alegre-grid.json",
     grid_buildings: "/sample-data/porto-alegre-grid.json",
+    transit_stops: "/sample-data/porto-alegre-transit-stops.json",
+    transit_routes: "/sample-data/porto-alegre-transit-routes.json",
+    solar_potential: "/sample-data/porto-alegre-solar-neighbourhoods.json",
+    ibge_census: "/sample-data/porto-alegre-ibge-indicators.json",
+    ibge_settlements: "/sample-data/porto-alegre-ibge-settlements.json",
   };
 
   const apiPaths: Record<string, string> = {
@@ -59,6 +64,11 @@ export async function loadLayerData(layerId: string): Promise<any> {
     grid_landslide: "/api/geospatial/grid",
     grid_population: "/api/geospatial/grid",
     grid_buildings: "/api/geospatial/grid",
+    transit_stops: "/api/geospatial/transit-stops",
+    transit_routes: "/api/geospatial/transit-routes",
+    solar_potential: "/api/geospatial/solar-neighbourhoods",
+    ibge_census: "/api/geospatial/ibge-indicators",
+    ibge_settlements: "/api/geospatial/ibge-settlements",
   };
 
   const samplePath = samplePaths[layerId];

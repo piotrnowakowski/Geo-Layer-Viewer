@@ -25,6 +25,24 @@ import path from "path";
 const OEF_TILE_LAYERS: Record<string, string> = {
   dynamic_world:
     "https://geo-test-api.s3.us-east-1.amazonaws.com/nbs/porto_alegre/land_use/dynamic_world/V1/2023/tiles_visual/{z}/{x}/{y}.png",
+  solar_pvout:
+    "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/tiles_pvout/{z}/{x}/{y}.png",
+};
+
+const S3_GEOJSON_URLS: Record<string, string> = {
+  "transit-stops": "https://geo-test-api.s3.us-east-1.amazonaws.com/poa-gtfs/release/2024-10-01/stops.geojson",
+  "transit-routes": "https://geo-test-api.s3.us-east-1.amazonaws.com/poa-gtfs/release/2024-10-01/shapes.geojson",
+  "solar-neighbourhoods": "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/poa_solar_neighbourhoods.geojson",
+  "ibge-indicators": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2010/porto_alegre/porto_alegre_indicators.geojson",
+  "ibge-settlements": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2024/porto_alegre/poa_informal_settlements.geojson",
+};
+
+const S3_CACHE_FILES: Record<string, string> = {
+  "transit-stops": "porto-alegre-transit-stops.json",
+  "transit-routes": "porto-alegre-transit-routes.json",
+  "solar-neighbourhoods": "porto-alegre-solar-neighbourhoods.json",
+  "ibge-indicators": "porto-alegre-ibge-indicators.json",
+  "ibge-settlements": "porto-alegre-ibge-settlements.json",
 };
 
 function getSampleDataPath(filename: string): string {
@@ -89,6 +107,34 @@ function buildGrid(bounds: GeoBounds): any {
   return grid;
 }
 
+async function fetchAndCacheS3GeoJSON(datasetKey: string): Promise<any> {
+  const cacheFile = S3_CACHE_FILES[datasetKey];
+  if (cacheFile) {
+    const cached = loadCachedData(cacheFile);
+    if (cached) return cached;
+  }
+
+  const url = S3_GEOJSON_URLS[datasetKey];
+  if (!url) throw new Error(`Unknown dataset: ${datasetKey}`);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  const response = await fetch(url, { signal: controller.signal });
+  clearTimeout(timeout);
+
+  if (!response.ok) {
+    throw new Error(`S3 fetch failed for ${datasetKey}: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (cacheFile) {
+    saveSampleData(cacheFile, data);
+  }
+
+  return data;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -138,6 +184,51 @@ export async function registerRoutes(
         return res.status(504).json({ message: "Tile request timed out" });
       }
       return res.status(502).json({ message: "Failed to fetch tile" });
+    }
+  });
+
+  app.get("/api/geospatial/transit-stops", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("transit-stops");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/transit-routes", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("transit-routes");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/solar-neighbourhoods", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("solar-neighbourhoods");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/ibge-indicators", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("ibge-indicators");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/ibge-settlements", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("ibge-settlements");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   });
 

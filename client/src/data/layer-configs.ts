@@ -11,10 +11,15 @@ import {
   Users,
   Leaf,
   AlertTriangle,
+  Bus,
+  MapPin,
+  Sun,
+  BarChart3,
+  Home,
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
-export type LayerGroup = "analysis" | "environment" | "oef";
+export type LayerGroup = "analysis" | "environment" | "transport" | "social" | "oef";
 
 export interface LayerConfig {
   id: string;
@@ -46,8 +51,16 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "surface_water", name: "Water Bodies", icon: Droplets, color: "#3b82f6", source: "geojson", group: "environment", available: true },
   { id: "rivers", name: "Rivers", icon: Droplets, color: "#06b6d4", source: "geojson", group: "environment", available: true },
   { id: "forest", name: "Forest", icon: Trees, color: "#22c55e", source: "geojson", group: "environment", available: true },
+  { id: "solar_potential", name: "Solar Potential", icon: Sun, color: "#f59e0b", source: "geojson", group: "environment", available: true },
+
+  { id: "transit_routes", name: "Bus Routes", icon: Bus, color: "#06b6d4", source: "geojson", group: "transport", available: true },
+  { id: "transit_stops", name: "Bus Stops", icon: MapPin, color: "#14b8a6", source: "geojson", group: "transport", available: true },
+
+  { id: "ibge_census", name: "Census Indicators", icon: BarChart3, color: "#a855f7", source: "geojson", group: "social", available: true },
+  { id: "ibge_settlements", name: "Informal Settlements", icon: Home, color: "#f43f5e", source: "geojson", group: "social", available: true },
 
   { id: "oef_dynamic_world", name: "Land Use (Dynamic World)", icon: Grid3X3, color: "#06d6a0", source: "tiles", group: "oef", available: true, tileLayerId: "dynamic_world" },
+  { id: "oef_solar_tiles", name: "Solar PV Tiles", icon: Sun, color: "#eab308", source: "tiles", group: "oef", available: true, tileLayerId: "solar_pvout" },
   { id: "oef_slope", name: "Slope", icon: Mountain, color: "#bc6c25", source: "tiles", group: "oef", available: false },
   { id: "oef_flow_accumulation", name: "Flow Accumulation", icon: Droplets, color: "#0077b6", source: "tiles", group: "oef", available: false },
   { id: "oef_canopy_cover", name: "Canopy Cover", icon: Trees, color: "#588157", source: "tiles", group: "oef", available: false },
@@ -62,5 +75,7 @@ export const LAYER_CONFIGS: LayerConfig[] = [
 export const LAYER_GROUPS = [
   { id: "analysis" as const, label: "Risk Analysis" },
   { id: "environment" as const, label: "Environment" },
+  { id: "transport" as const, label: "Transport" },
+  { id: "social" as const, label: "Social & Demographics" },
   { id: "oef" as const, label: "OEF Geospatial Data" },
 ];
