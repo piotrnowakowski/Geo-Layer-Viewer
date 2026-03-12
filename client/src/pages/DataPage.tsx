@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { LAYER_CONFIGS, LAYER_GROUPS } from "@/data/layer-configs";
+import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS } from "@/data/layer-configs";
 
 interface LayerDataInfo {
   id: string;
@@ -289,102 +289,132 @@ export default function DataPage() {
           Each layer includes its data source, methodology, temporal coverage, spatial resolution, and geographic extent.
         </p>
 
-        {LAYER_GROUPS.map((group) => {
-          const groupLayers = LAYER_CONFIGS.filter((l) => l.group === group.id);
-          if (groupLayers.length === 0) return null;
+        {LAYER_SECTIONS.map((section) => {
+          const sectionGroups = LAYER_GROUPS.filter((g) => g.section === section.id);
+          const isOef = section.id === "oef_catalog";
 
           return (
-            <section key={group.id} className="mb-10">
-              <h2
-                data-testid={`heading-group-${group.id}`}
-                className="text-xs font-semibold uppercase tracking-widest text-zinc-500 border-b border-zinc-800 pb-2 mb-4"
-              >
-                {group.label}
-              </h2>
-
-              <div className="space-y-4">
-                {groupLayers.map((layer) => {
-                  const info = LAYER_DATA_INFO.find((d) => d.id === layer.id);
-                  const Icon = layer.icon;
-
-                  return (
-                    <div
-                      key={layer.id}
-                      data-testid={`card-layer-${layer.id}`}
-                      className="bg-zinc-900 border border-zinc-800 rounded-xl p-5"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: layer.color + "22" }}
-                        >
-                          <Icon className="w-4 h-4" style={{ color: layer.color }} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-semibold text-white">{layer.name}</h3>
-                          {!layer.available && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-medium">
-                              Coming Soon
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {info ? (
-                        <div className="space-y-3 text-sm">
-                          <div>
-                            <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Methodology</dt>
-                            <dd className="text-zinc-300 leading-relaxed">{info.methodology}</dd>
-                          </div>
-
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div>
-                              <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Source</dt>
-                              <dd className="text-zinc-300 text-xs">
-                                {info.sourceUrl ? (
-                                  <a
-                                    href={info.sourceUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    data-testid={`link-source-${layer.id}`}
-                                    className="hover:text-blue-400 transition-colors inline-flex items-center gap-1"
-                                  >
-                                    {info.source}
-                                    <ExternalLink className="w-3 h-3" />
-                                  </a>
-                                ) : (
-                                  info.source
-                                )}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Date</dt>
-                              <dd className="text-zinc-300 text-xs">{info.date}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Resolution</dt>
-                              <dd className="text-zinc-300 text-xs">{info.resolution}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Coverage</dt>
-                              <dd className="text-zinc-300 text-xs">{info.coverage}</dd>
-                            </div>
-                          </div>
-
-                          {info.notes && (
-                            <div>
-                              <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Notes</dt>
-                              <dd className="text-zinc-400 text-xs leading-relaxed">{info.notes}</dd>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-zinc-500 text-xs">Documentation pending.</p>
-                      )}
-                    </div>
-                  );
-                })}
+            <section key={section.id} className="mb-12">
+              {/* Section header */}
+              <div className="flex items-center gap-3 mb-6">
+                {isOef ? (
+                  <span
+                    className="text-[11px] font-bold uppercase tracking-widest px-2.5 py-1 rounded"
+                    style={{ backgroundColor: 'rgba(0,31,168,0.25)', color: '#6B8CFF' }}
+                  >
+                    {section.label}
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                    {section.label}
+                  </span>
+                )}
+                <div
+                  className="flex-1 h-px"
+                  style={isOef ? { backgroundColor: 'rgba(0,31,168,0.4)' } : { backgroundColor: 'rgba(255,255,255,0.07)' }}
+                />
               </div>
+
+              {/* Groups inside this section */}
+              {sectionGroups.map((group) => {
+                const groupLayers = LAYER_CONFIGS.filter((l) => l.group === group.id);
+                if (groupLayers.length === 0) return null;
+
+                return (
+                  <div key={group.id} className="mb-8">
+                    <h2
+                      data-testid={`heading-group-${group.id}`}
+                      className="text-xs font-semibold uppercase tracking-widest text-zinc-500 border-b border-zinc-800 pb-2 mb-4"
+                    >
+                      {group.label}
+                    </h2>
+
+                    <div className="space-y-4">
+                      {groupLayers.map((layer) => {
+                        const info = LAYER_DATA_INFO.find((d) => d.id === layer.id);
+                        const Icon = layer.icon;
+
+                        return (
+                          <div
+                            key={layer.id}
+                            data-testid={`card-layer-${layer.id}`}
+                            className="bg-zinc-900 border border-zinc-800 rounded-xl p-5"
+                          >
+                            <div className="flex items-center gap-3 mb-3">
+                              <div
+                                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: layer.color + "22" }}
+                              >
+                                <Icon className="w-4 h-4" style={{ color: layer.color }} />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-white">{layer.name}</h3>
+                                {!layer.available && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-medium">
+                                    Coming Soon
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {info ? (
+                              <div className="space-y-3 text-sm">
+                                <div>
+                                  <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Methodology</dt>
+                                  <dd className="text-zinc-300 leading-relaxed">{info.methodology}</dd>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                  <div>
+                                    <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Source</dt>
+                                    <dd className="text-zinc-300 text-xs">
+                                      {info.sourceUrl ? (
+                                        <a
+                                          href={info.sourceUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          data-testid={`link-source-${layer.id}`}
+                                          className="hover:text-blue-400 transition-colors inline-flex items-center gap-1"
+                                        >
+                                          {info.source}
+                                          <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                      ) : (
+                                        info.source
+                                      )}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Date</dt>
+                                    <dd className="text-zinc-300 text-xs">{info.date}</dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Resolution</dt>
+                                    <dd className="text-zinc-300 text-xs">{info.resolution}</dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Coverage</dt>
+                                    <dd className="text-zinc-300 text-xs">{info.coverage}</dd>
+                                  </div>
+                                </div>
+
+                                {info.notes && (
+                                  <div>
+                                    <dt className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5">Notes</dt>
+                                    <dd className="text-zinc-400 text-xs leading-relaxed">{info.notes}</dd>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-zinc-500 text-xs">Documentation pending.</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </section>
           );
         })}

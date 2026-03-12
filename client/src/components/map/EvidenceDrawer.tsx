@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Layers, ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LAYER_GROUPS, type LayerState } from "@/data/layer-configs";
+import { LAYER_GROUPS, LAYER_SECTIONS, type LayerState } from "@/data/layer-configs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EvidenceDrawerProps {
@@ -28,15 +28,16 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
       className={cn(
         "site-explorer-panel",
         "absolute bottom-0 left-0 z-[1001]",
-        "w-[75%] max-w-[800px]",
+        "w-[80%] max-w-[900px]",
         "bg-zinc-900/95 backdrop-blur-sm",
         "border-t border-r border-zinc-700 rounded-tr-xl",
         "transition-all duration-300 ease-in-out",
-        expanded ? "max-h-[360px]" : "max-h-[48px]"
+        expanded ? "max-h-[440px]" : "max-h-[48px]"
       )}
       onMouseEnter={handleMouseEnter}
       onWheel={handleWheel}
     >
+      {/* Header bar */}
       <button
         data-testid="button-toggle-drawer"
         onClick={() => setExpanded(!expanded)}
@@ -62,26 +63,63 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
         )}
       </button>
 
+      {/* Body */}
       {expanded && (
-        <div className="px-4 pb-4 overflow-y-auto max-h-[310px]">
-          {LAYER_GROUPS.map((group) => {
-            const groupLayers = layers.filter((l) => l.group === group.id);
+        <div className="px-4 pb-4 overflow-y-auto max-h-[388px]">
+          {LAYER_SECTIONS.map((section) => {
+            const sectionGroups = LAYER_GROUPS.filter((g) => g.section === section.id);
+            const sectionLayers = layers.filter((l) =>
+              sectionGroups.some((g) => g.id === l.group)
+            );
+            if (sectionLayers.length === 0) return null;
+
+            const isOef = section.id === "oef_catalog";
+
             return (
-              <div key={group.id} className="mb-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                    {group.label}
-                  </span>
-                  <div className="flex-1 h-px bg-zinc-700/50" />
+              <div key={section.id} className="mb-4">
+                {/* Section header */}
+                <div className="flex items-center gap-2 mb-2.5 mt-1">
+                  {isOef ? (
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+                      style={{ backgroundColor: 'rgba(0,31,168,0.25)', color: '#6B8CFF' }}
+                    >
+                      {section.label}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                      {section.label}
+                    </span>
+                  )}
+                  <div className="flex-1 h-px" style={isOef ? { backgroundColor: 'rgba(0,31,168,0.35)' } : { backgroundColor: 'rgba(255,255,255,0.08)' }} />
                 </div>
-                <div className="grid grid-cols-6 gap-1.5">
-                  {groupLayers.map((layer) => (
-                    <LayerButton
-                      key={layer.id}
-                      layer={layer}
-                      onToggle={onToggleLayer}
-                    />
-                  ))}
+
+                {/* Sub-groups inside section */}
+                <div className="pl-0 space-y-2.5">
+                  {sectionGroups.map((group) => {
+                    const groupLayers = layers.filter((l) => l.group === group.id);
+                    if (groupLayers.length === 0) return null;
+
+                    return (
+                      <div key={group.id}>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500 pl-0.5">
+                            {group.label}
+                          </span>
+                          <div className="flex-1 h-px bg-zinc-800" />
+                        </div>
+                        <div className="grid grid-cols-6 gap-1.5">
+                          {groupLayers.map((layer) => (
+                            <LayerButton
+                              key={layer.id}
+                              layer={layer}
+                              onToggle={onToggleLayer}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

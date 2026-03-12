@@ -376,14 +376,18 @@ export default function MapViewer() {
               const name = p.neighbourhood_name || p.name || "Neighbourhood";
               const pop = p.population_total?.toLocaleString() || "N/A";
               const poverty = p.poverty_rate != null ? (p.poverty_rate * 100).toFixed(1) + "%" : "N/A";
+              const lowIncome = p.pct_low_income != null ? (p.pct_low_income * 100).toFixed(1) + "%" : "N/A";
+              const highIncome = p.pct_high_income != null ? (p.pct_high_income * 100).toFixed(1) + "%" : "N/A";
               const water = p.pct_piped_water != null ? (p.pct_piped_water * 100).toFixed(1) + "%" : "N/A";
+              const sewage = p.pct_formal_sewage != null ? (p.pct_formal_sewage * 100).toFixed(1) + "%" : "N/A";
               const density = p.pop_density_km2?.toFixed(0) || "N/A";
               const html = `
                 <div style="font-family: system-ui; font-size: 11px;">
                   <strong>${name}</strong><br/>
                   Population: ${pop}<br/>
                   Poverty rate: ${poverty}<br/>
-                  Piped water: ${water}<br/>
+                  Low income: ${lowIncome} | High income: ${highIncome}<br/>
+                  Piped water: ${water} | Sewage: ${sewage}<br/>
                   Density: ${density}/km\u00b2
                 </div>
               `;
