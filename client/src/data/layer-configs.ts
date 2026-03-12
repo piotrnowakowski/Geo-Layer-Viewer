@@ -59,7 +59,7 @@ export interface LayerSectionDef {
 
 export const LAYER_SECTIONS: LayerSectionDef[] = [
   { id: "oef_catalog", label: "OEF Geospatial Data" },
-  { id: "derived", label: "Derived Analysis" },
+  { id: "derived", label: "Reference Layers" },
 ];
 
 export const LAYER_GROUPS: LayerGroupDef[] = [
