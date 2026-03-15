@@ -51,6 +51,12 @@ export async function loadLayerData(layerId: string): Promise<any> {
     solar_potential: "/sample-data/porto-alegre-solar-neighbourhoods.json",
     ibge_census: "/sample-data/porto-alegre-ibge-indicators.json",
     ibge_settlements: "/sample-data/porto-alegre-ibge-settlements.json",
+    sites_parks:     "/sample-data/porto-alegre-sites-parks.json",
+    sites_schools:   "/sample-data/porto-alegre-sites-schools.json",
+    sites_hospitals: "/sample-data/porto-alegre-sites-hospitals.json",
+    sites_wetlands:  "/sample-data/porto-alegre-sites-wetlands.json",
+    sites_sports:    "/sample-data/porto-alegre-sites-sports.json",
+    sites_social:    "/sample-data/porto-alegre-sites-social.json",
   };
 
   const apiPaths: Record<string, string> = {
@@ -69,6 +75,12 @@ export async function loadLayerData(layerId: string): Promise<any> {
     solar_potential: "/api/geospatial/solar-neighbourhoods",
     ibge_census: "/api/geospatial/ibge-indicators",
     ibge_settlements: "/api/geospatial/ibge-settlements",
+    sites_parks:     "/api/geospatial/sites/sites_parks",
+    sites_schools:   "/api/geospatial/sites/sites_schools",
+    sites_hospitals: "/api/geospatial/sites/sites_hospitals",
+    sites_wetlands:  "/api/geospatial/sites/sites_wetlands",
+    sites_sports:    "/api/geospatial/sites/sites_sports",
+    sites_social:    "/api/geospatial/sites/sites_social",
   };
 
   const samplePath = samplePaths[layerId];

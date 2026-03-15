@@ -8,6 +8,7 @@ import { getLandcoverData } from "./services/worldcoverService";
 import { getBuildingData } from "./services/buildingService";
 import { getPopulationData } from "./services/worldpopService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
+import { fetchSiteLayer, SITE_LAYER_CONFIGS } from "./services/osmSitesService";
 import {
   generateGrid,
   computeRiverMetrics,
@@ -358,6 +359,28 @@ export async function registerRoutes(
       const bounds = getBoundsFromBoundary(boundary);
       const data = await getPopulationData(bounds);
       saveSampleData("porto-alegre-population.json", data);
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/sites/:layerId", async (req, res) => {
+    const { layerId } = req.params;
+    const config = SITE_LAYER_CONFIGS.find((c) => c.layerId === layerId);
+    if (!config) return res.status(404).json({ message: `Unknown site layer: ${layerId}` });
+
+    const cacheFile = `porto-alegre-sites-${layerId.replace("sites_", "")}.json`;
+    try {
+      const cached = loadCachedData(cacheFile);
+      if (cached) return res.json(cached);
+
+      const boundary = loadCachedData("porto-alegre-boundary.json");
+      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
+
+      const bounds = getBoundsFromBoundary(boundary);
+      const data = await fetchSiteLayer(layerId, bounds);
+      saveSampleData(cacheFile, data);
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });

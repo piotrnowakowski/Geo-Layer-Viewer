@@ -16,6 +16,11 @@ import {
   Sun,
   BarChart3,
   Home,
+  Heart,
+  GraduationCap,
+  Dumbbell,
+  Waves,
+  HandHeart,
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
@@ -26,7 +31,8 @@ export type LayerGroup =
   | "social"
   | "oef_tiles"
   | "analysis"
-  | "base_layers";
+  | "base_layers"
+  | "sites";
 
 export interface LayerConfig {
   id: string;
@@ -69,6 +75,7 @@ export const LAYER_GROUPS: LayerGroupDef[] = [
   { id: "oef_tiles",       label: "Geospatial Layers",        section: "oef_catalog" },
   { id: "analysis",        label: "Risk Analysis",            section: "derived"     },
   { id: "base_layers",     label: "Base Layers",              section: "derived"     },
+  { id: "sites",           label: "Climate Sites",            section: "derived"     },
 ];
 
 export const LAYER_CONFIGS: LayerConfig[] = [
@@ -104,9 +111,17 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "grid_buildings",    name: "Building Density",         icon: Building2, color: "#f97316", source: "geojson", group: "analysis",       available: true },
 
   // ── Derived → Base Layers ───────────────────────────────────────────────────
-  { id: "elevation",         name: "Elevation",                icon: Mountain,  color: "#c9a87c", source: "geojson", group: "base_layers",    available: true },
-  { id: "landcover",         name: "Land Cover",               icon: MapIcon,   color: "#4ade80", source: "geojson", group: "base_layers",    available: true },
-  { id: "surface_water",     name: "Water Bodies",             icon: Droplets,  color: "#3b82f6", source: "geojson", group: "base_layers",    available: true },
-  { id: "rivers",            name: "Rivers",                   icon: Droplets,  color: "#06b6d4", source: "geojson", group: "base_layers",    available: true },
-  { id: "forest",            name: "Forest",                   icon: Trees,     color: "#22c55e", source: "geojson", group: "base_layers",    available: true },
+  { id: "elevation",         name: "Elevation",                icon: Mountain,      color: "#c9a87c", source: "geojson", group: "base_layers", available: true },
+  { id: "landcover",         name: "Land Cover",               icon: MapIcon,       color: "#4ade80", source: "geojson", group: "base_layers", available: true },
+  { id: "surface_water",     name: "Water Bodies",             icon: Droplets,      color: "#3b82f6", source: "geojson", group: "base_layers", available: true },
+  { id: "rivers",            name: "Rivers",                   icon: Droplets,      color: "#06b6d4", source: "geojson", group: "base_layers", available: true },
+  { id: "forest",            name: "Forest",                   icon: Trees,         color: "#22c55e", source: "geojson", group: "base_layers", available: true },
+
+  // ── Derived → Climate Sites ─────────────────────────────────────────────────
+  { id: "sites_parks",       name: "Parks & Green Space",      icon: Trees,         color: "#22c55e", source: "geojson", group: "sites",       available: true },
+  { id: "sites_schools",     name: "Schools & Education",      icon: GraduationCap, color: "#f59e0b", source: "geojson", group: "sites",       available: true },
+  { id: "sites_hospitals",   name: "Hospitals & Health",       icon: Heart,         color: "#ef4444", source: "geojson", group: "sites",       available: true },
+  { id: "sites_wetlands",    name: "Wetlands",                 icon: Waves,         color: "#3b82f6", source: "geojson", group: "sites",       available: true },
+  { id: "sites_sports",      name: "Sports Grounds & Plazas",  icon: Dumbbell,      color: "#8b5cf6", source: "geojson", group: "sites",       available: true },
+  { id: "sites_social",      name: "Community Facilities",     icon: HandHeart,     color: "#ec4899", source: "geojson", group: "sites",       available: true },
 ];

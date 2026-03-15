@@ -420,6 +420,97 @@ export default function MapViewer() {
           });
         }
 
+        case "sites_parks":
+        case "sites_schools":
+        case "sites_hospitals":
+        case "sites_wetlands":
+        case "sites_sports":
+        case "sites_social": {
+          const geoJson = data?.geoJson || data;
+          if (!geoJson?.features) return null;
+
+          const siteColors: Record<string, string> = {
+            sites_parks:     "#22c55e",
+            sites_schools:   "#f59e0b",
+            sites_hospitals: "#ef4444",
+            sites_wetlands:  "#3b82f6",
+            sites_sports:    "#8b5cf6",
+            sites_social:    "#ec4899",
+          };
+
+          const siteNames: Record<string, string> = {
+            sites_parks:     "Park / Green Space",
+            sites_schools:   "School / Education",
+            sites_hospitals: "Hospital / Health Facility",
+            sites_wetlands:  "Wetland",
+            sites_sports:    "Sports Ground / Plaza",
+            sites_social:    "Community Facility",
+          };
+
+          const color = siteColors[layerId] || "#94a3b8";
+          const typeName = siteNames[layerId] || "Site";
+
+          const group = L.layerGroup();
+
+          const polygonFeatures = geoJson.features.filter(
+            (f: any) => f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon"
+          );
+          const pointFeatures = geoJson.features.filter(
+            (f: any) => f.geometry?.type === "Point"
+          );
+
+          if (polygonFeatures.length > 0) {
+            L.geoJSON({ type: "FeatureCollection", features: polygonFeatures }, {
+              style: {
+                color,
+                fillColor: color,
+                fillOpacity: 0.25,
+                weight: 1.5,
+                opacity: 0.9,
+              },
+              onEachFeature: (feature: any, layer: L.Layer) => {
+                const p = feature.properties || {};
+                const name = p.name || p.tags?.name || typeName;
+                const html = `
+                  <div style="font-family: system-ui; font-size: 11px;">
+                    <strong>${name}</strong><br/>
+                    <span style="color: #94a3b8;">${typeName}</span>
+                  </div>
+                `;
+                (layer as any).bindTooltip(html, { sticky: true });
+              },
+            }).addTo(group);
+          }
+
+          if (pointFeatures.length > 0) {
+            L.geoJSON({ type: "FeatureCollection", features: pointFeatures }, {
+              pointToLayer: (_feature: any, latlng: L.LatLng) => {
+                return L.circleMarker(latlng, {
+                  radius: 5,
+                  fillColor: color,
+                  color: "#ffffff",
+                  weight: 1,
+                  opacity: 0.9,
+                  fillOpacity: 0.8,
+                });
+              },
+              onEachFeature: (feature: any, layer: L.Layer) => {
+                const p = feature.properties || {};
+                const name = p.name || p.tags?.name || typeName;
+                const html = `
+                  <div style="font-family: system-ui; font-size: 11px;">
+                    <strong>${name}</strong><br/>
+                    <span style="color: #94a3b8;">${typeName}</span>
+                  </div>
+                `;
+                (layer as any).bindTooltip(html, { sticky: true });
+              },
+            }).addTo(group);
+          }
+
+          return group;
+        }
+
         default:
           return null;
       }
