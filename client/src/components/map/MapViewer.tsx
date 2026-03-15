@@ -453,46 +453,37 @@ export default function MapViewer() {
           });
         }
 
-        case "sites_social_vuln": {
+        case "sites_flood_zones": {
           const geoJson = data?.geoJson || data;
           if (!geoJson?.features) return null;
 
-          const getVulnColor = (idx: number): string => {
-            // 0 = least vulnerable (light), 1 = most vulnerable (dark purple)
-            if (idx >= 0.85) return "#581c87";
-            if (idx >= 0.70) return "#7e22ce";
-            if (idx >= 0.55) return "#9333ea";
-            if (idx >= 0.40) return "#a855f7";
-            if (idx >= 0.28) return "#c084fc";
-            if (idx >= 0.15) return "#d8b4fe";
-            return "#ede9fe";
-          };
-
           return L.geoJSON(geoJson, {
             style: (feature: any) => {
-              const idx = feature?.properties?.vuln_index ?? 0;
+              const natural = feature?.properties?.natural || "";
+              const waterway = feature?.properties?.waterway || "";
+              const isWater = natural === "water";
+              const isWetland = natural === "wetland";
+              const isRiverbank = waterway === "riverbank";
               return {
-                color: "#7e22ce",
-                fillColor: getVulnColor(idx),
-                fillOpacity: 0.65,
-                weight: 0.8,
-                opacity: 0.7,
+                color: isWater ? "#1e40af" : "#2563eb",
+                fillColor: isWater ? "#1d4ed8" : isWetland ? "#3b82f6" : isRiverbank ? "#60a5fa" : "#93c5fd",
+                fillOpacity: isWater ? 0.55 : 0.4,
+                weight: isWater ? 1.5 : 1,
+                opacity: 0.85,
+                dashArray: isWater ? undefined : "4 3",
               };
             },
             onEachFeature: (feature: any, layer: L.Layer) => {
               const p = feature.properties || {};
-              const name = p.neighbourhood_name || "Neighbourhood";
-              const idx = p.vuln_index != null ? (p.vuln_index * 100).toFixed(0) : "N/A";
-              const poverty = p.poverty_rate != null ? (p.poverty_rate * 100).toFixed(1) + "%" : "N/A";
-              const lowInc = p.pct_low_income != null ? (p.pct_low_income * 100).toFixed(1) + "%" : "N/A";
-              const pop = p.population_total?.toLocaleString() ?? "N/A";
+              const name = p.name || (p.natural === "water" ? "Water body" : p.natural === "wetland" ? "Wetland" : "Flood zone");
+              const type = p.natural || p.waterway || "water feature";
+              const water = p.water ? ` (${p.water})` : "";
               const html = `
                 <div style="font-family: system-ui; font-size: 11px;">
                   <strong>${name}</strong><br/>
-                  Vulnerability index: <strong>${idx}/100</strong><br/>
-                  Poverty rate: ${poverty} | Low-income HH: ${lowInc}<br/>
-                  Population: ${pop}<br/>
-                  <span style="color: #94a3b8;">Source: IBGE Censo 2022</span>
+                  <span style="color: #94a3b8;">Type: ${type}${water}</span><br/>
+                  <span style="color: #60a5fa;">Flood risk zone — NbS priority area</span><br/>
+                  <span style="color: #94a3b8;">Source: OpenStreetMap</span>
                 </div>
               `;
               (layer as any).bindTooltip(html, { sticky: true });
@@ -625,13 +616,15 @@ export default function MapViewer() {
         const tileLayerId = layerState.tileLayerId;
         if (!tileLayerId) return;
 
-        // GIBS WMTS layers (e.g. MODIS LST) only reach zoom 7 — set maxNativeZoom
-        // so Leaflet upscales those tiles rather than requesting non-existent higher zooms.
-        const isGibsLayer = tileLayerId === "modis_lst";
+        // GIBS WMTS layers (VIIRS, MODIS) have lower maxNativeZoom than regular tiles.
+        // Server-side clamping handles zoom > maxNativeZoom, but Leaflet needs the hint
+        // to avoid stretching tiles unnecessarily at low zoom levels.
+        const gibsMaxZoom: Record<string, number> = { viirs_i5_day: 9 };
+        const isGibsLayer = tileLayerId in gibsMaxZoom;
         const tileUrl = `/api/geospatial/tiles/${tileLayerId}/{z}/{x}/{y}.png`;
         const tileLayer = L.tileLayer(tileUrl, {
           opacity: 0.7,
-          maxNativeZoom: isGibsLayer ? 7 : 15,
+          maxNativeZoom: isGibsLayer ? gibsMaxZoom[tileLayerId!] : 15,
           maxZoom: 19,
           minZoom: isGibsLayer ? 0 : 10,
           errorTileUrl: "",

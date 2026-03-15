@@ -59,6 +59,13 @@ export const SITE_LAYER_CONFIGS: SiteLayerConfig[] = [
     osmTags: ["landuse=brownfield", "landuse=vacant", "landuse=abandoned"],
     climateRelevance: "Priority sites for NbS intervention — permeable surface, urban greening, stormwater retention",
   },
+  {
+    layerId: "sites_flood_zones",
+    label: "Flood Risk Zones",
+    color: "#1d4ed8",
+    osmTags: ["natural=water", "natural=wetland", "natural=floodplain", "waterway=riverbank"],
+    climateRelevance: "Permanent water bodies, wetlands and riparian zones — primary flood risk areas for NbS planning",
+  },
 ];
 
 function buildOverpassQuery(osmTags: string[], bbox: string): string {

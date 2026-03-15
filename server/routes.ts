@@ -39,13 +39,14 @@ const OEF_TILE_LAYERS: Record<string, TileLayerConfig> = {
     urlTemplate:
       "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/tiles_pvout/{z}/{x}/{y}.png",
   },
-  // NASA GIBS: MODIS Terra Land Surface Temperature (Day), 1km, public WMTS.
-  // GIBS uses {z}/{y}/{x} (WMTS TileRow before TileCol) and only serves up to zoom 7.
-  // Server-side zoom clamping converts any higher-zoom request to the equivalent zoom-7 tile.
-  modis_lst: {
+  // NASA GIBS: VIIRS SNPP Brightness Temp Band I5 (Day), 375m resolution, public WMTS.
+  // GIBS uses {z}/{y}/{x} (WMTS TileRow before TileCol) and serves up to zoom 9.
+  // Server-side zoom clamping converts any higher-zoom request to the equivalent zoom-9 tile.
+  // Date: 2022-01-15 = southern-hemisphere summer peak heat in Porto Alegre.
+  viirs_i5_day: {
     urlTemplate:
-      "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Land_Surface_Temp_Day/default/2023-07-15/GoogleMapsCompatible_Level7/{z}/{y}/{x}.jpg",
-    maxNativeZoom: 7,
+      "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_Brightness_Temp_BandI5_Day/default/2022-01-15/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",
+    maxNativeZoom: 9,
   },
 };
 
