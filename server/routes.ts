@@ -25,15 +25,28 @@ import type { GeoBounds } from "@shared/schema";
 import fs from "fs";
 import path from "path";
 
-const OEF_TILE_LAYERS: Record<string, string> = {
-  dynamic_world:
-    "https://geo-test-api.s3.us-east-1.amazonaws.com/nbs/porto_alegre/land_use/dynamic_world/V1/2023/tiles_visual/{z}/{x}/{y}.png",
-  solar_pvout:
-    "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/tiles_pvout/{z}/{x}/{y}.png",
-  // NASA GIBS: MODIS Terra Land Surface Temperature (Day), 1km resolution, public WMTS
-  // GIBS uses {z}/{y}/{x} (WMTS TileMatrix/TileRow/TileCol) — note y before x
-  modis_lst:
-    "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Land_Surface_Temp_Day/default/2023-07-15/GoogleMapsCompatible_Level7/{z}/{y}/{x}.jpg",
+interface TileLayerConfig {
+  urlTemplate: string;
+  maxNativeZoom?: number;
+}
+
+const OEF_TILE_LAYERS: Record<string, TileLayerConfig> = {
+  dynamic_world: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/nbs/porto_alegre/land_use/dynamic_world/V1/2023/tiles_visual/{z}/{x}/{y}.png",
+  },
+  solar_pvout: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/tiles_pvout/{z}/{x}/{y}.png",
+  },
+  // NASA GIBS: MODIS Terra Land Surface Temperature (Day), 1km, public WMTS.
+  // GIBS uses {z}/{y}/{x} (WMTS TileRow before TileCol) and only serves up to zoom 7.
+  // Server-side zoom clamping converts any higher-zoom request to the equivalent zoom-7 tile.
+  modis_lst: {
+    urlTemplate:
+      "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Land_Surface_Temp_Day/default/2023-07-15/GoogleMapsCompatible_Level7/{z}/{y}/{x}.jpg",
+    maxNativeZoom: 7,
+  },
 };
 
 const S3_GEOJSON_URLS: Record<string, string> = {
@@ -147,18 +160,33 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   app.get("/api/geospatial/tiles/:layerId/:z/:x/:y.png", async (req, res) => {
-    const { layerId, z, x, y } = req.params;
+    const { layerId } = req.params;
+    let { z, x, y } = req.params;
 
     if (!/^\d+$/.test(z) || !/^\d+$/.test(x) || !/^\d+$/.test(y)) {
       return res.status(400).json({ message: "Invalid tile coordinates" });
     }
 
-    const template = OEF_TILE_LAYERS[layerId];
-    if (!template) {
+    const config = OEF_TILE_LAYERS[layerId];
+    if (!config) {
       return res.status(404).json({ message: `Layer "${layerId}" not available` });
     }
 
-    const tileUrl = template
+    // Server-side zoom clamping: if the layer has a maxNativeZoom and the
+    // requested zoom exceeds it, compute the equivalent tile at maxNativeZoom.
+    // This handles clients that send high-zoom requests despite the Leaflet option.
+    if (config.maxNativeZoom !== undefined) {
+      const reqZ = parseInt(z);
+      if (reqZ > config.maxNativeZoom) {
+        const diff = reqZ - config.maxNativeZoom;
+        const scale = Math.pow(2, diff);
+        z = String(config.maxNativeZoom);
+        x = String(Math.floor(parseInt(x) / scale));
+        y = String(Math.floor(parseInt(y) / scale));
+      }
+    }
+
+    const tileUrl = config.urlTemplate
       .replace("{z}", z)
       .replace("{x}", x)
       .replace("{y}", y);
@@ -390,17 +418,59 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/geospatial/elderly", async (_req, res) => {
-    const cacheFile = "porto-alegre-elderly.json";
+  app.get("/api/geospatial/social-vulnerability", async (_req, res) => {
+    const cacheFile = "porto-alegre-social-vuln.json";
     try {
       const cached = loadCachedData(cacheFile);
       if (cached) return res.json(cached);
 
-      const data = await getElderlyPopulationData();
-      saveSampleData(cacheFile, data);
-      res.json(data);
+      // Build social vulnerability index from the real IBGE neighbourhood indicators
+      // (already cached from /api/geospatial/ibge-indicators).
+      // Uses: poverty_rate, pct_low_income (income Q1+Q2 households), pop_density_km2.
+      const ibgeData = loadCachedData("porto-alegre-ibge-indicators.json");
+      if (!ibgeData?.features?.length) {
+        return res.status(400).json({ message: "IBGE indicators not loaded — call /api/geospatial/ibge-indicators first" });
+      }
+
+      const features = ibgeData.features as any[];
+
+      // Compute min/max for normalisation
+      const getVal = (p: any) => {
+        const poverty = p.poverty_rate || 0;
+        const lowInc  = p.pct_low_income || 0;
+        return (poverty + lowInc) / 2;
+      };
+      const vals = features.map((f: any) => getVal(f.properties));
+      const minV = Math.min(...vals);
+      const maxV = Math.max(...vals);
+      const range = maxV - minV || 1;
+
+      const enriched = features.map((f: any) => {
+        const p = f.properties || {};
+        const raw = getVal(p);
+        const vuln_index = (raw - minV) / range; // 0 = least vulnerable, 1 = most
+        return {
+          ...f,
+          properties: {
+            ...p,
+            vuln_index,
+            vuln_pct: raw,
+            poverty_rate: p.poverty_rate || 0,
+            pct_low_income: p.pct_low_income || 0,
+            data_source: "ibge_censo_2022",
+          },
+        };
+      });
+
+      const result = {
+        source: "ibge_censo_2022_neighbourhood_indicators",
+        featureCount: enriched.length,
+        geoJson: { type: "FeatureCollection", features: enriched },
+      };
+      saveSampleData(cacheFile, result);
+      res.json(result);
     } catch (error: any) {
-      res.status(503).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
   });
 

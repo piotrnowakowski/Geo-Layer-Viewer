@@ -58,8 +58,7 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_sports:     "/sample-data/porto-alegre-sites-sports.json",
     sites_social:     "/sample-data/porto-alegre-sites-social.json",
     sites_vacant:     "/sample-data/porto-alegre-sites-vacant.json",
-    sites_flood2024:  "/sample-data/porto-alegre-flood-2024.json",
-    sites_elderly:    "/sample-data/porto-alegre-elderly.json",
+    sites_social_vuln: "/sample-data/porto-alegre-social-vuln.json",
   };
 
   const apiPaths: Record<string, string> = {
@@ -84,9 +83,8 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_wetlands:  "/api/geospatial/sites/sites_wetlands",
     sites_sports:    "/api/geospatial/sites/sites_sports",
     sites_social:    "/api/geospatial/sites/sites_social",
-    sites_vacant:    "/api/geospatial/sites/sites_vacant",
-    sites_flood2024: "/api/geospatial/flood-2024",
-    sites_elderly:   "/api/geospatial/elderly",
+    sites_vacant:      "/api/geospatial/sites/sites_vacant",
+    sites_social_vuln: "/api/geospatial/social-vulnerability",
   };
 
   const samplePath = samplePaths[layerId];

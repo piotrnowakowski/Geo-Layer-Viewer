@@ -453,28 +453,28 @@ export default function MapViewer() {
           });
         }
 
-        case "sites_elderly": {
+        case "sites_social_vuln": {
           const geoJson = data?.geoJson || data;
           if (!geoJson?.features) return null;
 
-          const getElderlyColor = (pct: number): string => {
-            if (pct >= 0.25) return "#6d28d9";
-            if (pct >= 0.20) return "#7c3aed";
-            if (pct >= 0.17) return "#8b5cf6";
-            if (pct >= 0.14) return "#a78bfa";
-            if (pct >= 0.11) return "#c4b5fd";
-            if (pct >= 0.08) return "#ddd6fe";
+          const getVulnColor = (idx: number): string => {
+            // 0 = least vulnerable (light), 1 = most vulnerable (dark purple)
+            if (idx >= 0.85) return "#581c87";
+            if (idx >= 0.70) return "#7e22ce";
+            if (idx >= 0.55) return "#9333ea";
+            if (idx >= 0.40) return "#a855f7";
+            if (idx >= 0.28) return "#c084fc";
+            if (idx >= 0.15) return "#d8b4fe";
             return "#ede9fe";
           };
 
           return L.geoJSON(geoJson, {
             style: (feature: any) => {
-              const pct = feature?.properties?.pct_elderly || 0;
-              const color = getElderlyColor(pct);
+              const idx = feature?.properties?.vuln_index ?? 0;
               return {
-                color: "#6d28d9",
-                fillColor: color,
-                fillOpacity: 0.6,
+                color: "#7e22ce",
+                fillColor: getVulnColor(idx),
+                fillOpacity: 0.65,
                 weight: 0.8,
                 opacity: 0.7,
               };
@@ -482,16 +482,17 @@ export default function MapViewer() {
             onEachFeature: (feature: any, layer: L.Layer) => {
               const p = feature.properties || {};
               const name = p.neighbourhood_name || "Neighbourhood";
-              const pct = p.pct_elderly != null ? (p.pct_elderly * 100).toFixed(1) + "%" : "N/A";
-              const count = p.pop_65plus?.toLocaleString() ?? "N/A";
-              const total = p.population_total?.toLocaleString() ?? "N/A";
-              const source = p.data_source === "ibge_sidra_neighbourhood" ? "IBGE Sidra (neighbourhood)" : "IBGE Sidra (city estimate)";
+              const idx = p.vuln_index != null ? (p.vuln_index * 100).toFixed(0) : "N/A";
+              const poverty = p.poverty_rate != null ? (p.poverty_rate * 100).toFixed(1) + "%" : "N/A";
+              const lowInc = p.pct_low_income != null ? (p.pct_low_income * 100).toFixed(1) + "%" : "N/A";
+              const pop = p.population_total?.toLocaleString() ?? "N/A";
               const html = `
                 <div style="font-family: system-ui; font-size: 11px;">
                   <strong>${name}</strong><br/>
-                  Elderly (65+): <strong>${pct}</strong> of pop.<br/>
-                  Count: ${count} / ${total} total<br/>
-                  <span style="color: #94a3b8;">Source: ${source}</span>
+                  Vulnerability index: <strong>${idx}/100</strong><br/>
+                  Poverty rate: ${poverty} | Low-income HH: ${lowInc}<br/>
+                  Population: ${pop}<br/>
+                  <span style="color: #94a3b8;">Source: IBGE Censo 2022</span>
                 </div>
               `;
               (layer as any).bindTooltip(html, { sticky: true });
