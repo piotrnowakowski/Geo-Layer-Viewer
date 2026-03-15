@@ -59,6 +59,7 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_social:     "/sample-data/porto-alegre-sites-social.json",
     sites_vacant:       "/sample-data/porto-alegre-sites-vacant.json",
     sites_flood_zones:  "/sample-data/porto-alegre-sites-flood_zones.json",
+    sites_flood2024:    "/sample-data/porto-alegre-flood-2024.json",
   };
 
   const apiPaths: Record<string, string> = {

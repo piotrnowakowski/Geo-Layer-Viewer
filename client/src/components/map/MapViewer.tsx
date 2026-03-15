@@ -438,14 +438,14 @@ export default function MapViewer() {
             },
             onEachFeature: (feature: any, layer: L.Layer) => {
               const p = feature.properties || {};
-              const type = p.obj_type || p.notation || p.class || "Flood area";
-              const name = p.name || p.admin_unit_l || "Inundated area";
-              const area = p.area_ha ? `${Number(p.area_ha).toFixed(1)} ha` : p.area_sqkm ? `${Number(p.area_sqkm).toFixed(2)} km²` : "";
+              const date = p.event_date || "2024-05-06";
+              const src = p.data_source ? "Planet/SkySat satellite" : "2024 Flood";
               const html = `
                 <div style="font-family: system-ui; font-size: 11px;">
-                  <strong>${name}</strong><br/>
-                  <span style="color: #94a3b8;">2024 Flood: ${type}</span>
-                  ${area ? `<br/><span>Area: ${area}</span>` : ""}
+                  <strong>Observed flood inundation</strong><br/>
+                  <span style="color: #60a5fa;">Date: ${date} (flood peak)</span><br/>
+                  <span style="color: #94a3b8;">Source: ${src}</span><br/>
+                  <span style="color: #94a3b8;">Guaíba watershed — Rio Grande do Sul</span>
                 </div>
               `;
               (layer as any).bindTooltip(html, { sticky: true });

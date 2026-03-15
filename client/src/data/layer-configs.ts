@@ -125,6 +125,7 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "sites_sports",      name: "Sports Grounds & Plazas",  icon: Dumbbell,      color: "#8b5cf6", source: "geojson", group: "sites",       available: true },
   { id: "sites_social",      name: "Community Facilities",     icon: HandHeart,     color: "#ec4899", source: "geojson", group: "sites",       available: true },
   { id: "sites_vacant",      name: "Vacant & Brownfield Land", icon: MapIcon,       color: "#a16207", source: "geojson", group: "sites",       available: true },
-  { id: "sites_flood_zones", name: "Flood Risk Zones",          icon: CloudRain,     color: "#1d4ed8", source: "geojson", group: "sites",       available: true },
+  { id: "sites_flood_zones", name: "Flood Risk Zones (OSM)",     icon: Waves,         color: "#1d4ed8", source: "geojson", group: "sites",       available: true },
+  { id: "sites_flood2024",   name: "2024 Flood Extent (Planet/SkySat)", icon: CloudRain, color: "#60a5fa", source: "geojson", group: "sites", available: true },
   { id: "ref_viirs_lst",     name: "Heat Intensity (VIIRS 375m)",icon: Flame,        color: "#f97316", source: "tiles",   group: "sites",       available: true, tileLayerId: "viirs_i5_day" },
 ];
