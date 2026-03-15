@@ -1,0 +1,248 @@
+Here's a full technical breakdown of how the pipeline works and how to extend it.
+
+How OSM Assets Work Today
+The Two APIs Involved
+1. Nominatim (nominatim.openstreetmap.org) — Used once per city to get the city boundary polygon. Called via getCityBoundary(), result is cached in the database. Returns a GeoJSON polygon and bounding box.
+
+2. Overpass API (overpass-api.de/api/interpreter) — Used for all feature queries. This is the main workhorse. It takes a structured query and returns OSM elements (nodes, ways, relations) with their geometry.
+
+The Current Query Flow
+When a user selects an intervention category in the Site Explorer:
+
+Frontend collects the osmAssetTypes from all interventions in that category — these are key=value OSM tag pairs like amenity=school or leisure=park
+
+Frontend posts to POST /api/geospatial/osm-assets with:
+
+bbox — the zone's bounding box [minLat, minLng, maxLat, maxLng]
+osmTypes — array of "key=value" strings
+zoneId + category — for cache keying
+Backend (osmAssetService.ts) builds an Overpass QL query like:
+
+[out:json][timeout:60][maxsize:52428800];
+(
+  node["amenity"="school"](bbox);
+  way["amenity"="school"](bbox);
+  relation["amenity"="school"](bbox);
+  node["leisure"="park"](bbox);
+  way["leisure"="park"](bbox);
+  relation["leisure"="park"](bbox);
+);
+out body geom;
+Response parsing maps each Overpass element to a typed geometry:
+
+OSM node → Point geometry
+OSM way (closed ring) → Polygon geometry + area in m²
+OSM way (open) → LineString geometry + length in m
+OSM relation → not currently handled (relations need out geom with recursion)
+Results are cached in PostgreSQL (osmAssetCache table) for 7 days per zoneId:category:bbox key.
+
+Current OSM Types Per Intervention
+Intervention	OSM Tags Queried
+Floodable park	leisure=park, leisure=playground, landuse=grass, landuse=recreation_ground
+Sponge square	place=square, highway=pedestrian, leisure=common, amenity=marketplace
+Retention yard	amenity=school, amenity=university, leisure=sports_pitch
+Detention field	leisure=sports_pitch, leisure=stadium, leisure=sports_centre
+Constructed wetland	natural=wetland, natural=water, landuse=meadow
+How to Add Separate Layers for Climate-Critical Site Types
+Step 1 — Define the Site Type Catalogue
+Each site type needs:
+
+A unique layerId string
+One or more OSM key=value tag pairs
+A geometry preference (point, polygon, or both)
+A color for map rendering
+Here's the recommended catalogue for urban climate action:
+
+const CLIMATE_SITE_LAYERS = [
+  {
+    layerId: 'hospitals',
+    label: 'Hospitals & Health Facilities',
+    color: '#ef4444',
+    osmTags: ['amenity=hospital', 'amenity=clinic', 'amenity=doctors', 'healthcare=hospital'],
+    preferPolygon: true,
+    climateRelevance: 'Critical infrastructure — heat stress, flood vulnerability, evacuation'
+  },
+  {
+    layerId: 'schools',
+    label: 'Schools & Universities',
+    color: '#f59e0b',
+    osmTags: ['amenity=school', 'amenity=kindergarten', 'amenity=university', 'amenity=college'],
+    preferPolygon: true,
+    climateRelevance: 'High occupancy during heat waves, NbS implementation sites'
+  },
+  {
+    layerId: 'parks',
+    label: 'Parks & Green Space',
+    color: '#22c55e',
+    osmTags: ['leisure=park', 'leisure=garden', 'leisure=nature_reserve', 'landuse=recreation_ground'],
+    preferPolygon: true,
+    climateRelevance: 'Cooling islands, NbS opportunity zones, stormwater retention'
+  },
+  {
+    layerId: 'wetlands',
+    label: 'Wetlands & Water Bodies',
+    color: '#3b82f6',
+    osmTags: ['natural=wetland', 'natural=water', 'landuse=reservoir', 'water=lake', 'water=pond'],
+    preferPolygon: true,
+    climateRelevance: 'Flood attenuation, biodiversity corridors, water regulation'
+  },
+  {
+    layerId: 'sports_grounds',
+    label: 'Sports Grounds & Plazas',
+    color: '#8b5cf6',
+    osmTags: ['leisure=sports_pitch', 'leisure=stadium', 'leisure=sports_centre', 'highway=pedestrian', 'place=square'],
+    preferPolygon: true,
+    climateRelevance: 'Retrofittable for detention/retention, permeable surfaces'
+  },
+  {
+    layerId: 'transport_hubs',
+    label: 'Transport & Infrastructure',
+    color: '#94a3b8',
+    osmTags: ['amenity=bus_station', 'railway=station', 'aeroway=aerodrome', 'highway=motorway'],
+    preferPolygon: false,
+    climateRelevance: 'Flood exposure, heat island contribution, green corridor opportunity'
+  },
+  {
+    layerId: 'social_facilities',
+    label: 'Social & Community Facilities',
+    color: '#ec4899',
+    osmTags: ['amenity=community_centre', 'amenity=social_facility', 'amenity=shelter', 'amenity=place_of_worship'],
+    preferPolygon: true,
+    climateRelevance: 'Vulnerable population clusters, evacuation centres, heat refuges'
+  },
+  {
+    layerId: 'markets_food',
+    label: 'Markets & Food Supply',
+    color: '#f97316',
+    osmTags: ['amenity=marketplace', 'landuse=farmland', 'landuse=orchard', 'shop=supermarket'],
+    preferPolygon: true,
+    climateRelevance: 'Food security under climate stress, urban agriculture potential'
+  },
+  {
+    layerId: 'industrial',
+    label: 'Industrial & Contaminated Sites',
+    color: '#71717a',
+    osmTags: ['landuse=industrial', 'landuse=brownfield', 'landuse=commercial', 'man_made=wastewater_plant'],
+    preferPolygon: true,
+    climateRelevance: 'Impervious surface, heat island, NbS retrofit opportunity'
+  },
+  {
+    layerId: 'forests_trees',
+    label: 'Urban Forest & Tree Canopy',
+    color: '#16a34a',
+    osmTags: ['landuse=forest', 'natural=wood', 'natural=tree_row', 'landuse=allotments'],
+    preferPolygon: true,
+    climateRelevance: 'Canopy cover, cooling, carbon sequestration, biodiversity'
+  },
+];
+Step 2 — Overpass Query for Polygon Geometry
+The current implementation sends out body geom; which works for way elements. To also get relation geometry (which is how large parks, hospital campuses, and university grounds are often mapped), the query needs to recurse:
+
+[out:json][timeout:90][maxsize:104857600];
+(
+  way["amenity"="hospital"](bbox);
+  relation["amenity"="hospital"](bbox);
+);
+out body;
+>;
+out skel qt;
+Or for a geometry-inclusive approach that handles relations:
+
+[out:json][timeout:90];
+(
+  way["amenity"="hospital"](bbox);
+  relation["amenity"="hospital"](bbox);
+);
+out geom;
+out geom on a relation returns a members array with each member's geometry. You need to reconstruct the polygon from the outer way members.
+
+Step 3 — Geometry Reconstruction for Relations
+Currently osmAssetService.ts doesn't handle OSM relation elements. To get the full polygon outline of, say, a university campus or a large park mapped as a relation:
+
+function buildPolygonFromRelation(el: any): any | null {
+  if (el.type !== 'relation' || !el.members) return null;
+  const outerWays = el.members
+    .filter((m: any) => m.type === 'way' && m.role === 'outer' && m.geometry)
+    .map((m: any) => m.geometry.map((p: any) => [p.lon, p.lat]));
+  if (outerWays.length === 0) return null;
+  // For a simple single-outer-ring relation:
+  if (outerWays.length === 1) {
+    const ring = outerWays[0];
+    // Close the ring if needed
+    if (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1]) {
+      ring.push(ring[0]);
+    }
+    return { type: 'Polygon', coordinates: [ring] };
+  }
+  // For multi-ring relations, use turf to merge them:
+  // import * as turf from '@turf/turf';
+  // const features = outerWays.map(w => turf.lineString(w));
+  // ... merge into polygon using turf.lineToPolygon or polygonize
+  return null; // handle complex cases separately
+}
+Step 4 — Backend Endpoint Per Layer
+Instead of a single POST /api/geospatial/osm-assets that mixes all tags, add one endpoint (or parameterize with layerId) that fetches a single clean layer:
+
+// POST /api/geospatial/layers/:layerId
+app.post('/api/geospatial/layers/:layerId', async (req, res) => {
+  const { layerId } = req.params;
+  const { bbox, cityLocode } = req.body;
+  const layerConfig = CLIMATE_SITE_LAYERS.find(l => l.layerId === layerId);
+  if (!layerConfig) return res.status(404).json({ error: 'Unknown layer' });
+  const result = await fetchOsmAssets({
+    zoneId: cityLocode,      // use city-level cache key
+    category: layerId,
+    bbox,
+    osmTypes: layerConfig.osmTags,
+  });
+  // Return as GeoJSON FeatureCollection for direct Leaflet use
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: result.assets
+      .filter(a => a.geometry?.type === 'Polygon' || a.geometry?.type === 'MultiPolygon')
+      .map(a => ({
+        type: 'Feature',
+        geometry: a.geometry,
+        properties: {
+          id: a.id,
+          name: a.name,
+          layerId,
+          tags: a.tags,
+          area: a.area,
+        },
+      })),
+  };
+  res.json({ data: featureCollection, fromCache: result.fromCache });
+});
+Step 5 — Frontend Layer Toggle Integration
+In the LAYER_CONFIGS array in site-explorer.tsx, add each site type as a new layer with source: 'geojson' and a fetch function that calls the new endpoint:
+
+{
+  id: 'hospitals',
+  label: 'Hospitals',
+  group: 'Infrastructure',
+  source: 'geojson',
+  available: true,
+  color: '#ef4444',
+  // fetch function triggers on toggle:
+  fetchData: async (bbox) => {
+    const res = await fetch('/api/geospatial/layers/hospitals', {
+      method: 'POST',
+      body: JSON.stringify({ bbox, cityLocode }),
+    });
+    return res.json();
+  },
+  renderStyle: {
+    fillColor: '#ef4444',
+    fillOpacity: 0.3,
+    color: '#ef4444',
+    weight: 1.5,
+  }
+}
+Key Limitations to Know
+Issue	Detail
+Points vs polygons	Small features (a single clinic, a corner park) are often mapped as OSM node (point), not a polygon. You'll get centroid points for these. Filter by geometry.type to separate them into point and polygon sub-layers
+Relations	Large features (university campuses, national parks) are relation type. The current code ignores these entirely — only way elements get polygon geometry
+Overpass rate limits	The public endpoint allows ~1 req/min per IP. Aggressively cache results. The current code caches 7 days in PostgreSQL — extend this to 30 days for static infrastructure like hospitals and schools
+Bbox size	A city-wide bbox query for amenity=hospital across all nodes/ways/relations is fast. A query for landuse=forest at city scale can timeout — add [maxsize] and consider tiling the bbox
+OSM completeness	OSM coverage varies by city. Porto Alegre has excellent coverage. For cities in the Global South, some facilities may only exist as points with no polygon
