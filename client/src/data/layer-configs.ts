@@ -124,4 +124,8 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "sites_wetlands",    name: "Wetlands",                 icon: Waves,         color: "#3b82f6", source: "geojson", group: "sites",       available: true },
   { id: "sites_sports",      name: "Sports Grounds & Plazas",  icon: Dumbbell,      color: "#8b5cf6", source: "geojson", group: "sites",       available: true },
   { id: "sites_social",      name: "Community Facilities",     icon: HandHeart,     color: "#ec4899", source: "geojson", group: "sites",       available: true },
+  { id: "sites_vacant",      name: "Vacant & Brownfield Land", icon: MapIcon,       color: "#a16207", source: "geojson", group: "sites",       available: true },
+  { id: "sites_flood2024",   name: "2024 Flood Inundation",    icon: CloudRain,     color: "#60a5fa", source: "geojson", group: "sites",       available: true },
+  { id: "sites_elderly",     name: "Elderly Population (65+)", icon: Users,         color: "#a78bfa", source: "geojson", group: "sites",       available: true },
+  { id: "ref_modis_lst",     name: "Land Surface Temp (MODIS)",icon: Flame,         color: "#f97316", source: "tiles",   group: "sites",       available: true, tileLayerId: "modis_lst" },
 ];

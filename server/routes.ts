@@ -9,6 +9,8 @@ import { getBuildingData } from "./services/buildingService";
 import { getPopulationData } from "./services/worldpopService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import { fetchSiteLayer, SITE_LAYER_CONFIGS } from "./services/osmSitesService";
+import { getFlood2024Data } from "./services/flood2024Service";
+import { getElderlyPopulationData } from "./services/elderlyService";
 import {
   generateGrid,
   computeRiverMetrics,
@@ -28,6 +30,10 @@ const OEF_TILE_LAYERS: Record<string, string> = {
     "https://geo-test-api.s3.us-east-1.amazonaws.com/nbs/porto_alegre/land_use/dynamic_world/V1/2023/tiles_visual/{z}/{x}/{y}.png",
   solar_pvout:
     "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/tiles_pvout/{z}/{x}/{y}.png",
+  // NASA GIBS: MODIS Terra Land Surface Temperature (Day), 1km resolution, public WMTS
+  // GIBS uses {z}/{y}/{x} (WMTS TileMatrix/TileRow/TileCol) — note y before x
+  modis_lst:
+    "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_Land_Surface_Temp_Day/default/2023-07-15/GoogleMapsCompatible_Level7/{z}/{y}/{x}.jpg",
 };
 
 const S3_GEOJSON_URLS: Record<string, string> = {
@@ -174,8 +180,9 @@ export async function registerRoutes(
       }
 
       const buffer = Buffer.from(await tileResponse.arrayBuffer());
+      const upstreamContentType = tileResponse.headers.get("content-type") || "image/png";
       res.set({
-        "Content-Type": "image/png",
+        "Content-Type": upstreamContentType,
         "Cache-Control": "public, max-age=86400",
         "Access-Control-Allow-Origin": "*",
       });
@@ -362,6 +369,38 @@ export async function registerRoutes(
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/flood-2024", async (_req, res) => {
+    const cacheFile = "porto-alegre-flood-2024.json";
+    try {
+      const cached = loadCachedData(cacheFile);
+      if (cached) return res.json(cached);
+
+      const boundary = loadCachedData("porto-alegre-boundary.json");
+      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
+
+      const bounds = getBoundsFromBoundary(boundary);
+      const data = await getFlood2024Data(bounds);
+      saveSampleData(cacheFile, data);
+      res.json(data);
+    } catch (error: any) {
+      res.status(503).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/elderly", async (_req, res) => {
+    const cacheFile = "porto-alegre-elderly.json";
+    try {
+      const cached = loadCachedData(cacheFile);
+      if (cached) return res.json(cached);
+
+      const data = await getElderlyPopulationData();
+      saveSampleData(cacheFile, data);
+      res.json(data);
+    } catch (error: any) {
+      res.status(503).json({ message: error.message });
     }
   });
 

@@ -420,12 +420,92 @@ export default function MapViewer() {
           });
         }
 
+        case "sites_flood2024": {
+          const geoJson = data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: (feature: any) => {
+              const type = feature?.properties?.obj_type || feature?.properties?.notation || "flood";
+              const isExtent = type === "AffectedArea" || type === "Flooded";
+              return {
+                color: "#60a5fa",
+                fillColor: isExtent ? "#1d4ed8" : "#3b82f6",
+                fillOpacity: 0.35,
+                weight: 1.5,
+                opacity: 0.85,
+                dashArray: isExtent ? undefined : "4 2",
+              };
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const type = p.obj_type || p.notation || p.class || "Flood area";
+              const name = p.name || p.admin_unit_l || "Inundated area";
+              const area = p.area_ha ? `${Number(p.area_ha).toFixed(1)} ha` : p.area_sqkm ? `${Number(p.area_sqkm).toFixed(2)} km²` : "";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong><br/>
+                  <span style="color: #94a3b8;">2024 Flood: ${type}</span>
+                  ${area ? `<br/><span>Area: ${area}</span>` : ""}
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "sites_elderly": {
+          const geoJson = data?.geoJson || data;
+          if (!geoJson?.features) return null;
+
+          const getElderlyColor = (pct: number): string => {
+            if (pct >= 0.25) return "#6d28d9";
+            if (pct >= 0.20) return "#7c3aed";
+            if (pct >= 0.17) return "#8b5cf6";
+            if (pct >= 0.14) return "#a78bfa";
+            if (pct >= 0.11) return "#c4b5fd";
+            if (pct >= 0.08) return "#ddd6fe";
+            return "#ede9fe";
+          };
+
+          return L.geoJSON(geoJson, {
+            style: (feature: any) => {
+              const pct = feature?.properties?.pct_elderly || 0;
+              const color = getElderlyColor(pct);
+              return {
+                color: "#6d28d9",
+                fillColor: color,
+                fillOpacity: 0.6,
+                weight: 0.8,
+                opacity: 0.7,
+              };
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const name = p.neighbourhood_name || "Neighbourhood";
+              const pct = p.pct_elderly != null ? (p.pct_elderly * 100).toFixed(1) + "%" : "N/A";
+              const count = p.pop_65plus?.toLocaleString() ?? "N/A";
+              const total = p.population_total?.toLocaleString() ?? "N/A";
+              const source = p.data_source === "ibge_sidra_neighbourhood" ? "IBGE Sidra (neighbourhood)" : "IBGE Sidra (city estimate)";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong><br/>
+                  Elderly (65+): <strong>${pct}</strong> of pop.<br/>
+                  Count: ${count} / ${total} total<br/>
+                  <span style="color: #94a3b8;">Source: ${source}</span>
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
         case "sites_parks":
         case "sites_schools":
         case "sites_hospitals":
         case "sites_wetlands":
         case "sites_sports":
-        case "sites_social": {
+        case "sites_social":
+        case "sites_vacant": {
           const geoJson = data?.geoJson || data;
           if (!geoJson?.features) return null;
 
@@ -436,6 +516,7 @@ export default function MapViewer() {
             sites_wetlands:  "#3b82f6",
             sites_sports:    "#8b5cf6",
             sites_social:    "#ec4899",
+            sites_vacant:    "#a16207",
           };
 
           const siteNames: Record<string, string> = {
@@ -445,6 +526,7 @@ export default function MapViewer() {
             sites_wetlands:  "Wetland",
             sites_sports:    "Sports Ground / Plaza",
             sites_social:    "Community Facility",
+            sites_vacant:    "Vacant / Brownfield Land",
           };
 
           const color = siteColors[layerId] || "#94a3b8";
@@ -542,12 +624,15 @@ export default function MapViewer() {
         const tileLayerId = layerState.tileLayerId;
         if (!tileLayerId) return;
 
+        // GIBS WMTS layers (e.g. MODIS LST) only reach zoom 7 — set maxNativeZoom
+        // so Leaflet upscales those tiles rather than requesting non-existent higher zooms.
+        const isGibsLayer = tileLayerId === "modis_lst";
         const tileUrl = `/api/geospatial/tiles/${tileLayerId}/{z}/{x}/{y}.png`;
         const tileLayer = L.tileLayer(tileUrl, {
           opacity: 0.7,
-          maxNativeZoom: 15,
+          maxNativeZoom: isGibsLayer ? 7 : 15,
           maxZoom: 19,
-          minZoom: 10,
+          minZoom: isGibsLayer ? 0 : 10,
           errorTileUrl: "",
           className: "oef-tile-layer",
         });

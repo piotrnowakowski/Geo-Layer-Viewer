@@ -1,0 +1,233 @@
+602.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/366/602.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+602.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/364/602.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+603.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/365/603.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+601.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/364/601.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+602.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/365/602.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+601.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/365/601.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+603.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/366/603.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+601.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/366/601.png 502 (Bad Gateway)
+Image
+createTile @ leaflet.js:7963
+_addTile @ leaflet.js:7784
+_update @ leaflet.js:7715
+_setView @ leaflet.js:7613
+_resetView @ leaflet.js:7582
+onAdd @ leaflet.js:7295
+_layerAdd @ leaflet.js:4454
+whenReady @ leaflet.js:2981
+addLayer @ leaflet.js:4475
+addTo @ leaflet.js:4402
+(anonymous) @ /src/components/map/MapViewer.tsx:596
+onClick @ /src/components/map/…denceDrawer.tsx:248
+callCallback2 @ chunk-LPF6KSF2.js:3680
+invokeGuardedCallbackDev @ chunk-LPF6KSF2.js:3705
+invokeGuardedCallback @ chunk-LPF6KSF2.js:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-LPF6KSF2.js:3742
+executeDispatch @ chunk-LPF6KSF2.js:7046
+processDispatchQueueItemsInOrder @ chunk-LPF6KSF2.js:7066
+processDispatchQueue @ chunk-LPF6KSF2.js:7075
+dispatchEventsForPlugins @ chunk-LPF6KSF2.js:7083
+(anonymous) @ chunk-LPF6KSF2.js:7206
+batchedUpdates$1 @ chunk-LPF6KSF2.js:18966
+batchedUpdates @ chunk-LPF6KSF2.js:3585
+dispatchEventForPluginEventSystem @ chunk-LPF6KSF2.js:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-LPF6KSF2.js:5484
+dispatchEvent @ chunk-LPF6KSF2.js:5478
+dispatchDiscreteEvent @ chunk-LPF6KSF2.js:5455Understand this error
+603.png:1  GET https://01ed2387-5fca-4a8c-9dfc-1cba3915811f-00-en9orlnyz6gn.spock.replit.dev/api/geospatial/tiles/modis_lst/10/364/603.png 502 (Bad Gateway)

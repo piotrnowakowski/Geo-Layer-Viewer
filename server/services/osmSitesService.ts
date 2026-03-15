@@ -52,6 +52,13 @@ export const SITE_LAYER_CONFIGS: SiteLayerConfig[] = [
     osmTags: ["amenity=community_centre", "amenity=social_facility", "amenity=shelter", "amenity=place_of_worship"],
     climateRelevance: "Vulnerable population clusters, evacuation centres, heat refuges",
   },
+  {
+    layerId: "sites_vacant",
+    label: "Vacant & Brownfield Land",
+    color: "#a16207",
+    osmTags: ["landuse=brownfield", "landuse=vacant", "landuse=abandoned"],
+    climateRelevance: "Priority sites for NbS intervention — permeable surface, urban greening, stormwater retention",
+  },
 ];
 
 function buildOverpassQuery(osmTags: string[], bbox: string): string {
