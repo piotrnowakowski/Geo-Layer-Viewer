@@ -95,12 +95,17 @@ client/public/sample-data/ — Cached real data
 - Both GET /api/geospatial/grid and POST /api/geospatial/fetch-all enforce this gating
 - If dependencies are missing, grid is computed but not persisted
 
-## Layer System (26 layers, 5 groups)
+## Layer System (62 layers, 10 groups)
 - **Risk Analysis** (5): Flood Risk, Heat Risk, Landslide Risk, Population Density, Building Density
 - **Environment** (6): Elevation, Land Cover, Water Bodies, Rivers, Forest, Solar Potential
 - **Transport** (2): Bus Routes, Bus Stops
 - **Social & Demographics** (2): Census Indicators, Informal Settlements
-- **OEF Geospatial** (11): Dynamic World (tiles), Solar PV Tiles, Slope, Flow Accumulation, Canopy Cover, Flood/Heat Hazard, Exposure, Cooling Capacity, Composite Risk, NbS Opportunity Zones (most unavailable — tiles not yet on S3)
+- **Geospatial Layers** (11): Dynamic World, Solar PV, JRC Surface Water Transition, GHSL Built-Up, GHSL Urbanisation, Hansen Forest Loss, GHSL Population, VIIRS Night Lights, Copernicus EMSN194 Flood, MODIS NDVI, MERIT Hydro HAND — all available via OEF S3 tile proxy
+- **Hydrology & Terrain** (6): Copernicus DEM, MERIT ELV, MERIT UPA, JRC Occurrence, JRC Seasonality, Hansen Treecover 2000 — all available via OEF S3
+- **Extreme Climate Indices** (20): CHIRPS R90p/R95p/R99p/RX1day/RX5day × (2024 + climatology baseline), ERA5-Land TNx/TX90p/TX99p/TXx × (2024 + climatology), HWM 2024 + HWM climatology — all available via OEF S3
+- **Climate Projections** (11): Flood Risk Index 2024 + 2030s/2050s/2100s × SSP2-4.5/SSP5-8.5, Heatwave Magnitude 2030s/2050s/2100s — all available via OEF S3
+- **Placeholder OEF tiles** (6): Slope, Flow Accumulation, Canopy Cover, Flood/Heat Hazard, Exposure, Cooling, Composite Risk, NbS Opportunity Zones (available: false — tiles pending)
+- **Climate Sites** (7+): Parks, Schools, Hospitals, Wetlands, Sports, Social, Vacant, Flood Zones, Flood 2024
 
 ## Design System
 - **CityCatalyst design system** from Open Earth Foundation

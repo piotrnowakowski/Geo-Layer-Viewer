@@ -22,6 +22,8 @@ import {
   Waves,
   HandHeart,
   Moon,
+  Thermometer,
+  TrendingUp,
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
@@ -31,6 +33,9 @@ export type LayerGroup =
   | "transport"
   | "social"
   | "oef_tiles"
+  | "hydrology"
+  | "climate_extreme"
+  | "climate_projections"
   | "analysis"
   | "base_layers"
   | "sites";
@@ -70,13 +75,16 @@ export const LAYER_SECTIONS: LayerSectionDef[] = [
 ];
 
 export const LAYER_GROUPS: LayerGroupDef[] = [
-  { id: "oef_environment", label: "Environment",              section: "oef_catalog" },
-  { id: "transport",       label: "Transport",                section: "oef_catalog" },
-  { id: "social",          label: "Social & Demographics",    section: "oef_catalog" },
-  { id: "oef_tiles",       label: "Geospatial Layers",        section: "oef_catalog" },
-  { id: "analysis",        label: "Risk Analysis",            section: "derived"     },
-  { id: "base_layers",     label: "Base Layers",              section: "derived"     },
-  { id: "sites",           label: "Climate Sites",            section: "derived"     },
+  { id: "oef_environment",    label: "Environment",              section: "oef_catalog" },
+  { id: "transport",          label: "Transport",                section: "oef_catalog" },
+  { id: "social",             label: "Social & Demographics",    section: "oef_catalog" },
+  { id: "oef_tiles",          label: "Geospatial Layers",        section: "oef_catalog" },
+  { id: "hydrology",          label: "Hydrology & Terrain",      section: "oef_catalog" },
+  { id: "climate_extreme",    label: "Extreme Climate Indices",  section: "oef_catalog" },
+  { id: "climate_projections",label: "Climate Projections",      section: "oef_catalog" },
+  { id: "analysis",           label: "Risk Analysis",            section: "derived"     },
+  { id: "base_layers",        label: "Base Layers",              section: "derived"     },
+  { id: "sites",              label: "Climate Sites",            section: "derived"     },
 ];
 
 export const LAYER_CONFIGS: LayerConfig[] = [
@@ -112,6 +120,54 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "oef_cooling",          name: "Cooling Capacity",               icon: Leaf,         color: "#2d6a4f", source: "tiles", group: "oef_tiles", available: false },
   { id: "oef_composite_risk",   name: "Composite Risk",                 icon: AlertTriangle,color: "#e63946", source: "tiles", group: "oef_tiles", available: false },
   { id: "oef_opportunity_zones",name: "NbS Opportunity Zones",          icon: MapPinned,    color: "#06d6a0", source: "tiles", group: "oef_tiles", available: false },
+
+  // ── OEF Catalog → Hydrology & Terrain ──────────────────────────────────────
+  { id: "oef_copernicus_dem",   name: "DEM Elevation (Copernicus)",     icon: Mountain,     color: "#a16207", source: "tiles", group: "hydrology", available: true, tileLayerId: "copernicus_dem_visual" },
+  { id: "oef_merit_elv",        name: "Terrain Elevation (MERIT)",      icon: Mountain,     color: "#bc6c25", source: "tiles", group: "hydrology", available: true, tileLayerId: "merit_elv" },
+  { id: "oef_merit_upa",        name: "Upstream Area (MERIT)",          icon: Droplets,     color: "#0369a1", source: "tiles", group: "hydrology", available: true, tileLayerId: "merit_upa" },
+  { id: "oef_jrc_occurrence",   name: "Surface Water Occurrence (JRC)", icon: Waves,        color: "#1d4ed8", source: "tiles", group: "hydrology", available: true, tileLayerId: "jrc_occurrence" },
+  { id: "oef_jrc_seasonality",  name: "Surface Water Seasonality (JRC)",icon: Waves,        color: "#0891b2", source: "tiles", group: "hydrology", available: true, tileLayerId: "jrc_seasonality" },
+  { id: "oef_hansen_treecover", name: "Tree Cover 2000 (Hansen)",       icon: Trees,        color: "#166534", source: "tiles", group: "hydrology", available: true, tileLayerId: "hansen_treecover2000" },
+
+  // ── OEF Catalog → Extreme Climate Indices ──────────────────────────────────
+  // CHIRPS extreme precipitation
+  { id: "oef_chirps_r90p_2024",    name: "Prec. R90p 2024 (CHIRPS)",      icon: CloudRain,    color: "#1e40af", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_r90p_2024" },
+  { id: "oef_chirps_r90p_clim",    name: "Prec. R90p Baseline (CHIRPS)",  icon: CloudRain,    color: "#3b82f6", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_r90p_clim" },
+  { id: "oef_chirps_r95p_2024",    name: "Prec. R95p 2024 (CHIRPS)",      icon: CloudRain,    color: "#1e3a8a", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_r95p_2024" },
+  { id: "oef_chirps_r95p_clim",    name: "Prec. R95p Baseline (CHIRPS)",  icon: CloudRain,    color: "#2563eb", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_r95p_clim" },
+  { id: "oef_chirps_r99p_2024",    name: "Prec. R99p 2024 (CHIRPS)",      icon: CloudRain,    color: "#172554", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_r99p_2024" },
+  { id: "oef_chirps_r99p_clim",    name: "Prec. R99p Baseline (CHIRPS)",  icon: CloudRain,    color: "#1d4ed8", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_r99p_clim" },
+  { id: "oef_chirps_rx1day_2024",  name: "Max 1-day Prec. 2024 (CHIRPS)",icon: CloudRain,    color: "#075985", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_rx1day_2024" },
+  { id: "oef_chirps_rx1day_clim",  name: "Max 1-day Prec. Baseline",      icon: CloudRain,    color: "#0ea5e9", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_rx1day_clim" },
+  { id: "oef_chirps_rx5day_2024",  name: "Max 5-day Prec. 2024 (CHIRPS)",icon: CloudRain,    color: "#164e63", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_rx5day_2024" },
+  { id: "oef_chirps_rx5day_clim",  name: "Max 5-day Prec. Baseline",      icon: CloudRain,    color: "#06b6d4", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "chirps_rx5day_clim" },
+  // ERA5-Land extreme temperature
+  { id: "oef_era5_tnx_2024",      name: "Min Temp Max TNx 2024 (ERA5)",  icon: Thermometer,  color: "#b45309", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_tnx_2024" },
+  { id: "oef_era5_tnx_clim",      name: "Min Temp Max TNx Baseline",     icon: Thermometer,  color: "#d97706", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_tnx_clim" },
+  { id: "oef_era5_tx90p_2024",    name: "Hot Days TX90p 2024 (ERA5)",    icon: Thermometer,  color: "#c2410c", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_tx90p_2024" },
+  { id: "oef_era5_tx90p_clim",    name: "Hot Days TX90p Baseline",       icon: Thermometer,  color: "#ea580c", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_tx90p_clim" },
+  { id: "oef_era5_tx99p_2024",    name: "Extreme Heat TX99p 2024 (ERA5)",icon: Thermometer,  color: "#991b1b", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_tx99p_2024" },
+  { id: "oef_era5_tx99p_clim",    name: "Extreme Heat TX99p Baseline",   icon: Thermometer,  color: "#b91c1c", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_tx99p_clim" },
+  { id: "oef_era5_txx_2024",      name: "Max Temp TXx 2024 (ERA5)",      icon: Thermometer,  color: "#7f1d1d", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_txx_2024" },
+  { id: "oef_era5_txx_clim",      name: "Max Temp TXx Baseline",         icon: Thermometer,  color: "#dc2626", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "era5_txx_clim" },
+  // ERA5-Land heatwave magnitude (observed)
+  { id: "oef_hwm_2024",           name: "Heatwave Magnitude 2024 (ERA5)",icon: Flame,        color: "#d97706", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "hwm_2024" },
+  { id: "oef_hwm_clim",           name: "Heatwave Magnitude Baseline",   icon: Flame,        color: "#f59e0b", source: "tiles", group: "climate_extreme", available: true, tileLayerId: "hwm_clim" },
+
+  // ── OEF Catalog → Climate Projections ──────────────────────────────────────
+  // Flood Risk Index — present + scenarios
+  { id: "oef_fri_2024",           name: "Flood Risk Index 2024",           icon: CloudRain,    color: "#1e3a8a", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2024" },
+  { id: "oef_fri_2030s_245",      name: "Flood Risk 2030s SSP2-4.5",       icon: TrendingUp,   color: "#1e40af", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2030s_245" },
+  { id: "oef_fri_2030s_585",      name: "Flood Risk 2030s SSP5-8.5",       icon: TrendingUp,   color: "#1d4ed8", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2030s_585" },
+  { id: "oef_fri_2050s_245",      name: "Flood Risk 2050s SSP2-4.5",       icon: TrendingUp,   color: "#2563eb", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2050s_245" },
+  { id: "oef_fri_2050s_585",      name: "Flood Risk 2050s SSP5-8.5",       icon: TrendingUp,   color: "#3b82f6", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2050s_585" },
+  { id: "oef_fri_2100s_245",      name: "Flood Risk 2100s SSP2-4.5",       icon: TrendingUp,   color: "#60a5fa", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2100s_245" },
+  { id: "oef_fri_2100s_585",      name: "Flood Risk 2100s SSP5-8.5",       icon: TrendingUp,   color: "#93c5fd", source: "tiles", group: "climate_projections", available: true, tileLayerId: "fri_2100s_585" },
+  // Heatwave Magnitude — projections
+  { id: "oef_hwm_2030s_245",      name: "Heatwave Mag. 2030s SSP2-4.5",   icon: TrendingUp,   color: "#b45309", source: "tiles", group: "climate_projections", available: true, tileLayerId: "hwm_2030s_245" },
+  { id: "oef_hwm_2030s_585",      name: "Heatwave Mag. 2030s SSP5-8.5",   icon: TrendingUp,   color: "#d97706", source: "tiles", group: "climate_projections", available: true, tileLayerId: "hwm_2030s_585" },
+  { id: "oef_hwm_2050s_585",      name: "Heatwave Mag. 2050s SSP5-8.5",   icon: TrendingUp,   color: "#f59e0b", source: "tiles", group: "climate_projections", available: true, tileLayerId: "hwm_2050s_585" },
+  { id: "oef_hwm_2100s_585",      name: "Heatwave Mag. 2100s SSP5-8.5",   icon: TrendingUp,   color: "#fbbf24", source: "tiles", group: "climate_projections", available: true, tileLayerId: "hwm_2100s_585" },
 
   // ── Derived → Risk Analysis ─────────────────────────────────────────────────
   { id: "grid_flood",        name: "Flood Risk",               icon: CloudRain, color: "#3b82f6", source: "geojson", group: "analysis",       available: true },
