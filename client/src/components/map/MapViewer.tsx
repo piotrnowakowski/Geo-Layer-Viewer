@@ -6,11 +6,8 @@ import {
   getFloodColor,
   getHeatColor,
   getLandslideColor,
-  getPopulationColor,
-  getBuildingColor,
   getSolarColor,
   getPovertyColor,
-  LANDCOVER_COLORS,
 } from "@/data/colors";
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
 import Header from "@/components/layout/Header";
@@ -137,9 +134,7 @@ export default function MapViewer() {
       switch (layerId) {
         case "grid_flood":
         case "grid_heat":
-        case "grid_landslide":
-        case "grid_population":
-        case "grid_buildings": {
+        case "grid_landslide": {
           const geoJson = data.geoJson || data;
           if (!geoJson?.features) return null;
 
@@ -147,16 +142,12 @@ export default function MapViewer() {
             grid_flood: "flood_score",
             grid_heat: "heat_score",
             grid_landslide: "landslide_score",
-            grid_population: "pop_density",
-            grid_buildings: "building_density",
           };
 
           const colorFn: Record<string, (v: number) => string> = {
             grid_flood: getFloodColor,
             grid_heat: getHeatColor,
             grid_landslide: getLandslideColor,
-            grid_population: getPopulationColor,
-            grid_buildings: getBuildingColor,
           };
 
           const key = metricKey[layerId];
@@ -199,27 +190,6 @@ export default function MapViewer() {
               if (elev) {
                 (layer as any).bindTooltip(`${elev}m`, { sticky: true });
               }
-            },
-          });
-        }
-
-        case "landcover": {
-          const geoJson = data.geoJson || data;
-          if (!geoJson?.features) return null;
-          return L.geoJSON(geoJson, {
-            style: (feature: any) => {
-              const cls = feature?.properties?.landcover_class || "bareVegetation";
-              const color = LANDCOVER_COLORS[cls] || "#DEB887";
-              return {
-                color,
-                fillColor: color,
-                fillOpacity: 0.5,
-                weight: 0.5,
-              };
-            },
-            onEachFeature: (feature: any, layer: L.Layer) => {
-              const cls = feature.properties?.landcover_class || "unknown";
-              (layer as any).bindTooltip(`Land cover: ${cls}`, { sticky: true });
             },
           });
         }

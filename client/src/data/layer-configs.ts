@@ -117,12 +117,9 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "grid_flood",        name: "Flood Risk",               icon: CloudRain, color: "#3b82f6", source: "geojson", group: "analysis",       available: true },
   { id: "grid_heat",         name: "Heat Risk",                icon: Flame,     color: "#ef4444", source: "geojson", group: "analysis",       available: true },
   { id: "grid_landslide",    name: "Landslide Risk",           icon: Mountain,  color: "#a16207", source: "geojson", group: "analysis",       available: true },
-  { id: "grid_population",   name: "Population Density",       icon: Users,     color: "#8b5cf6", source: "geojson", group: "analysis",       available: true },
-  { id: "grid_buildings",    name: "Building Density",         icon: Building2, color: "#f97316", source: "geojson", group: "analysis",       available: true },
 
   // ── Derived → Base Layers ───────────────────────────────────────────────────
   { id: "elevation",         name: "Elevation",                icon: Mountain,      color: "#c9a87c", source: "geojson", group: "base_layers", available: true },
-  { id: "landcover",         name: "Land Cover",               icon: MapIcon,       color: "#4ade80", source: "geojson", group: "base_layers", available: true },
   { id: "surface_water",     name: "Water Bodies",             icon: Droplets,      color: "#3b82f6", source: "geojson", group: "base_layers", available: true },
   { id: "rivers",            name: "Rivers",                   icon: Droplets,      color: "#06b6d4", source: "geojson", group: "base_layers", available: true },
   { id: "forest",            name: "Forest",                   icon: Trees,         color: "#22c55e", source: "geojson", group: "base_layers", available: true },

@@ -37,15 +37,12 @@ export async function loadBoundaryData(): Promise<any> {
 export async function loadLayerData(layerId: string): Promise<any> {
   const samplePaths: Record<string, string> = {
     elevation: "/sample-data/porto-alegre-elevation.json",
-    landcover: "/sample-data/porto-alegre-landcover.json",
     surface_water: "/sample-data/porto-alegre-surface-water.json",
     rivers: "/sample-data/porto-alegre-rivers.json",
     forest: "/sample-data/porto-alegre-forest.json",
     grid_flood: "/sample-data/porto-alegre-grid.json",
     grid_heat: "/sample-data/porto-alegre-grid.json",
     grid_landslide: "/sample-data/porto-alegre-grid.json",
-    grid_population: "/sample-data/porto-alegre-grid.json",
-    grid_buildings: "/sample-data/porto-alegre-grid.json",
     transit_stops: "/sample-data/porto-alegre-transit-stops.json",
     transit_routes: "/sample-data/porto-alegre-transit-routes.json",
     solar_potential: "/sample-data/porto-alegre-solar-neighbourhoods.json",
@@ -64,15 +61,12 @@ export async function loadLayerData(layerId: string): Promise<any> {
 
   const apiPaths: Record<string, string> = {
     elevation: "/api/geospatial/elevation",
-    landcover: "/api/geospatial/landcover",
     surface_water: "/api/geospatial/surface-water",
     rivers: "/api/geospatial/rivers",
     forest: "/api/geospatial/forest",
     grid_flood: "/api/geospatial/grid",
     grid_heat: "/api/geospatial/grid",
     grid_landslide: "/api/geospatial/grid",
-    grid_population: "/api/geospatial/grid",
-    grid_buildings: "/api/geospatial/grid",
     transit_stops: "/api/geospatial/transit-stops",
     transit_routes: "/api/geospatial/transit-routes",
     solar_potential: "/api/geospatial/solar-neighbourhoods",
