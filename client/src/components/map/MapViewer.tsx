@@ -12,6 +12,7 @@ import {
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
 import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
+import LegendPanel from "./LegendPanel";
 
 export default function MapViewer() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -632,6 +633,7 @@ export default function MapViewer() {
         />
 
         <EvidenceDrawer layers={layers} onToggleLayer={toggleLayer} />
+        <LegendPanel layers={layers} />
 
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-[2000]">
