@@ -175,10 +175,7 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "grid_landslide",    name: "Landslide Risk",           icon: Mountain,  color: "#a16207", source: "geojson", group: "analysis",       available: true },
 
   // ── Derived → Base Layers ───────────────────────────────────────────────────
-  { id: "elevation",         name: "Elevation",                icon: Mountain,      color: "#c9a87c", source: "geojson", group: "base_layers", available: true },
-  { id: "surface_water",     name: "Water Bodies",             icon: Droplets,      color: "#3b82f6", source: "geojson", group: "base_layers", available: true },
   { id: "rivers",            name: "Rivers",                   icon: Droplets,      color: "#06b6d4", source: "geojson", group: "base_layers", available: true },
-  { id: "forest",            name: "Forest",                   icon: Trees,         color: "#22c55e", source: "geojson", group: "base_layers", available: true },
 
   // ── Derived → Climate Sites ─────────────────────────────────────────────────
   { id: "sites_parks",       name: "Parks & Green Space",      icon: Trees,         color: "#22c55e", source: "geojson", group: "sites",       available: true },

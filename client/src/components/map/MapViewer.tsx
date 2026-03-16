@@ -176,41 +176,6 @@ export default function MapViewer() {
           });
         }
 
-        case "elevation": {
-          const contours = data.contours || data;
-          if (!contours?.features) return null;
-          return L.geoJSON(contours, {
-            style: {
-              color: "#c9a87c",
-              weight: 1,
-              opacity: 0.6,
-            },
-            onEachFeature: (feature: any, layer: L.Layer) => {
-              const elev = feature.properties?.elevation || feature.properties?.ele;
-              if (elev) {
-                (layer as any).bindTooltip(`${elev}m`, { sticky: true });
-              }
-            },
-          });
-        }
-
-        case "surface_water": {
-          const geoJson = data.geoJson || data;
-          if (!geoJson?.features) return null;
-          return L.geoJSON(geoJson, {
-            style: {
-              color: "#3b82f6",
-              fillColor: "#1e40af",
-              fillOpacity: 0.4,
-              weight: 1,
-            },
-            onEachFeature: (feature: any, layer: L.Layer) => {
-              const name = feature.properties?.name || "Water body";
-              (layer as any).bindTooltip(name, { sticky: true });
-            },
-          });
-        }
-
         case "rivers": {
           const geoJson = data.geoJson || data;
           if (!geoJson?.features) return null;
@@ -222,23 +187,6 @@ export default function MapViewer() {
             },
             onEachFeature: (feature: any, layer: L.Layer) => {
               const name = feature.properties?.name || "Waterway";
-              (layer as any).bindTooltip(name, { sticky: true });
-            },
-          });
-        }
-
-        case "forest": {
-          const geoJson = data.geoJson || data;
-          if (!geoJson?.features) return null;
-          return L.geoJSON(geoJson, {
-            style: {
-              color: "#22c55e",
-              fillColor: "#166534",
-              fillOpacity: 0.4,
-              weight: 1,
-            },
-            onEachFeature: (feature: any, layer: L.Layer) => {
-              const name = feature.properties?.name || "Forest area";
               (layer as any).bindTooltip(name, { sticky: true });
             },
           });

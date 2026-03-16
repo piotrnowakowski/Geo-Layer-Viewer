@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, FlaskConical } from "lucide-react";
 import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS } from "@/data/layer-configs";
 
 interface LayerDataInfo {
@@ -11,6 +11,55 @@ interface LayerDataInfo {
   resolution: string;
   coverage: string;
   notes?: string;
+}
+
+// ── Raw-data access instructions by layer group ──────────────────────────────
+const ACCESS_GEE =
+  "These tiles are pre-rendered PNGs — pixel values are display colours, not raw data values. " +
+  "To use this dataset in numerical calculations, access it via Google Earth Engine (GEE): open " +
+  "code.earthengine.google.com, search the Data Catalog for the dataset name or the GEE asset ID " +
+  "shown in the source link, and run server-side analysis (JavaScript or Python earthengine-api). " +
+  "Export results to GeoTIFF via ee.Image.export() for use in GDAL, rasterio, or xarray pipelines.";
+
+const ACCESS_CHIRPS =
+  "These tiles are pre-rendered PNGs — pixel values are display colours, not raw precipitation values. " +
+  "Raw daily grids are available via Google Earth Engine (dataset: UCSB-CHG/CHIRPS/DAILY) or the " +
+  "CHIRPS FTP server (ftp://ftp.chc.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/). " +
+  "Index computation (R90p, R95p, R99p, RX1day, RX5day) requires: (1) deriving per-pixel percentile " +
+  "thresholds from the 1981–2010 baseline time series, (2) applying thresholds to the target year. " +
+  "Recommended Python stack: xarray, numpy, cftime. No API key required.";
+
+const ACCESS_ERA5 =
+  "These tiles are pre-rendered PNGs — pixel values are display colours, not raw temperature values. " +
+  "Raw ERA5-Land fields are available via the Copernicus Climate Data Store API " +
+  "(pip install cdsapi; register at cds.climate.copernicus.eu). Request dataset " +
+  "'reanalysis-era5-land', variable '2m_temperature', as NetCDF. " +
+  "ETCCDI index definitions (TNx, TXx, TX90p, TX99p) are documented at climdex.org. " +
+  "Recommended Python stack: xarray, cf_index, rioxarray. Free with CDS account.";
+
+const ACCESS_OEF_COMPUTED =
+  "These tiles are pre-rendered PNGs of OEF-computed indices — pixel values are display colours, " +
+  "not raw index values. Source GeoTIFF rasters are available via the OEF geospatial-data repository " +
+  "(github.com/Open-Earth-Foundation/geospatial-data) or on request from the OEF data team. " +
+  "Inputs for independent replication: CHIRPS v2.0 (precipitation, via GEE: UCSB-CHG/CHIRPS/DAILY) " +
+  "and Copernicus DEM GLO-30 (terrain, via AWS: registry.opendata.aws/copernicus-dem) for FRI; " +
+  "ERA5-Land daily temperature + CMIP6 downscaled projections for HWM. " +
+  "Python stack: xarray, rioxarray, scipy, intake-esm.";
+
+const ACCESS_COPERNICUS_DEM =
+  "These tiles are pre-rendered PNGs — pixel values are display colours, not elevation metres. " +
+  "Raw GeoTIFF data is freely available from AWS Open Data Registry without authentication " +
+  "(registry.opendata.aws/copernicus-dem). Download specific tiles by lat/lon bounding box " +
+  "using 'aws s3 cp --no-sign-request', then mosaic with gdalwarp. " +
+  "Also accessible server-side via Google Earth Engine (asset: COPERNICUS/DEM/GLO30).";
+
+function getRawDataAccess(layerId: string): string {
+  if (layerId.startsWith("oef_chirps_")) return ACCESS_CHIRPS;
+  if (layerId.startsWith("oef_era5_")) return ACCESS_ERA5;
+  if (layerId === "oef_hwm_2024" || layerId === "oef_hwm_clim") return ACCESS_ERA5;
+  if (layerId.startsWith("oef_hwm_") || layerId.startsWith("oef_fri_")) return ACCESS_OEF_COMPUTED;
+  if (layerId === "oef_copernicus_dem") return ACCESS_COPERNICUS_DEM;
+  return ACCESS_GEE;
 }
 
 const LAYER_DATA_INFO: LayerDataInfo[] = [
@@ -40,26 +89,6 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     coverage: "Porto Alegre municipality boundary",
   },
   {
-    id: "elevation",
-    methodology: "Elevation contours and raster samples extracted from Copernicus DEM GLO-30 via AWS Open Data. Contour lines generated at fixed elevation intervals from the 30m DEM. Slope is derived from elevation range within each grid cell.",
-    source: "Copernicus DEM GLO-30 — European Space Agency",
-    sourceUrl: "https://registry.opendata.aws/copernicus-dem/",
-    date: "2021 (based on TanDEM-X mission data 2011-2015, updated with auxiliary data)",
-    resolution: "30 meters (1 arc-second)",
-    coverage: "Porto Alegre municipality — 10,848 raster sample points",
-    notes: "Elevation range: -1.7m to 307.8m. Mean elevation: 34.2m. DEM hosted on AWS S3 as Cloud-Optimized GeoTIFF (COG).",
-  },
-  {
-    id: "surface_water",
-    methodology: "Surface water body polygons (lakes, lagoons, reservoirs, ponds) extracted from OpenStreetMap via Overpass API using [natural=water], [water=lake/reservoir/lagoon/pond], and [landuse=reservoir] tags.",
-    source: "OpenStreetMap — Overpass API",
-    sourceUrl: "https://wiki.openstreetmap.org/wiki/Tag:natural%3Dwater",
-    date: "2024 (continuously updated)",
-    resolution: "Vector polygons at full OSM detail",
-    coverage: "Porto Alegre municipality bounding box",
-    notes: "Includes Guaiba Lake (Lago Guaiba), smaller urban lagoons, and man-made reservoirs. Proximity to water bodies is used in flood risk calculation.",
-  },
-  {
     id: "rivers",
     methodology: "River and stream line features extracted from OpenStreetMap via Overpass API using [waterway=river/stream/canal/drain] tags within the city bounding box.",
     source: "OpenStreetMap — Overpass API",
@@ -68,16 +97,6 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     resolution: "Vector LineString geometries at full OSM detail",
     coverage: "Porto Alegre municipality bounding box",
     notes: "Includes major rivers (Rio Gravataí, Arroio Dilúvio) and minor streams/canals. River proximity is a key input to flood risk scoring.",
-  },
-  {
-    id: "forest",
-    methodology: "Forest canopy polygons extracted from OpenStreetMap via Overpass API using [natural=wood], [landuse=forest], and [leisure=park]+[natural=wood] tags.",
-    source: "OpenStreetMap — Overpass API",
-    sourceUrl: "https://wiki.openstreetmap.org/wiki/Tag:natural%3Dwood",
-    date: "2024 (continuously updated)",
-    resolution: "Vector polygons at full OSM detail",
-    coverage: "Porto Alegre municipality bounding box",
-    notes: "Canopy cover percentage per grid cell is used in heat risk and landslide risk calculations. Higher canopy cover reduces both heat island effect and slope erosion risk.",
   },
   {
     id: "solar_potential",
@@ -942,9 +961,38 @@ export default function DataPage() {
                                     <dd className="text-zinc-400 text-xs leading-relaxed">{info.notes}</dd>
                                   </div>
                                 )}
+
+                                {layer.source === "tiles" && (
+                                  <div className="mt-1 rounded-lg border border-amber-800/40 bg-amber-950/25 p-3 flex gap-2.5">
+                                    <FlaskConical className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                                    <div>
+                                      <dt className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">
+                                        For Calculations
+                                      </dt>
+                                      <dd className="text-amber-200/65 text-xs leading-relaxed">
+                                        {getRawDataAccess(layer.id)}
+                                      </dd>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             ) : (
-                              <p className="text-zinc-500 text-xs">Documentation pending.</p>
+                              <div className="space-y-2">
+                                <p className="text-zinc-500 text-xs">Documentation pending.</p>
+                                {layer.source === "tiles" && (
+                                  <div className="rounded-lg border border-amber-800/40 bg-amber-950/25 p-3 flex gap-2.5">
+                                    <FlaskConical className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                                    <div>
+                                      <dt className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">
+                                        For Calculations
+                                      </dt>
+                                      <dd className="text-amber-200/65 text-xs leading-relaxed">
+                                        {getRawDataAccess(layer.id)}
+                                      </dd>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         );

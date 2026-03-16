@@ -105,7 +105,14 @@ client/public/sample-data/ — Cached real data
 - **Extreme Climate Indices** (20): CHIRPS R90p/R95p/R99p/RX1day/RX5day × (2024 + climatology baseline), ERA5-Land TNx/TX90p/TX99p/TXx × (2024 + climatology), HWM 2024 + HWM climatology — all available via OEF S3
 - **Climate Projections** (11): Flood Risk Index 2024 + 2030s/2050s/2100s × SSP2-4.5/SSP5-8.5, Heatwave Magnitude 2030s/2050s/2100s — all available via OEF S3
 - **Placeholder OEF tiles** (6): Slope, Flow Accumulation, Canopy Cover, Flood/Heat Hazard, Exposure, Cooling, Composite Risk, NbS Opportunity Zones (available: false — tiles pending)
+- **Base Layers** (1): Rivers (OSM waterways — kept; elevation/surface_water/forest removed, superseded by OEF rasters)
 - **Climate Sites** (7+): Parks, Schools, Hospitals, Wetlands, Sports, Social, Vacant, Flood Zones, Flood 2024
+
+## DataPage Disclaimer
+- All OEF tile layers show a "For Calculations" amber callout on the Data Sources page
+- Disclaimer explains tiles are pre-rendered PNGs (RGB display colours, not raw values)
+- Access path varies by layer: GEE (JRC/GHSL/Hansen/MODIS/MERIT), CHIRPS FTP/GEE, Copernicus CDS API (ERA5-Land), AWS Open Data (Copernicus DEM), OEF GitHub (FRI/HWM computed indices)
+- Logic in `getRawDataAccess(layerId)` function — dispatches by ID prefix to 5 access-string constants
 
 ## Design System
 - **CityCatalyst design system** from Open Earth Foundation
