@@ -48,7 +48,7 @@ export async function getLandcoverData(
       if (classKey) {
         classes[classKey]++;
       }
-      feature.properties.landcover_class = classKey || landuse;
+      if (feature.properties) feature.properties.landcover_class = classKey || landuse;
     }
   }
 

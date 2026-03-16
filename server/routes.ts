@@ -22,6 +22,17 @@ import {
   computeCompositeScores,
 } from "./services/gridService";
 import type { GeoBounds } from "@shared/schema";
+import {
+  sampleAtPoints,
+  listRasterDatasets,
+  preloadRasterDatasets,
+} from "./services/cogSamplerService";
+import {
+  loadLayer,
+  listVectorLayers,
+  pointsInLayer,
+  intersectLines,
+} from "./services/spatialAnalysisService";
 import fs from "fs";
 import path from "path";
 
@@ -250,6 +261,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Kick off background raster pre-loading so the first user request is fast
+  preloadRasterDatasets();
+
   app.get("/api/geospatial/tiles/:layerId/:z/:x/:y.png", async (req, res) => {
     const { layerId } = req.params;
     let { z, x, y } = req.params;
@@ -618,5 +632,125 @@ export async function registerRoutes(
     }
   });
 
+  // ── Spatial analysis catalog ──────────────────────────────────────────────
+  app.get("/api/analyze/datasets", (_req, res) => {
+    res.json({
+      raster: listRasterDatasets(),
+      vector: listVectorLayers(),
+    });
+  });
+
+  // ── Raster sampling ───────────────────────────────────────────────────────
+  // POST /api/analyze/raster
+  // Body: { datasetId: string, features: GeoJSON FeatureCollection }
+  // Adds a "<datasetId>" property to each feature with the sampled raster value.
+  app.post("/api/analyze/raster", async (req, res) => {
+    try {
+      const { datasetId, features } = req.body as {
+        datasetId: string;
+        features: { type: string; features: any[] };
+      };
+      if (!datasetId || !features?.features) {
+        return res.status(400).json({ message: "datasetId and features are required" });
+      }
+
+      // Extract a representative lon/lat for each feature
+      const points = features.features.map((f: any) => {
+        const geom = f.geometry;
+        if (!geom) return { lng: 0, lat: 0 };
+        if (geom.type === "Point") {
+          return { lng: geom.coordinates[0] as number, lat: geom.coordinates[1] as number };
+        }
+        const coords = flattenCoords(geom);
+        if (coords.length === 0) return { lng: 0, lat: 0 };
+        const lng = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+        const lat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+        return { lng, lat };
+      });
+
+      const values = await sampleAtPoints(datasetId, points);
+      const enriched = features.features.map((f: any, i: number) => ({
+        ...f,
+        properties: { ...(f.properties ?? {}), [datasetId]: values[i] },
+      }));
+
+      res.json({
+        type: "FeatureCollection",
+        features: enriched,
+        _meta: {
+          datasetId,
+          sampled: values.filter((v) => v !== null).length,
+          total: enriched.length,
+        },
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ── Vector overlay ────────────────────────────────────────────────────────
+  // POST /api/analyze/vector
+  // Body: { operation, layerA, layerB, options }
+  // operation: "points_in_layer" | "intersect_lines"
+  // layerA / layerB: layer IDs (see GET /api/analyze/datasets)
+  // options: { bufferMeters?, scoreField?, scoreThreshold? }
+  app.post("/api/analyze/vector", async (req, res) => {
+    try {
+      const { operation, layerA, layerB, options = {} } = req.body as {
+        operation: string;
+        layerA: string;
+        layerB: string;
+        options?: {
+          bufferMeters?: number;
+          scoreField?: string;
+          scoreThreshold?: number;
+        };
+      };
+
+      if (!operation || !layerA || !layerB) {
+        return res.status(400).json({ message: "operation, layerA, and layerB are required" });
+      }
+
+      const fcA = loadLayer(layerA);
+      const fcB = loadLayer(layerB);
+
+      let result;
+      if (operation === "points_in_layer") {
+        result = pointsInLayer(fcA, fcB, options);
+      } else if (operation === "intersect_lines") {
+        result = intersectLines(fcA, fcB, options);
+      } else {
+        return res
+          .status(400)
+          .json({ message: `Unknown operation "${operation}". Valid: points_in_layer, intersect_lines` });
+      }
+
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   return httpServer;
+}
+
+// ── Coordinate extraction helper ──────────────────────────────────────────
+function flattenCoords(geom: any): number[][] {
+  if (!geom) return [];
+  switch (geom.type) {
+    case "Point":
+      return [geom.coordinates];
+    case "LineString":
+    case "MultiPoint":
+      return geom.coordinates;
+    case "Polygon":
+    case "MultiLineString":
+      return geom.coordinates.flat(1);
+    case "MultiPolygon":
+      return geom.coordinates.flat(2);
+    case "GeometryCollection":
+      return geom.geometries.flatMap(flattenCoords);
+    default:
+      return [];
+  }
 }

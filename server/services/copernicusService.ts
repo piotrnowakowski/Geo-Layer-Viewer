@@ -54,8 +54,10 @@ async function fetchAndParseDemTile(url: string): Promise<ParsedDemTile | null> 
     const [data] = await image.readRasters();
     const origin = image.getOrigin();
     const resolution = image.getResolution();
-    const tiepoint = image.getTiePoints?.()?.[0] || { x: origin[0], y: origin[1] };
-    const scale = image.getFileDirectory?.()?.ModelPixelScale || [Math.abs(resolution[0]), Math.abs(resolution[1])];
+    const tiePoints = (image as any).getTiePoints?.() as any[] | undefined;
+    const tiepoint = tiePoints?.[0] || { x: origin[0], y: origin[1] };
+    const fileDir = (image as any).getFileDirectory?.() as any;
+    const scale = fileDir?.ModelPixelScale || [Math.abs(resolution[0]), Math.abs(resolution[1])];
 
     return {
       width,

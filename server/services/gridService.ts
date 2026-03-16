@@ -282,8 +282,8 @@ export function computeFlowAccumulation(grid: any, elevationData: any): void {
   const minLng = Math.min(...lngs);
   const maxLng = Math.max(...lngs);
 
-  const uniqueLats = [...new Set(lats.map((l: number) => Math.round(l * 10000) / 10000))].sort((a: number, b: number) => a - b);
-  const uniqueLngs = [...new Set(lngs.map((l: number) => Math.round(l * 10000) / 10000))].sort((a: number, b: number) => a - b);
+  const uniqueLats = Array.from(new Set<number>(lats.map((l: number) => Math.round(l * 10000) / 10000))).sort((a: number, b: number) => a - b);
+  const uniqueLngs = Array.from(new Set<number>(lngs.map((l: number) => Math.round(l * 10000) / 10000))).sort((a: number, b: number) => a - b);
 
   const rows = uniqueLats.length;
   const cols = uniqueLngs.length;

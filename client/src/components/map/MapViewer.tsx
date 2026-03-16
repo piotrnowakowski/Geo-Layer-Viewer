@@ -453,7 +453,7 @@ export default function MapViewer() {
           );
 
           if (polygonFeatures.length > 0) {
-            L.geoJSON({ type: "FeatureCollection", features: polygonFeatures }, {
+            L.geoJSON({ type: "FeatureCollection", features: polygonFeatures } as any, {
               style: {
                 color,
                 fillColor: color,
@@ -476,7 +476,7 @@ export default function MapViewer() {
           }
 
           if (pointFeatures.length > 0) {
-            L.geoJSON({ type: "FeatureCollection", features: pointFeatures }, {
+            L.geoJSON({ type: "FeatureCollection", features: pointFeatures } as any, {
               pointToLayer: (_feature: any, latlng: L.LatLng) => {
                 return L.circleMarker(latlng, {
                   radius: 5,
