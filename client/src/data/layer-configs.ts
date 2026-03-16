@@ -21,6 +21,7 @@ import {
   Dumbbell,
   Waves,
   HandHeart,
+  Moon,
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
@@ -91,17 +92,26 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "ibge_settlements",  name: "Informal Settlements",     icon: Home,      color: "#f43f5e", source: "geojson", group: "social",          available: true },
 
   // ── OEF Catalog → Geospatial Layers (tiles) ────────────────────────────────
-  { id: "oef_dynamic_world",    name: "Land Use (Dynamic World)", icon: Grid3X3,     color: "#06d6a0", source: "tiles",   group: "oef_tiles",    available: true,  tileLayerId: "dynamic_world" },
-  { id: "oef_solar_tiles",      name: "Solar PV Tiles",           icon: Sun,         color: "#eab308", source: "tiles",   group: "oef_tiles",    available: true,  tileLayerId: "solar_pvout" },
-  { id: "oef_slope",            name: "Slope",                    icon: Mountain,    color: "#bc6c25", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_flow_accumulation",name: "Flow Accumulation",        icon: Droplets,    color: "#0077b6", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_canopy_cover",     name: "Canopy Cover",             icon: Trees,       color: "#588157", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_flood_hazard",     name: "Flood Hazard",             icon: CloudRain,   color: "#023e8a", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_heat_hazard",      name: "Heat Hazard",              icon: Flame,       color: "#d00000", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_exposure",         name: "Exposure Score",           icon: Users,       color: "#7b2cbf", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_cooling",          name: "Cooling Capacity",         icon: Leaf,        color: "#2d6a4f", source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_composite_risk",   name: "Composite Risk",           icon: AlertTriangle,color: "#e63946",source: "tiles",   group: "oef_tiles",    available: false },
-  { id: "oef_opportunity_zones",name: "NbS Opportunity Zones",   icon: MapPinned,   color: "#06d6a0", source: "tiles",   group: "oef_tiles",    available: false },
+  { id: "oef_dynamic_world",    name: "Land Use (Dynamic World)",       icon: Grid3X3,      color: "#06d6a0", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "dynamic_world" },
+  { id: "oef_solar_tiles",      name: "Solar PV Potential",             icon: Sun,          color: "#eab308", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "solar_pvout" },
+  { id: "oef_jrc_surface_water",name: "Surface Water Change (JRC)",     icon: Waves,        color: "#0077b6", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "jrc_surface_water" },
+  { id: "oef_ghsl_built_up",    name: "Built-Up Surface (GHSL)",        icon: Building2,    color: "#ef4444", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "ghsl_built_up" },
+  { id: "oef_ghsl_urbanization",name: "Degree of Urbanisation (GHSL)",  icon: MapPinned,    color: "#f97316", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "ghsl_urbanization" },
+  { id: "oef_hansen_forest",    name: "Forest Loss 2000–2024 (Hansen)", icon: Trees,        color: "#dc2626", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "hansen_forest_loss" },
+  { id: "oef_ghsl_population",  name: "Population Grid (GHSL)",         icon: Users,        color: "#8b5cf6", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "ghsl_population" },
+  { id: "oef_viirs_nightlights",name: "Night Lights (VIIRS DNB)",       icon: Moon,         color: "#fbbf24", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "viirs_nightlights" },
+  { id: "oef_emsn194",          name: "2024 Flood Depth (Copernicus)",  icon: CloudRain,    color: "#1d4ed8", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "copernicus_emsn194" },
+  { id: "oef_modis_ndvi",       name: "Vegetation Index NDVI (MODIS)",  icon: Leaf,         color: "#4ade80", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "modis_ndvi" },
+  { id: "oef_merit_hydro",      name: "Height Above Drainage (MERIT)",  icon: Droplets,     color: "#0ea5e9", source: "tiles", group: "oef_tiles", available: true,  tileLayerId: "merit_hydro_hand" },
+  { id: "oef_slope",            name: "Slope",                          icon: Mountain,     color: "#bc6c25", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_flow_accumulation",name: "Flow Accumulation",              icon: Droplets,     color: "#0077b6", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_canopy_cover",     name: "Canopy Cover",                   icon: Trees,        color: "#588157", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_flood_hazard",     name: "Flood Hazard",                   icon: CloudRain,    color: "#023e8a", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_heat_hazard",      name: "Heat Hazard",                    icon: Flame,        color: "#d00000", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_exposure",         name: "Exposure Score",                 icon: Users,        color: "#7b2cbf", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_cooling",          name: "Cooling Capacity",               icon: Leaf,         color: "#2d6a4f", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_composite_risk",   name: "Composite Risk",                 icon: AlertTriangle,color: "#e63946", source: "tiles", group: "oef_tiles", available: false },
+  { id: "oef_opportunity_zones",name: "NbS Opportunity Zones",          icon: MapPinned,    color: "#06d6a0", source: "tiles", group: "oef_tiles", available: false },
 
   // ── Derived → Risk Analysis ─────────────────────────────────────────────────
   { id: "grid_flood",        name: "Flood Risk",               icon: CloudRain, color: "#3b82f6", source: "geojson", group: "analysis",       available: true },

@@ -31,17 +31,53 @@ interface TileLayerConfig {
 }
 
 const OEF_TILE_LAYERS: Record<string, TileLayerConfig> = {
+  // ── OEF geospatial-data catalog tile layers ────────────────────────────────
   dynamic_world: {
     urlTemplate:
-      "https://geo-test-api.s3.us-east-1.amazonaws.com/nbs/porto_alegre/land_use/dynamic_world/V1/2023/tiles_visual/{z}/{x}/{y}.png",
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/dynamic_world/release/v1/2023/porto_alegre/tiles_visual/{z}/{x}/{y}.png",
   },
   solar_pvout: {
     urlTemplate:
       "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/tiles_pvout/{z}/{x}/{y}.png",
   },
-  // NASA GIBS: VIIRS SNPP Brightness Temp Band I5 (Day), 375m resolution, public WMTS.
-  // GIBS uses {z}/{y}/{x} (WMTS TileRow before TileCol) and serves up to zoom 9.
-  // Server-side zoom clamping converts any higher-zoom request to the equivalent zoom-9 tile.
+  jrc_surface_water: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/jrc_global_surface_water/release/v1/porto_alegre/transition/tiles_visual/{z}/{x}/{y}.png",
+  },
+  ghsl_built_up: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/ghsl_built_up/release/v1/2025/porto_alegre/tiles_visual/{z}/{x}/{y}.png",
+  },
+  ghsl_urbanization: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/ghsl_degree_urbanization/release/v2/2024/porto_alegre/tiles_visual/{z}/{x}/{y}.png",
+  },
+  hansen_forest_loss: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/hansen_forest_change/release/v1/2024/porto_alegre/loss/tiles_visual/{z}/{x}/{y}.png",
+  },
+  ghsl_population: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/ghsl_population/release/v1/2025/porto_alegre/tiles_visual/{z}/{x}/{y}.png",
+  },
+  viirs_nightlights: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/noaa_viirs_nightlights/release/v1/2024/tiles_visual/{z}/{x}/{y}.png",
+  },
+  copernicus_emsn194: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/copernicus_emsn194/release/v1/2024/porto_alegre/tiles_visual/{z}/{x}/{y}.png",
+  },
+  modis_ndvi: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/modis_ndvi/release/v1/2024/tiles_visual/{z}/{x}/{y}.png",
+  },
+  merit_hydro_hand: {
+    urlTemplate:
+      "https://geo-test-api.s3.us-east-1.amazonaws.com/merit_hydro/release/v1/porto_alegre/hnd/tiles_visual/{z}/{x}/{y}.png",
+  },
+  // ── NASA GIBS: VIIRS SNPP Brightness Temp Band I5 (Day), 375m ─────────────
+  // GIBS uses {z}/{y}/{x} (WMTS TileRow before TileCol), serves up to zoom 9.
   // Date: 2022-01-15 = southern-hemisphere summer peak heat in Porto Alegre.
   viirs_i5_day: {
     urlTemplate:
