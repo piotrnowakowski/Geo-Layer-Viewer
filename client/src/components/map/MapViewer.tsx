@@ -10,6 +10,7 @@ import {
   getPovertyColor,
 } from "@/data/colors";
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
+import { sampleRasterAtPoint, geometryCentroid, linestringMidpoint } from "@/lib/valueTileUtils";
 import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
 import LegendPanel from "./LegendPanel";
@@ -512,6 +513,113 @@ export default function MapViewer() {
     []
   );
 
+  // Builds a Leaflet layer by filtering vector features against a raster threshold.
+  // Runs entirely client-side: loads the source GeoJSON, samples the value tile at
+  // each feature's centroid/midpoint, then keeps only features above the threshold.
+  async function buildPostprocessedLayer(layerId: string): Promise<L.Layer | null> {
+    if (layerId === "post_settlements_flood") {
+      const data = await loadLayerData("ibge_settlements");
+      const geoJson = data?.geoJson || data;
+      if (!geoJson?.features) return null;
+
+      const friConfig = LAYER_CONFIGS.find((l) => l.id === "oef_fri_2024");
+      const enc = friConfig?.valueEncoding;
+      if (!enc?.urlTemplate) return null;
+
+      const THRESHOLD = 0.4;
+      const passed: any[] = [];
+
+      for (const feature of geoJson.features) {
+        const centroid = geometryCentroid(feature.geometry);
+        if (!centroid) continue;
+        const value = await sampleRasterAtPoint(centroid[0], centroid[1], enc, 11);
+        if (value !== null && value > THRESHOLD) {
+          passed.push({ ...feature, properties: { ...feature.properties, fri_value: value } });
+        }
+      }
+
+      if (passed.length === 0) return null;
+
+      return L.geoJSON(
+        { type: "FeatureCollection", features: passed } as any,
+        {
+          style: {
+            color: "#ef4444",
+            fillColor: "#dc2626",
+            fillOpacity: 0.7,
+            weight: 2.5,
+            opacity: 1,
+          },
+          onEachFeature: (feature: any, layer: L.Layer) => {
+            const p = feature.properties || {};
+            const name = p.settlement_name || p.name || "Informal settlement";
+            const fri = p.fri_value?.toFixed(3) ?? "?";
+            (layer as any).bindTooltip(
+              `<div style="font-family:system-ui;font-size:11px;">
+                <strong style="color:#ef4444">⚠ High flood risk</strong><br/>
+                <strong>${name}</strong><br/>
+                Flood Risk Index: <strong>${fri}</strong> <span style="color:#94a3b8">(threshold: 0.4)</span><br/>
+                <span style="color:#94a3b8">Source: OEF FRI 2024 × IBGE settlements</span>
+               </div>`,
+              { sticky: true }
+            );
+          },
+        }
+      );
+    }
+
+    if (layerId === "post_bus_heatwave") {
+      const data = await loadLayerData("transit_routes");
+      const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+      if (!geoJson?.features) return null;
+
+      const hwmConfig = LAYER_CONFIGS.find((l) => l.id === "oef_hwm_2024");
+      const enc = hwmConfig?.valueEncoding;
+      if (!enc?.urlTemplate) return null;
+
+      const THRESHOLD = 10; // °C·days
+      const passed: any[] = [];
+
+      for (const feature of geoJson.features) {
+        const mid = linestringMidpoint(feature.geometry);
+        if (!mid) continue;
+        const value = await sampleRasterAtPoint(mid[0], mid[1], enc, 11);
+        if (value !== null && value >= THRESHOLD) {
+          passed.push({ ...feature, properties: { ...feature.properties, hwm_value: value } });
+        }
+      }
+
+      if (passed.length === 0) return null;
+
+      return L.geoJSON(
+        { type: "FeatureCollection", features: passed } as any,
+        {
+          style: {
+            color: "#fb923c",
+            weight: 3,
+            opacity: 0.95,
+          },
+          onEachFeature: (feature: any, layer: L.Layer) => {
+            const p = feature.properties || {};
+            const routeId = p.shape_id || p.id || "Route";
+            const hwm = p.hwm_value?.toFixed(1) ?? "?";
+            (layer as any).bindTooltip(
+              `<div style="font-family:system-ui;font-size:11px;">
+                <strong style="color:#fb923c">🌡 Heatwave zone</strong><br/>
+                <strong>Bus Route ${routeId}</strong><br/>
+                Heatwave Magnitude: <strong>${hwm} °C·days</strong> <span style="color:#94a3b8">(threshold: 10)</span><br/>
+                <span style="color:#94a3b8">Source: ERA5 HWM 2024 × GTFS transit routes</span>
+               </div>`,
+              { sticky: true }
+            );
+          },
+        }
+      );
+    }
+
+    return null;
+  }
+
   const toggleLayer = useCallback(
     async (layerId: string) => {
       const map = mapRef.current;
@@ -529,6 +637,36 @@ export default function MapViewer() {
         setLayers((prev) =>
           prev.map((l) => (l.id === layerId ? { ...l, enabled: false } : l))
         );
+        return;
+      }
+
+      // ── Postprocessed spatial query layers ────────────────────────────────
+      if (layerId === "post_settlements_flood" || layerId === "post_bus_heatwave") {
+        setLayers((prev) =>
+          prev.map((l) => (l.id === layerId ? { ...l, loading: true } : l))
+        );
+
+        try {
+          const leafletLayer = await buildPostprocessedLayer(layerId);
+          if (leafletLayer) {
+            leafletLayer.addTo(map);
+            layerRefsMap.current.set(layerId, leafletLayer);
+            setLayers((prev) =>
+              prev.map((l) =>
+                l.id === layerId ? { ...l, enabled: true, loaded: true, loading: false } : l
+              )
+            );
+          } else {
+            setLayers((prev) =>
+              prev.map((l) => (l.id === layerId ? { ...l, loading: false } : l))
+            );
+          }
+        } catch (err) {
+          console.error(`Postprocessed layer ${layerId} failed:`, err);
+          setLayers((prev) =>
+            prev.map((l) => (l.id === layerId ? { ...l, loading: false } : l))
+          );
+        }
         return;
       }
 

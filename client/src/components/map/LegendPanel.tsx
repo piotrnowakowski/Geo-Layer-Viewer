@@ -187,6 +187,10 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
   // ── VIIRS I5 brightness temperature ──────────────────────────────────────────
   ref_viirs_lst: { kind: "gradient", colors: ["#313695","#74add1","#ffffbf","#f46d43","#a50026"], labels: ["25°C", "45°C surface"] },
+
+  // ── Spatial Query layers ─────────────────────────────────────────────────────
+  post_settlements_flood: { kind: "solid" },
+  post_bus_heatwave: { kind: "line" },
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────

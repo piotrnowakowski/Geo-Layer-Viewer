@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
-export type LayerSection = "oef_catalog" | "derived";
+export type LayerSection = "oef_catalog" | "derived" | "postprocessing";
 export type LayerGroup =
   | "urban_land"
   | "environment"
@@ -37,7 +37,8 @@ export type LayerGroup =
   | "climate_projections"
   | "analysis"
   | "base_layers"
-  | "sites";
+  | "sites"
+  | "spatial_queries";
 
 // Value-tile encoding from OEF GitHub catalog (datasets.yaml).
 // Formula for numeric layers: value = (R + 256*G + 65536*B + offset) / scale
@@ -86,20 +87,22 @@ export interface LayerSectionDef {
 }
 
 export const LAYER_SECTIONS: LayerSectionDef[] = [
-  { id: "oef_catalog", label: "OEF Geospatial Data" },
-  { id: "derived", label: "Reference Layers" },
+  { id: "oef_catalog",     label: "OEF Geospatial Data" },
+  { id: "derived",         label: "Reference Layers" },
+  { id: "postprocessing",  label: "Spatial Queries" },
 ];
 
 export const LAYER_GROUPS: LayerGroupDef[] = [
-  { id: "urban_land",         label: "Land Use & Urban Form",    section: "oef_catalog" },
-  { id: "environment",        label: "Environment & Ecology",    section: "oef_catalog" },
-  { id: "population",         label: "Population & Society",     section: "oef_catalog" },
-  { id: "hydrology",          label: "Hydrology & Terrain",      section: "oef_catalog" },
-  { id: "climate_extreme",    label: "Extreme Climate Indices",  section: "oef_catalog" },
-  { id: "climate_projections",label: "Climate Projections",      section: "oef_catalog" },
-  { id: "analysis",           label: "Risk Analysis",            section: "derived"     },
-  { id: "base_layers",        label: "Base Layers",              section: "derived"     },
-  { id: "sites",              label: "Climate Sites",            section: "derived"     },
+  { id: "urban_land",         label: "Land Use & Urban Form",    section: "oef_catalog"    },
+  { id: "environment",        label: "Environment & Ecology",    section: "oef_catalog"    },
+  { id: "population",         label: "Population & Society",     section: "oef_catalog"    },
+  { id: "hydrology",          label: "Hydrology & Terrain",      section: "oef_catalog"    },
+  { id: "climate_extreme",    label: "Extreme Climate Indices",  section: "oef_catalog"    },
+  { id: "climate_projections",label: "Climate Projections",      section: "oef_catalog"    },
+  { id: "analysis",           label: "Risk Analysis",            section: "derived"        },
+  { id: "base_layers",        label: "Base Layers",              section: "derived"        },
+  { id: "sites",              label: "Climate Sites",            section: "derived"        },
+  { id: "spatial_queries",    label: "Spatial Queries",          section: "postprocessing" },
 ];
 
 // ── Value-tile URL templates (from OEF GitHub catalog datasets.yaml) ─────────
@@ -325,4 +328,29 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "sites_flood_zones", name: "Flood Risk Zones (OSM)",        icon: Waves,         color: "#1d4ed8", source: "geojson", group: "sites", available: true, hasValueTiles: true },
   { id: "sites_flood2024",   name: "2024 Flood Extent (Planet/SkySat)", icon: CloudRain, color: "#60a5fa", source: "geojson", group: "sites", available: true, hasValueTiles: true },
   { id: "ref_viirs_lst",     name: "Heat Intensity (VIIRS 375m)",   icon: Flame,         color: "#f97316", source: "tiles",   group: "sites", available: true, tileLayerId: "viirs_i5_day", hasValueTiles: false },
+
+  // ── Spatial Queries (postprocessing) ────────────────────────────────────────
+  // Vector × raster intersections: features filtered by raster threshold at centroid.
+  {
+    id: "post_settlements_flood",
+    name: "Settlements @ FRI > 0.4",
+    icon: AlertTriangle,
+    color: "#ef4444",
+    source: "geojson",
+    group: "spatial_queries",
+    available: true,
+    hasValueTiles: true,
+    valueEncoding: { type: "numeric", unit: "FRI index" },
+  },
+  {
+    id: "post_bus_heatwave",
+    name: "Bus Lines in HWM ≥ 10 °C·d",
+    icon: Flame,
+    color: "#fb923c",
+    source: "geojson",
+    group: "spatial_queries",
+    available: true,
+    hasValueTiles: true,
+    valueEncoding: { type: "numeric", unit: "°C·days" },
+  },
 ];
