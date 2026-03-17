@@ -130,6 +130,48 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
   );
 }
 
+// Dot shown on each layer button indicating data access level:
+//   green filled  → value_tile or inline GeoJSON: real numbers decodable
+//   grey ring     → visual tiles only: pixels are display colours, not data values
+function DataDot({ layer }: { layer: LayerState }) {
+  if (!layer.available) return null;
+  if (layer.source === "geojson" && !layer.hasValueTiles) return null;
+
+  const hasValues = layer.hasValueTiles === true;
+  const unit = layer.valueEncoding?.unit;
+
+  const tooltipText = hasValues
+    ? unit
+      ? `Real values available · ${unit}`
+      : "Real values available"
+    : "Visual display only · no numeric values";
+
+  const dot = (
+    <div
+      data-testid={`dot-data-${layer.id}`}
+      className={cn(
+        "absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full",
+        hasValues
+          ? "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.7)]"
+          : "border border-zinc-500 bg-transparent"
+      )}
+    />
+  );
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 cursor-default">
+          {dot}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-[10px] max-w-[160px] text-center">
+        {tooltipText}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function LayerButton({
   layer,
   onToggle,
@@ -167,11 +209,7 @@ function LayerButton({
             className="w-4 h-4"
             style={layer.enabled ? { color: layer.color } : undefined}
           />
-          {layer.source === "tiles" && isAvailable && (
-            <div
-              className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400"
-            />
-          )}
+          <DataDot layer={layer} />
         </div>
       )}
       <span className="text-[9px] leading-tight font-medium truncate w-full">

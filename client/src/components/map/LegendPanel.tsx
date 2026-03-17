@@ -191,13 +191,20 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function GradientBar({ colors, labels }: { colors: string[]; labels: [string, string] }) {
+function GradientBar({ colors, labels, unit }: { colors: string[]; labels: [string, string]; unit?: string }) {
   return (
     <div className="mt-1.5 ml-5">
-      <div
-        className="h-1.5 rounded-sm w-full"
-        style={{ background: `linear-gradient(to right, ${colors.join(", ")})` }}
-      />
+      <div className="flex items-center gap-1.5">
+        <div
+          className="h-1.5 rounded-sm flex-1"
+          style={{ background: `linear-gradient(to right, ${colors.join(", ")})` }}
+        />
+        {unit && (
+          <span className="text-[8px] text-emerald-400 font-medium shrink-0 leading-none">
+            {unit}
+          </span>
+        )}
+      </div>
       <div className="flex justify-between mt-0.5">
         <span className="text-[9px] text-zinc-500">{labels[0]}</span>
         <span className="text-[9px] text-zinc-500">{labels[1]}</span>
@@ -225,6 +232,8 @@ function CategoricalItems({ items }: { items: { color: string; label: string }[]
 function LayerRow({ layer }: { layer: LayerState }) {
   const def: LegendDef = LEGEND_DEF[layer.id] ?? { kind: "solid" };
   const { color } = layer;
+  const hasValues = layer.hasValueTiles === true;
+  const unit = layer.valueEncoding?.unit;
 
   return (
     <div className="py-1.5">
@@ -239,9 +248,18 @@ function LayerRow({ layer }: { layer: LayerState }) {
         <span className="text-[11px] text-zinc-200 leading-tight truncate flex-1">
           {layer.name}
         </span>
+        <div
+          title={hasValues ? (unit ? `Values: ${unit}` : "Values available") : "Visual only"}
+          className={[
+            "shrink-0 w-1.5 h-1.5 rounded-full",
+            hasValues
+              ? "bg-emerald-400"
+              : (layer.source === "tiles" ? "border border-zinc-600 bg-transparent" : "hidden"),
+          ].join(" ")}
+        />
       </div>
 
-      {def.kind === "gradient"    && <GradientBar   colors={def.colors} labels={def.labels} />}
+      {def.kind === "gradient"    && <GradientBar colors={def.colors} labels={def.labels} unit={hasValues ? unit : undefined} />}
       {def.kind === "categorical" && <CategoricalItems items={def.items} />}
     </div>
   );
@@ -280,6 +298,19 @@ export default function LegendPanel({ layers }: Props) {
             {activeLayers.map((layer) => (
               <LayerRow key={layer.id} layer={layer} />
             ))}
+          </div>
+        </div>
+      )}
+
+      {expanded && (
+        <div className="px-3 pb-2 flex items-center gap-3 border-t border-zinc-800/60 pt-1.5">
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[8px] text-zinc-500">Values accessible</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full border border-zinc-600" />
+            <span className="text-[8px] text-zinc-500">Visual only</span>
           </div>
         </div>
       )}
