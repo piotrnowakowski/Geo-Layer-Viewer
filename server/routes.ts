@@ -731,6 +731,28 @@ export async function registerRoutes(
     }
   });
 
+  // ── Value-tile proxy (CORS bypass for OEF S3 value PNGs) ─────────────────
+  // The S3 bucket does not send CORS headers, so the browser cannot read pixels
+  // directly.  This route fetches the PNG server-side and streams it back.
+  app.get("/api/geospatial/proxy-tile", async (req, res) => {
+    const { url } = req.query as { url?: string };
+    const ALLOWED_HOST = "https://geo-test-api.s3.us-east-1.amazonaws.com/";
+    if (!url || !url.startsWith(ALLOWED_HOST)) {
+      return res.status(400).json({ error: "URL must be from the OEF S3 bucket" });
+    }
+    try {
+      const upstream = await fetch(url);
+      if (!upstream.ok) return res.status(upstream.status).end();
+      const buf = await upstream.arrayBuffer();
+      res.set("Content-Type", "image/png");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.set("Access-Control-Allow-Origin", "*");
+      res.end(Buffer.from(buf));
+    } catch (err: any) {
+      res.status(502).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }
 

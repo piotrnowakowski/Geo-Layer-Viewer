@@ -13,6 +13,7 @@ import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
 import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
 import LegendPanel from "./LegendPanel";
+import ValueTooltip from "./ValueTooltip";
 
 export default function MapViewer() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -632,6 +633,7 @@ export default function MapViewer() {
           style={{ zIndex: 0 }}
         />
 
+        <ValueTooltip mapRef={mapRef} layers={layers} mapReady={mapReady} />
         <EvidenceDrawer layers={layers} onToggleLayer={toggleLayer} />
         <LegendPanel layers={layers} />
 
