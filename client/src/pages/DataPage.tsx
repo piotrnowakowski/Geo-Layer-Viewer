@@ -1,6 +1,6 @@
 import { Link } from "wouter";
-import { ArrowLeft, ExternalLink, FlaskConical } from "lucide-react";
-import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS } from "@/data/layer-configs";
+import { ArrowLeft, ExternalLink, FlaskConical, CheckCircle2 } from "lucide-react";
+import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS, type LayerConfig } from "@/data/layer-configs";
 
 interface LayerDataInfo {
   id: string;
@@ -60,6 +60,55 @@ function getRawDataAccess(layerId: string): string {
   if (layerId.startsWith("oef_hwm_") || layerId.startsWith("oef_fri_")) return ACCESS_OEF_COMPUTED;
   if (layerId === "oef_copernicus_dem") return ACCESS_COPERNICUS_DEM;
   return ACCESS_GEE;
+}
+
+// Returns a short description of what numerical values are accessible in-tool for layers
+// where hasValueTiles is true. Used to populate the green "Values Available" box.
+function getInToolValueDescription(layer: LayerConfig): string {
+  const enc = layer.valueEncoding;
+
+  // Postprocessing (spatial query) layers — raster value sampled and attached to each feature
+  if (layer.id === "post_settlements_flood") {
+    return "Flood Risk Index (0–1) decoded from the OEF FRI 2024 raster at each settlement centroid " +
+      "and attached to the feature. Hover any highlighted polygon to read the exact FRI value. " +
+      "Only settlements with FRI > 0.4 are shown.";
+  }
+  if (layer.id === "post_bus_heatwave") {
+    return "Heatwave Magnitude (°C·days) decoded from the OEF HWM 2024 raster at each route midpoint " +
+      "and attached to the feature. Hover any route to read the exact HWM value. " +
+      "Only routes with HWM ≥ 10 °C·days are shown.";
+  }
+
+  // Tile layers with value tiles
+  if (layer.source === "tiles" && enc) {
+    if (enc.type === "categorical") {
+      const classNames = enc.classes ? Object.values(enc.classes).join(", ") : "land cover classes";
+      return `Categorical pixel values decoded in-tool. Hover the map to read the land cover class at any point. ` +
+        `Available classes: ${classNames}.`;
+    }
+    if (enc.type === "numeric" && enc.unit) {
+      return `Pixel values decoded to real numbers (${enc.unit}) using the OEF value tile formula ` +
+        `value = (R + 256·G + 65536·B + ${enc.offset ?? 0}) / ${enc.scale ?? 100}. ` +
+        `Hover the map to read the exact value at any point in the tooltip.`;
+    }
+  }
+
+  // GeoJSON layers with quantitative properties
+  if (layer.id === "solar_potential") {
+    return "Real values available as GeoJSON feature properties: PVOUT_mean (kWh/kWp/day), " +
+      "GHI_mean (kWh/m²/year), DNI_mean. Hover any neighbourhood polygon to see the values. " +
+      "Raw data also available via the Global Solar Atlas API.";
+  }
+  if (layer.id === "ibge_census") {
+    return "Real values available as GeoJSON feature properties: poverty_rate (0–1), population_total, " +
+      "pct_low_income, pct_high_income, pct_piped_water, pct_formal_sewage, pop_density_km² " +
+      "Hover any neighbourhood polygon to see all indicators.";
+  }
+
+  // Generic GeoJSON vector layers (geometry + properties are the data)
+  return "Vector geometry and feature properties are directly accessible. Hover any feature to " +
+    "see its properties in the tooltip. The underlying GeoJSON is served from the API at /api/geospatial/ " +
+    "and can be fetched programmatically for use in spatial analysis.";
 }
 
 const LAYER_DATA_INFO: LayerDataInfo[] = [
@@ -901,8 +950,14 @@ export default function DataPage() {
                               >
                                 <Icon className="w-4 h-4" style={{ color: layer.color }} />
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="text-sm font-semibold text-white">{layer.name}</h3>
+                                {layer.hasValueTiles && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                                    style={{ backgroundColor: 'rgba(16,185,129,0.15)', color: '#34d399' }}>
+                                    Values decoded
+                                  </span>
+                                )}
                                 {!layer.available && (
                                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-medium">
                                     Coming Soon
@@ -959,7 +1014,21 @@ export default function DataPage() {
                                   </div>
                                 )}
 
-                                {layer.source === "tiles" && (
+                                {layer.hasValueTiles && (
+                                  <div className="mt-1 rounded-lg border border-emerald-800/40 bg-emerald-950/25 p-3 flex gap-2.5">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                                    <div>
+                                      <dt className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+                                        Values Available In-Tool
+                                      </dt>
+                                      <dd className="text-emerald-200/70 text-xs leading-relaxed">
+                                        {getInToolValueDescription(layer)}
+                                      </dd>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {layer.source === "tiles" && !layer.hasValueTiles && (
                                   <div className="mt-1 rounded-lg border border-amber-800/40 bg-amber-950/25 p-3 flex gap-2.5">
                                     <FlaskConical className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
                                     <div>
@@ -976,7 +1045,20 @@ export default function DataPage() {
                             ) : (
                               <div className="space-y-2">
                                 <p className="text-zinc-500 text-xs">Documentation pending.</p>
-                                {layer.source === "tiles" && (
+                                {layer.hasValueTiles && (
+                                  <div className="rounded-lg border border-emerald-800/40 bg-emerald-950/25 p-3 flex gap-2.5">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                                    <div>
+                                      <dt className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+                                        Values Available In-Tool
+                                      </dt>
+                                      <dd className="text-emerald-200/70 text-xs leading-relaxed">
+                                        {getInToolValueDescription(layer)}
+                                      </dd>
+                                    </div>
+                                  </div>
+                                )}
+                                {layer.source === "tiles" && !layer.hasValueTiles && (
                                   <div className="rounded-lg border border-amber-800/40 bg-amber-950/25 p-3 flex gap-2.5">
                                     <FlaskConical className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
                                     <div>
