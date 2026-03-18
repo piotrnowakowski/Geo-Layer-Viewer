@@ -49,11 +49,6 @@ function oef(lo: string, hi: string): GradientDef {
 
 const LEGEND_DEF: Record<string, LegendDef> = {
 
-  // ── Derived risk grid (real measured values from 1 216-cell GeoJSON cache) ──
-  grid_flood:     { kind: "gradient", colors: ["#dbeafe","#93c5fd","#60a5fa","#3b82f6","#1e40af"], labels: ["0.11", "0.56 score"] },
-  grid_heat:      { kind: "gradient", colors: ["#fee2e2","#fca5a5","#f87171","#dc2626","#991b1b"], labels: ["0.00", "0.88 score"] },
-  grid_landslide: { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#ca8a04","#78350f"], labels: ["0.17", "0.49 score"] },
-
   // ── IBGE & social (real measured values) ────────────────────────────────────
   ibge_census:    { kind: "gradient", colors: ["#ede9fe","#c084fc","#a855f7","#7e22ce","#3b0764"], labels: ["2%", "35% poverty rate"] },
   ibge_settlements: { kind: "solid" },
@@ -62,19 +57,8 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
-  rivers:         { kind: "line"  },
   transit_routes: { kind: "line"  },
   transit_stops:  { kind: "point" },
-
-  sites_parks:       { kind: "point" },
-  sites_schools:     { kind: "point" },
-  sites_hospitals:   { kind: "point" },
-  sites_wetlands:    { kind: "point" },
-  sites_sports:      { kind: "point" },
-  sites_social:      { kind: "point" },
-  sites_vacant:      { kind: "solid" },
-  sites_flood_zones: { kind: "solid" },
-  sites_flood2024:   { kind: "solid" },
 
   // ── OEF tile — Land Use & Urban ─────────────────────────────────────────────
   // Dynamic World: categorical colours confirmed by sampling zoom-10 tiles.
@@ -184,9 +168,6 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   oef_fri_2050s_585: oef("Low risk", "High SSP5-8.5"),
   oef_fri_2100s_245: oef("Low risk", "High SSP2-4.5"),
   oef_fri_2100s_585: oef("Low risk", "High SSP5-8.5"),
-
-  // ── VIIRS I5 brightness temperature ──────────────────────────────────────────
-  ref_viirs_lst: { kind: "gradient", colors: ["#313695","#74add1","#ffffbf","#f46d43","#a50026"], labels: ["25°C", "45°C surface"] },
 
   // ── Spatial Query layers ─────────────────────────────────────────────────────
   post_settlements_flood: { kind: "solid" },
