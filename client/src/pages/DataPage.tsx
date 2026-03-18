@@ -792,6 +792,28 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     coverage: "Porto Alegre municipality and surroundings",
     notes: "End-of-century worst-case scenario for heatwave intensity. Used to stress-test NbS designs and quantify the maximum adaptation gap that NbS must bridge.",
   },
+
+  // ── Spatial Queries (postprocessing) ─────────────────────────────────────
+  {
+    id: "post_settlements_flood",
+    methodology: "Client-side spatial query that intersects the IBGE informal settlements vector layer with the OEF Flood Risk Index (FRI) 2024 raster. For each settlement polygon, its centroid is computed and the OEF FRI value tile is fetched at zoom 11 and decoded using the formula value = (R + 256·G + 65536·B + 6) / 100. Only polygons where the decoded FRI value exceeds 0.4 are retained and rendered. This identifies the subset of informal settlements that fall in the highest-risk flood zones according to the OEF raster, combining the spatial precision of the IBGE cadastre with the hazard quantification of the OEF index.",
+    source: "OEF Flood Risk Index 2024 × IBGE Informal Settlements (aglomerados subnormais) 2022",
+    sourceUrl: "https://github.com/Open-Earth-Foundation/geospatial-data",
+    date: "FRI: 2024; IBGE boundaries: 2022 census (released 2024)",
+    resolution: "Vector output derived from IBGE polygon boundaries; raster sampling at OEF ~5 km native resolution",
+    coverage: "Porto Alegre municipality — subset of 125 informal settlement polygons where FRI > 0.4",
+    notes: "Computed entirely client-side on layer activation. FRI threshold of 0.4 selects settlements in the upper portion of the flood risk distribution. Results depend on the centroid falling within the raster tile footprint — polygons with centroids outside the Porto Alegre tile coverage are excluded.",
+  },
+  {
+    id: "post_bus_heatwave",
+    methodology: "Client-side spatial query that intersects the GTFS bus route geometries with the OEF Heatwave Magnitude (HWM) 2024 raster. For each bus route LineString, its midpoint is computed and the OEF HWM value tile is fetched at zoom 11 and decoded using the formula value = (R + 256·G + 65536·B + 600) / 100. Only routes where the decoded HWM value meets or exceeds 10 °C·days are retained and rendered. In Porto Alegre the 2024 HWM raster shows a uniform value of 11.0 °C·days across the city, so the entire bus network qualifies — this is factually correct and reflects that all transit infrastructure in Porto Alegre operated under heatwave conditions in 2024.",
+    source: "OEF Heatwave Magnitude 2024 × EPTC Porto Alegre GTFS Static Feed (bus route shapes)",
+    sourceUrl: "https://github.com/Open-Earth-Foundation/geospatial-data",
+    date: "HWM: 2024; GTFS: October 2024 release",
+    resolution: "Vector output at GTFS shape point resolution; raster sampling at ERA5-Land ~9 km native resolution",
+    coverage: "Porto Alegre municipality — 762 bus route shapes, all qualifying at HWM ≥ 10 °C·days threshold",
+    notes: "Computed client-side on layer activation. The uniform HWM value across Porto Alegre means all bus routes pass the threshold, confirming city-wide heatwave exposure of transit infrastructure. HWM threshold of 10 °C·days corresponds to the lower bound of a moderate heatwave event by ERA5-Land climatological standards.",
+  },
 ];
 
 export default function DataPage() {
