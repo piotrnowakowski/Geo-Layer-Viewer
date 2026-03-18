@@ -257,6 +257,52 @@ async function fetchAndCacheS3GeoJSON(datasetKey: string): Promise<any> {
   return data;
 }
 
+// ── Coordinate extraction helper ──────────────────────────────────────────
+function flattenCoords(geom: any): number[][] {
+  if (!geom) return [];
+  switch (geom.type) {
+    case "Point":
+      return [geom.coordinates];
+    case "LineString":
+    case "MultiPoint":
+      return geom.coordinates;
+    case "Polygon":
+    case "MultiLineString":
+      return geom.coordinates.flat(1);
+    case "MultiPolygon":
+      return geom.coordinates.flat(2);
+    case "GeometryCollection":
+      return geom.geometries.flatMap(flattenCoords);
+    default:
+      return [];
+  }
+}
+
+async function registerCachedRoute(
+  app: Express,
+  routePath: string,
+  cacheKey: string,
+  loader: (bounds: GeoBounds) => Promise<any>,
+  statusOnErr = 500
+) {
+  app.get(routePath, async (_req, res) => {
+    try {
+      const cached = loadCachedData(cacheKey);
+      if (cached) return res.json(cached);
+
+      const boundary = loadCachedData("porto-alegre-boundary.json");
+      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
+
+      const bounds = getBoundsFromBoundary(boundary);
+      const data = await loader(bounds);
+      saveSampleData(cacheKey, data);
+      res.json(data);
+    } catch (error: any) {
+      res.status(statusOnErr).json({ message: error.message });
+    }
+  });
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -264,68 +310,63 @@ export async function registerRoutes(
   // Kick off background raster pre-loading so the first user request is fast
   preloadRasterDatasets();
 
-  app.get("/api/geospatial/tiles/:layerId/:z/:x/:y.png", async (req, res) => {
-    const { layerId } = req.params;
-    let { z, x, y } = req.params;
+  // Register OEF tile layers
+  Object.entries(OEF_TILE_LAYERS).forEach(([layerId, config]) => {
+    app.get(`/api/geospatial/tiles/${layerId}/:z/:x/:y.png`, async (req, res) => {
+      let { z, x, y } = req.params;
 
-    if (!/^\d+$/.test(z) || !/^\d+$/.test(x) || !/^\d+$/.test(y)) {
-      return res.status(400).json({ message: "Invalid tile coordinates" });
-    }
-
-    const config = OEF_TILE_LAYERS[layerId];
-    if (!config) {
-      return res.status(404).json({ message: `Layer "${layerId}" not available` });
-    }
-
-    // Server-side zoom clamping: if the layer has a maxNativeZoom and the
-    // requested zoom exceeds it, compute the equivalent tile at maxNativeZoom.
-    // This handles clients that send high-zoom requests despite the Leaflet option.
-    if (config.maxNativeZoom !== undefined) {
-      const reqZ = parseInt(z);
-      if (reqZ > config.maxNativeZoom) {
-        const diff = reqZ - config.maxNativeZoom;
-        const scale = Math.pow(2, diff);
-        z = String(config.maxNativeZoom);
-        x = String(Math.floor(parseInt(x) / scale));
-        y = String(Math.floor(parseInt(y) / scale));
+      if (!/^\d+$/.test(z) || !/^\d+$/.test(x) || !/^\d+$/.test(y)) {
+        return res.status(400).json({ message: "Invalid tile coordinates" });
       }
-    }
 
-    const tileUrl = config.urlTemplate
-      .replace("{z}", z)
-      .replace("{x}", x)
-      .replace("{y}", y);
-
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-      const tileResponse = await fetch(tileUrl, { signal: controller.signal });
-      clearTimeout(timeout);
-
-      if (!tileResponse.ok) {
-        if (tileResponse.status === 404 || tileResponse.status === 403) {
-          res.set("Cache-Control", "public, max-age=3600");
-          return res.status(204).end();
+      // Server-side zoom clamping
+      if (config.maxNativeZoom !== undefined) {
+        const reqZ = parseInt(z);
+        if (reqZ > config.maxNativeZoom) {
+          const diff = reqZ - config.maxNativeZoom;
+          const scale = Math.pow(2, diff);
+          z = String(config.maxNativeZoom);
+          x = String(Math.floor(parseInt(x) / scale));
+          y = String(Math.floor(parseInt(y) / scale));
         }
-        return res
-          .status(502)
-          .json({ message: `Upstream error: ${tileResponse.status}` });
       }
 
-      const buffer = Buffer.from(await tileResponse.arrayBuffer());
-      const upstreamContentType = tileResponse.headers.get("content-type") || "image/png";
-      res.set({
-        "Content-Type": upstreamContentType,
-        "Cache-Control": "public, max-age=86400",
-        "Access-Control-Allow-Origin": "*",
-      });
-      res.send(buffer);
-    } catch (error: any) {
-      if (error.name === "AbortError") {
-        return res.status(504).json({ message: "Tile request timed out" });
+      const tileUrl = config.urlTemplate
+        .replace("{z}", z)
+        .replace("{x}", x)
+        .replace("{y}", y);
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const tileResponse = await fetch(tileUrl, { signal: controller.signal });
+        clearTimeout(timeout);
+
+        if (!tileResponse.ok) {
+          if (tileResponse.status === 404 || tileResponse.status === 403) {
+            res.set("Cache-Control", "public, max-age=3600");
+            return res.status(204).end();
+          }
+          return res
+            .status(502)
+            .json({ message: `Upstream error: ${tileResponse.status}` });
+        }
+
+        const buffer = Buffer.from(await tileResponse.arrayBuffer());
+        const upstreamContentType = tileResponse.headers.get("content-type") || "image/png";
+        res.set({
+          "Content-Type": upstreamContentType,
+          "Cache-Control": "public, max-age=86400",
+          "Access-Control-Allow-Origin": "*",
+        });
+        res.send(buffer);
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          return res.status(504).json({ message: "Tile request timed out" });
+        }
+        return res.status(502).json({ message: "Failed to fetch tile" });
       }
-      return res.status(502).json({ message: "Failed to fetch tile" });
-    }
+    });
   });
 
   app.get("/api/geospatial/transit-stops", async (_req, res) => {
@@ -373,22 +414,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/geospatial/elevation", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-elevation.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getElevationData(bounds);
-      saveSampleData("porto-alegre-elevation.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
+  registerCachedRoute(app, "/api/geospatial/elevation", "porto-alegre-elevation.json", (b) => getElevationData(b));
 
   app.get("/api/geospatial/boundary", async (_req, res) => {
     try {
@@ -403,125 +429,13 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/geospatial/rivers", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-rivers.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getRiversData("BR-POA", bounds);
-      saveSampleData("porto-alegre-rivers.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/surface-water", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-surface-water.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getSurfaceWaterData("BR-POA", bounds);
-      saveSampleData("porto-alegre-surface-water.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/forest", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-forest.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getForestCanopyData("BR-POA", bounds);
-      saveSampleData("porto-alegre-forest.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/landcover", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-landcover.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getLandcoverData("BR-POA", bounds);
-      saveSampleData("porto-alegre-landcover.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/buildings", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-buildings.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getBuildingData("BR-POA", bounds);
-      saveSampleData("porto-alegre-buildings.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/population", async (_req, res) => {
-    try {
-      const cached = loadCachedData("porto-alegre-population.json");
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getPopulationData(bounds);
-      saveSampleData("porto-alegre-population.json", data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/geospatial/flood-2024", async (_req, res) => {
-    const cacheFile = "porto-alegre-flood-2024.json";
-    try {
-      const cached = loadCachedData(cacheFile);
-      if (cached) return res.json(cached);
-
-      const boundary = loadCachedData("porto-alegre-boundary.json");
-      if (!boundary) return res.status(400).json({ message: "Boundary not loaded yet" });
-
-      const bounds = getBoundsFromBoundary(boundary);
-      const data = await getFlood2024Data(bounds);
-      saveSampleData(cacheFile, data);
-      res.json(data);
-    } catch (error: any) {
-      res.status(503).json({ message: error.message });
-    }
-  });
+  registerCachedRoute(app, "/api/geospatial/rivers", "porto-alegre-rivers.json", (b) => getRiversData("BR-POA", b));
+  registerCachedRoute(app, "/api/geospatial/surface-water", "porto-alegre-surface-water.json", (b) => getSurfaceWaterData("BR-POA", b));
+  registerCachedRoute(app, "/api/geospatial/forest", "porto-alegre-forest.json", (b) => getForestCanopyData("BR-POA", b));
+  registerCachedRoute(app, "/api/geospatial/landcover", "porto-alegre-landcover.json", (b) => getLandcoverData("BR-POA", b));
+  registerCachedRoute(app, "/api/geospatial/buildings", "porto-alegre-buildings.json", (b) => getBuildingData("BR-POA", b));
+  registerCachedRoute(app, "/api/geospatial/population", "porto-alegre-population.json", (b) => getPopulationData(b));
+  registerCachedRoute(app, "/api/geospatial/flood-2024", "porto-alegre-flood-2024.json", (b) => getFlood2024Data(b), 503);
 
   app.get("/api/geospatial/social-vulnerability", async (_req, res) => {
     const cacheFile = "porto-alegre-social-vuln.json";
@@ -529,17 +443,12 @@ export async function registerRoutes(
       const cached = loadCachedData(cacheFile);
       if (cached) return res.json(cached);
 
-      // Build social vulnerability index from the real IBGE neighbourhood indicators
-      // (already cached from /api/geospatial/ibge-indicators).
-      // Uses: poverty_rate, pct_low_income (income Q1+Q2 households), pop_density_km2.
       const ibgeData = loadCachedData("porto-alegre-ibge-indicators.json");
       if (!ibgeData?.features?.length) {
         return res.status(400).json({ message: "IBGE indicators not loaded — call /api/geospatial/ibge-indicators first" });
       }
 
       const features = ibgeData.features as any[];
-
-      // Compute min/max for normalisation
       const getVal = (p: any) => {
         const poverty = p.poverty_rate || 0;
         const lowInc  = p.pct_low_income || 0;
@@ -553,7 +462,7 @@ export async function registerRoutes(
       const enriched = features.map((f: any) => {
         const p = f.properties || {};
         const raw = getVal(p);
-        const vuln_index = (raw - minV) / range; // 0 = least vulnerable, 1 = most
+        const vuln_index = (raw - minV) / range;
         return {
           ...f,
           properties: {
@@ -632,7 +541,6 @@ export async function registerRoutes(
     }
   });
 
-  // ── Spatial analysis catalog ──────────────────────────────────────────────
   app.get("/api/analyze/datasets", (_req, res) => {
     res.json({
       raster: listRasterDatasets(),
@@ -640,10 +548,6 @@ export async function registerRoutes(
     });
   });
 
-  // ── Raster sampling ───────────────────────────────────────────────────────
-  // POST /api/analyze/raster
-  // Body: { datasetId: string, features: GeoJSON FeatureCollection }
-  // Adds a "<datasetId>" property to each feature with the sampled raster value.
   app.post("/api/analyze/raster", async (req, res) => {
     try {
       const { datasetId, features } = req.body as {
@@ -654,7 +558,6 @@ export async function registerRoutes(
         return res.status(400).json({ message: "datasetId and features are required" });
       }
 
-      // Extract a representative lon/lat for each feature
       const points = features.features.map((f: any) => {
         const geom = f.geometry;
         if (!geom) return { lng: 0, lat: 0 };
@@ -688,12 +591,6 @@ export async function registerRoutes(
     }
   });
 
-  // ── Vector overlay ────────────────────────────────────────────────────────
-  // POST /api/analyze/vector
-  // Body: { operation, layerA, layerB, options }
-  // operation: "points_in_layer" | "intersect_lines"
-  // layerA / layerB: layer IDs (see GET /api/analyze/datasets)
-  // options: { bufferMeters?, scoreField?, scoreThreshold? }
   app.post("/api/analyze/vector", async (req, res) => {
     try {
       const { operation, layerA, layerB, options = {} } = req.body as {
@@ -731,9 +628,6 @@ export async function registerRoutes(
     }
   });
 
-  // ── Value-tile proxy (CORS bypass for OEF S3 value PNGs) ─────────────────
-  // The S3 bucket does not send CORS headers, so the browser cannot read pixels
-  // directly.  This route fetches the PNG server-side and streams it back.
   app.get("/api/geospatial/proxy-tile", async (req, res) => {
     const { url } = req.query as { url?: string };
     const ALLOWED_HOST = "https://geo-test-api.s3.us-east-1.amazonaws.com/";
@@ -754,25 +648,4 @@ export async function registerRoutes(
   });
 
   return httpServer;
-}
-
-// ── Coordinate extraction helper ──────────────────────────────────────────
-function flattenCoords(geom: any): number[][] {
-  if (!geom) return [];
-  switch (geom.type) {
-    case "Point":
-      return [geom.coordinates];
-    case "LineString":
-    case "MultiPoint":
-      return geom.coordinates;
-    case "Polygon":
-    case "MultiLineString":
-      return geom.coordinates.flat(1);
-    case "MultiPolygon":
-      return geom.coordinates.flat(2);
-    case "GeometryCollection":
-      return geom.geometries.flatMap(flattenCoords);
-    default:
-      return [];
-  }
 }

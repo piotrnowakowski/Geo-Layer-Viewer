@@ -1,27 +1,3 @@
-export function getFloodColor(score: number): string {
-  if (score >= 0.7) return '#1e40af';
-  if (score >= 0.5) return '#3b82f6';
-  if (score >= 0.3) return '#60a5fa';
-  if (score >= 0.1) return '#93c5fd';
-  return '#dbeafe';
-}
-
-export function getHeatColor(score: number): string {
-  if (score >= 0.7) return '#991b1b';
-  if (score >= 0.5) return '#dc2626';
-  if (score >= 0.3) return '#f87171';
-  if (score >= 0.1) return '#fca5a5';
-  return '#fee2e2';
-}
-
-export function getLandslideColor(score: number): string {
-  if (score >= 0.7) return '#78350f';
-  if (score >= 0.5) return '#a16207';
-  if (score >= 0.3) return '#ca8a04';
-  if (score >= 0.1) return '#eab308';
-  return '#fef3c7';
-}
-
 export function getPopulationColor(density: number): string {
   if (density >= 0.5) return '#5b21b6';
   if (density >= 0.3) return '#7c3aed';
