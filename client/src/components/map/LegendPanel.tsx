@@ -57,8 +57,19 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
+  rivers:         { kind: "line"  },
   transit_routes: { kind: "line"  },
   transit_stops:  { kind: "point" },
+
+  sites_parks:       { kind: "point" },
+  sites_schools:     { kind: "point" },
+  sites_hospitals:   { kind: "point" },
+  sites_wetlands:    { kind: "point" },
+  sites_sports:      { kind: "point" },
+  sites_social:      { kind: "point" },
+  sites_vacant:      { kind: "solid" },
+  sites_flood_zones: { kind: "solid" },
+  sites_flood2024:   { kind: "solid" },
 
   // ── OEF tile — Land Use & Urban ─────────────────────────────────────────────
   // Dynamic World: categorical colours confirmed by sampling zoom-10 tiles.
@@ -168,6 +179,9 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   oef_fri_2050s_585: oef("Low risk", "High SSP5-8.5"),
   oef_fri_2100s_245: oef("Low risk", "High SSP2-4.5"),
   oef_fri_2100s_585: oef("Low risk", "High SSP5-8.5"),
+
+  // ── VIIRS I5 brightness temperature ──────────────────────────────────────────
+  ref_viirs_lst: { kind: "gradient", colors: ["#313695","#74add1","#ffffbf","#f46d43","#a50026"], labels: ["25°C", "45°C surface"] },
 
   // ── Spatial Query layers ─────────────────────────────────────────────────────
   post_settlements_flood: { kind: "solid" },

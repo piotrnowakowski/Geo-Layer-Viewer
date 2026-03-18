@@ -132,6 +132,22 @@ export default function MapViewer() {
       if (!data) return null;
 
       switch (layerId) {
+        case "rivers": {
+          const geoJson = data.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: {
+              color: "#06b6d4",
+              weight: 2,
+              opacity: 0.8,
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const name = feature.properties?.name || "Waterway";
+              (layer as any).bindTooltip(name, { sticky: true });
+            },
+          });
+        }
+
         case "transit_stops": {
           const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
           if (!geoJson?.features) return null;
@@ -276,6 +292,171 @@ export default function MapViewer() {
               (layer as any).bindTooltip(html, { sticky: true });
             },
           });
+        }
+
+        case "sites_flood2024": {
+          const geoJson = data?.geoJson || data;
+          if (!geoJson?.features) return null;
+          return L.geoJSON(geoJson, {
+            style: (feature: any) => {
+              const type = feature?.properties?.obj_type || feature?.properties?.notation || "flood";
+              const isExtent = type === "AffectedArea" || type === "Flooded";
+              return {
+                color: "#60a5fa",
+                fillColor: isExtent ? "#1d4ed8" : "#3b82f6",
+                fillOpacity: 0.35,
+                weight: 1.5,
+                opacity: 0.85,
+                dashArray: isExtent ? undefined : "4 2",
+              };
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const date = p.event_date || "2024-05-06";
+              const src = p.data_source ? "Planet/SkySat satellite" : "2024 Flood";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>Observed flood inundation</strong><br/>
+                  <span style="color: #60a5fa;">Date: ${date} (flood peak)</span><br/>
+                  <span style="color: #94a3b8;">Source: ${src}</span><br/>
+                  <span style="color: #94a3b8;">Guaíba watershed — Rio Grande do Sul</span>
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "sites_flood_zones": {
+          const geoJson = data?.geoJson || data;
+          if (!geoJson?.features) return null;
+
+          return L.geoJSON(geoJson, {
+            style: (feature: any) => {
+              const natural = feature?.properties?.natural || "";
+              const waterway = feature?.properties?.waterway || "";
+              const isWater = natural === "water";
+              const isWetland = natural === "wetland";
+              const isRiverbank = waterway === "riverbank";
+              return {
+                color: isWater ? "#1e40af" : "#2563eb",
+                fillColor: isWater ? "#1d4ed8" : isWetland ? "#3b82f6" : isRiverbank ? "#60a5fa" : "#93c5fd",
+                fillOpacity: isWater ? 0.55 : 0.4,
+                weight: isWater ? 1.5 : 1,
+                opacity: 0.85,
+                dashArray: isWater ? undefined : "4 3",
+              };
+            },
+            onEachFeature: (feature: any, layer: L.Layer) => {
+              const p = feature.properties || {};
+              const name = p.name || (p.natural === "water" ? "Water body" : p.natural === "wetland" ? "Wetland" : "Flood zone");
+              const type = p.natural || p.waterway || "water feature";
+              const water = p.water ? ` (${p.water})` : "";
+              const html = `
+                <div style="font-family: system-ui; font-size: 11px;">
+                  <strong>${name}</strong><br/>
+                  <span style="color: #94a3b8;">Type: ${type}${water}</span><br/>
+                  <span style="color: #60a5fa;">Flood risk zone — NbS priority area</span><br/>
+                  <span style="color: #94a3b8;">Source: OpenStreetMap</span>
+                </div>
+              `;
+              (layer as any).bindTooltip(html, { sticky: true });
+            },
+          });
+        }
+
+        case "sites_parks":
+        case "sites_schools":
+        case "sites_hospitals":
+        case "sites_wetlands":
+        case "sites_sports":
+        case "sites_social":
+        case "sites_vacant": {
+          const geoJson = data?.geoJson || data;
+          if (!geoJson?.features) return null;
+
+          const siteColors: Record<string, string> = {
+            sites_parks:     "#22c55e",
+            sites_schools:   "#f59e0b",
+            sites_hospitals: "#ef4444",
+            sites_wetlands:  "#3b82f6",
+            sites_sports:    "#8b5cf6",
+            sites_social:    "#ec4899",
+            sites_vacant:    "#a16207",
+          };
+
+          const siteNames: Record<string, string> = {
+            sites_parks:     "Park / Green Space",
+            sites_schools:   "School / Education",
+            sites_hospitals: "Hospital / Health Facility",
+            sites_wetlands:  "Wetland",
+            sites_sports:    "Sports Ground / Plaza",
+            sites_social:    "Community Facility",
+            sites_vacant:    "Vacant / Brownfield Land",
+          };
+
+          const color = siteColors[layerId] || "#94a3b8";
+          const typeName = siteNames[layerId] || "Site";
+
+          const group = L.layerGroup();
+
+          const polygonFeatures = geoJson.features.filter(
+            (f: any) => f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon"
+          );
+          const pointFeatures = geoJson.features.filter(
+            (f: any) => f.geometry?.type === "Point"
+          );
+
+          if (polygonFeatures.length > 0) {
+            L.geoJSON({ type: "FeatureCollection", features: polygonFeatures } as any, {
+              style: {
+                color,
+                fillColor: color,
+                fillOpacity: 0.25,
+                weight: 1.5,
+                opacity: 0.9,
+              },
+              onEachFeature: (feature: any, layer: L.Layer) => {
+                const p = feature.properties || {};
+                const name = p.name || p.tags?.name || typeName;
+                const html = `
+                  <div style="font-family: system-ui; font-size: 11px;">
+                    <strong>${name}</strong><br/>
+                    <span style="color: #94a3b8;">${typeName}</span>
+                  </div>
+                `;
+                (layer as any).bindTooltip(html, { sticky: true });
+              },
+            }).addTo(group);
+          }
+
+          if (pointFeatures.length > 0) {
+            L.geoJSON({ type: "FeatureCollection", features: pointFeatures } as any, {
+              pointToLayer: (_feature: any, latlng: L.LatLng) => {
+                return L.circleMarker(latlng, {
+                  radius: 5,
+                  fillColor: color,
+                  color: "#ffffff",
+                  weight: 1,
+                  opacity: 0.9,
+                  fillOpacity: 0.8,
+                });
+              },
+              onEachFeature: (feature: any, layer: L.Layer) => {
+                const p = feature.properties || {};
+                const name = p.name || p.tags?.name || typeName;
+                const html = `
+                  <div style="font-family: system-ui; font-size: 11px;">
+                    <strong>${name}</strong><br/>
+                    <span style="color: #94a3b8;">${typeName}</span>
+                  </div>
+                `;
+                (layer as any).bindTooltip(html, { sticky: true });
+              },
+            }).addTo(group);
+          }
+
+          return group;
         }
 
         default:

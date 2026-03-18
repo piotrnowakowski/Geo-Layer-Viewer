@@ -5,6 +5,7 @@ import {
   Building2,
   Droplets,
   Trees,
+  Map as MapIcon,
   Grid3X3,
   MapPinned,
   Users,
@@ -15,14 +16,18 @@ import {
   Sun,
   BarChart3,
   Home,
+  Heart,
+  GraduationCap,
+  Dumbbell,
   Waves,
+  HandHeart,
   Moon,
   Thermometer,
   TrendingUp,
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
-export type LayerSection = "oef_catalog" | "postprocessing";
+export type LayerSection = "oef_catalog" | "derived" | "postprocessing";
 export type LayerGroup =
   | "urban_land"
   | "environment"
@@ -30,6 +35,8 @@ export type LayerGroup =
   | "hydrology"
   | "climate_extreme"
   | "climate_projections"
+  | "base_layers"
+  | "sites"
   | "spatial_queries";
 
 // Value-tile encoding from OEF GitHub catalog (datasets.yaml).
@@ -80,6 +87,7 @@ export interface LayerSectionDef {
 
 export const LAYER_SECTIONS: LayerSectionDef[] = [
   { id: "oef_catalog",     label: "OEF Geospatial Data" },
+  { id: "derived",         label: "Reference Layers" },
   { id: "postprocessing",  label: "Spatial Queries" },
 ];
 
@@ -90,6 +98,8 @@ export const LAYER_GROUPS: LayerGroupDef[] = [
   { id: "hydrology",          label: "Hydrology & Terrain",      section: "oef_catalog"    },
   { id: "climate_extreme",    label: "Extreme Climate Indices",  section: "oef_catalog"    },
   { id: "climate_projections",label: "Climate Projections",      section: "oef_catalog"    },
+  { id: "base_layers",        label: "Base Layers",              section: "derived"        },
+  { id: "sites",              label: "Climate Sites",            section: "derived"        },
   { id: "spatial_queries",    label: "Spatial Queries",          section: "postprocessing" },
 ];
 
@@ -296,6 +306,21 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     valueEncoding: { type: "numeric", scale: 100, offset: 2383, unit: "°C·days",
       urlTemplate: vtUrl("nbs/porto_alegre/climate_hazards/heatwave_indices/hwm/2100s_ssp585") },
   },
+
+  // ── Derived → Base Layers ────────────────────────────────────────────────────
+  { id: "rivers", name: "Rivers", icon: Droplets, color: "#06b6d4", source: "geojson", group: "base_layers", available: true, hasValueTiles: false },
+
+  // ── Derived → Climate Sites ──────────────────────────────────────────────────
+  { id: "sites_parks",       name: "Parks & Green Space",           icon: Trees,         color: "#22c55e", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_schools",     name: "Schools & Education",           icon: GraduationCap, color: "#f59e0b", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_hospitals",   name: "Hospitals & Health",            icon: Heart,         color: "#ef4444", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_wetlands",    name: "Wetlands",                      icon: Waves,         color: "#3b82f6", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_sports",      name: "Sports Grounds & Plazas",       icon: Dumbbell,      color: "#8b5cf6", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_social",      name: "Community Facilities",          icon: HandHeart,     color: "#ec4899", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_vacant",      name: "Vacant & Brownfield Land",      icon: MapIcon,       color: "#a16207", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_flood_zones", name: "Flood Risk Zones (OSM)",        icon: Waves,         color: "#1d4ed8", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "sites_flood2024",   name: "2024 Flood Extent (Planet/SkySat)", icon: CloudRain, color: "#60a5fa", source: "geojson", group: "sites", available: true, hasValueTiles: true },
+  { id: "ref_viirs_lst",     name: "Heat Intensity (VIIRS 375m)",   icon: Flame,         color: "#f97316", source: "tiles",   group: "sites", available: true, tileLayerId: "viirs_i5_day", hasValueTiles: false },
 
   // ── Spatial Queries (postprocessing) ────────────────────────────────────────
   // Vector × raster intersections: features filtered by raster threshold at centroid.
