@@ -1,6 +1,6 @@
-# NbS Map Visualizer — Agent Guide
+# Geospatial Data Visualizer — Agent Guide
 
-Porto Alegre, Brazil geospatial NbS (Nature-based Solutions) map.
+Porto Alegre, Brazil geospatial data visualizer.
 Full-stack TypeScript (Express + React/Vite). Leaflet maps. Dark theme (CityCatalyst design system, Poppins, primary blue `#001fa8`).
 
 **Golden rule: all data must be real — no synthetic, mocked, or placeholder values.**
