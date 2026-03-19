@@ -272,6 +272,11 @@
   font-family: var(--font-sans);
 }
 
+.leaflet-container .leaflet-interactive:focus,
+.leaflet-container .leaflet-interactive:focus-visible {
+  outline: none !important;
+}
+
 .leaflet-top,
 .leaflet-bottom {
   z-index: 999 !important;

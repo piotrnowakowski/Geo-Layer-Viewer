@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-03-19T10:10:49Z",
-    "inputPath": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/Municipal_buildings.xlsx",
-    "outputPath": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/Municipal_buildings.geocoded.json",
-    "cachePath": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/.cache/Municipal_buildings.geocode-cache.json",
+    "generatedAt": "2026-03-19T13:18:38Z",
+    "inputPath": "D:\\GitHub\\Geo-Layer-Viewer\\pv_panel_data\\Municipal_buildings.xlsx",
+    "outputPath": "D:\\GitHub\\Geo-Layer-Viewer\\pv_panel_data\\Municipal_buildings.geocoded.json",
+    "cachePath": "D:\\GitHub\\Geo-Layer-Viewer\\pv_panel_data\\.cache\\Municipal_buildings.geocode-cache.json",
     "geocoder": "ArcGIS World Geocoding Service",
-    "delayMs": 50,
+    "delayMs": 100,
     "totalRows": 1340,
     "matchedRows": 1340,
     "unmatchedRows": 0

@@ -438,8 +438,7 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               Properties: ${registros}
             </div>
           `;
-          (layer as any).bindTooltip(html, { sticky: true });
-          (layer as any).bindPopup(html);
+          (layer as any).bindPopup(html, { maxWidth: 240 });
         },
       });
     }

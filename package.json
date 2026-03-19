@@ -12,7 +12,11 @@
     "pv:municipal-buildings": "python3 script/convert_municipal_buildings.py",
     "solar:import-municipal": "tsx script/import-google-solar-municipal.ts",
     "solar:import-municipal:test100": "tsx script/import-google-solar-municipal.ts --limit 100",
-    "solar:seed-municipal:test100": "tsx script/import-google-solar-municipal.ts --seed-only --limit 100"
+    "solar:seed-municipal:test100": "tsx script/import-google-solar-municipal.ts --seed-only --limit 100",
+    "solar:list-commercial-neighbourhoods": "tsx script/import-google-solar-commercial.ts --list-neighbourhoods",
+    "solar:import-commercial": "tsx script/import-google-solar-commercial.ts",
+    "solar:import-commercial:test10": "tsx script/import-google-solar-commercial.ts --limit 10",
+    "solar:seed-commercial:test10": "tsx script/import-google-solar-commercial.ts --seed-only --limit 10"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -9,3 +9,5 @@ vite.config.ts.*
 client/public/sample-data/worldpop_bra_2020.tif
 package-lock.json
 package.json
+iptu/iptu_2025.csv
+iptu/iptu_2025_cleaned.csv
