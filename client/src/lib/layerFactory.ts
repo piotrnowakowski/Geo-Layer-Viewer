@@ -331,8 +331,6 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               ${renderPopupRow("Payback", paybackHtml)}
               ${renderPopupRow("Lifetime savings", lifetimeSavingsHtml)}
               ${renderPopupRow("Grid export", gridExportHtml)}
-              <span style="color: #94a3b8;">Imagery:</span> ${escapeHtml(p.imageryQuality || "N/A")} · ${escapeHtml(p.imageryDate || "N/A")}<br/>
-              <span style="color: #94a3b8;">Match distance:</span> ${escapeHtml(formatNumber(p.matchDistanceMeters, 1))} m
             </div>
           `;
           (layer as any).bindTooltip(escapeHtml(sourceAddress), { sticky: true });
