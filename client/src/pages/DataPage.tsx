@@ -102,6 +102,7 @@ function getInToolValueDescription(layer: LayerConfig): string {
   if (layer.id === "google_solar_municipal") {
     return "Real values imported from Google Solar Building Insights and stored as GeoJSON point properties: " +
       "maxSunshineHoursPerYear, carbonOffsetKgPerYear, paybackYears, lifetimeSavings, " +
+      "estimatedInstalledCostPerPanel, estimatedInvestmentCost, " +
       "percentageExportedToGrid, annualExportedToGridKwh, imageryQuality, and imageryDate. " +
       "Click any municipal building point to see the full Solar API-derived popup.";
   }
@@ -140,13 +141,13 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
   },
   {
     id: "google_solar_municipal",
-    methodology: "Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, selects the default financial analysis (or the first available scenario), and stores normalized popup-ready fields including sun hours, payback, lifetime savings, carbon offset, and annual exported electricity.",
+    methodology: "Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, selects the default financial analysis (or the first available scenario), and stores normalized popup-ready fields including sun hours, payback, lifetime savings, carbon offset, annual exported electricity, and an estimated installed investment derived from a configurable piecewise-linear BRL cost-per-panel benchmark.",
     source: "Google Solar API — Building Insights, joined to Porto Alegre municipal building coordinates",
     sourceUrl: "https://developers.google.com/maps/documentation/solar/building-insights",
     date: "On-demand snapshot import from current Google Solar coverage",
     resolution: "Individual municipal building points (matched to Google building center)",
     coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json",
-    notes: "Geometry is a building-center point, not a cadastral footprint. Financial fields come from the selected Building Insights analysis scenario and may be null when Google returns no viable panel configuration.",
+    notes: "Geometry is a building-center point, not a cadastral footprint. Financial fields come from the selected Building Insights analysis scenario and may be null when Google returns no viable panel configuration. Estimated investment fields are derived locally from a 400 W reference-panel benchmark table using piecewise linear interpolation and are not returned by Google.",
   },
   {
     id: "transit_stops",

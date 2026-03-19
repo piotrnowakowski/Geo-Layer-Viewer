@@ -1,6 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
 import { loadDotEnvFile } from "../shared/loadDotEnv";
+import {
+  estimateSolarInvestment,
+  getSolarInvestmentModelMetadata,
+} from "./lib/solarInvestmentModel";
 
 const DEFAULT_INPUT_FILE = "pv_panel_data/Municipal_buildings.geocoded.json";
 const DEFAULT_OUTPUT_FILE =
@@ -339,6 +343,18 @@ function selectMaxPanelConfig(
   }, null);
 }
 
+function buildEstimatedInvestmentProperties(
+  panelCount: number | null | undefined,
+  panelCapacityWatts: number | null | undefined
+) {
+  const estimate = estimateSolarInvestment(panelCount, panelCapacityWatts);
+
+  return {
+    estimatedInstalledCostPerPanel: estimate?.estimatedInstalledCostPerPanel ?? null,
+    estimatedInvestmentCost: estimate?.estimatedInvestmentCost ?? null,
+  };
+}
+
 function buildFeature(
   record: GeocodedRecord,
   response: GoogleBuildingInsightsResponse
@@ -353,9 +369,14 @@ function buildFeature(
   const initialAcKwhPerYear = financialDetails?.initialAcKwhPerYear ?? null;
   const percentageExportedToGrid = financialDetails?.percentageExportedToGrid ?? null;
   const carbonOffsetFactorKgPerMwh = response.solarPotential?.carbonOffsetFactorKgPerMwh ?? null;
-  const maxArrayPanelsCount = response.solarPotential?.maxArrayPanelsCount ?? null;
+  const maxArrayPanelsCount =
+    response.solarPotential?.maxArrayPanelsCount ?? maxPanelConfig?.panelsCount ?? null;
   const panelCapacityWatts = response.solarPotential?.panelCapacityWatts ?? null;
   const maxYearlyEnergyDcKwh = maxPanelConfig?.yearlyEnergyDcKwh ?? null;
+  const estimatedInvestment = buildEstimatedInvestmentProperties(
+    maxArrayPanelsCount,
+    panelCapacityWatts
+  );
   const carbonOffsetKgPerYear =
     initialAcKwhPerYear !== null && carbonOffsetFactorKgPerMwh !== null
       ? (initialAcKwhPerYear / 1000) * carbonOffsetFactorKgPerMwh
@@ -396,6 +417,7 @@ function buildFeature(
       maxYearlyEnergyDcKwh,
       sunshineQuantiles: response.solarPotential?.wholeRoofStats?.sunshineQuantiles ?? [],
       carbonOffsetFactorKgPerMwh,
+      ...estimatedInvestment,
       importStatus: "enriched",
       importMessage: null,
       monthlyBill: normalizeMoney(analysis?.monthlyBill),
@@ -416,6 +438,7 @@ function buildFeature(
 function buildSeedFeature(record: GeocodedRecord): MunicipalSolarFeature {
   const sourceLat = record.location!.latitude as number;
   const sourceLng = record.location!.longitude as number;
+  const estimatedInvestment = buildEstimatedInvestmentProperties(null, null);
 
   return {
     type: "Feature" as const,
@@ -448,6 +471,7 @@ function buildSeedFeature(record: GeocodedRecord): MunicipalSolarFeature {
       maxYearlyEnergyDcKwh: null,
       sunshineQuantiles: [],
       carbonOffsetFactorKgPerMwh: null,
+      ...estimatedInvestment,
       importStatus: "seed_only",
       importMessage: "Awaiting Google Solar API enrichment",
       monthlyBill: null,
@@ -547,6 +571,7 @@ async function main() {
     importedAt: new Date().toISOString(),
     inputFile: options.inputPath,
     mode: options.seedOnly ? "seed_only" : "enriched",
+    estimatedInvestmentCostModel: getSolarInvestmentModelMetadata(),
     totalMatchedRecords: matchedRecords.length,
     selectedOffset: options.offset,
     selectedLimit: options.limit,

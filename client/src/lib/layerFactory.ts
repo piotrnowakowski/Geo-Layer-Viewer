@@ -270,6 +270,8 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
             typeof maxArrayPanelsCount === "number" && typeof panelCapacityWatts === "number"
               ? (maxArrayPanelsCount * panelCapacityWatts) / 1000
               : null;
+          const estimatedInstalledCostPerPanel = p.estimatedInstalledCostPerPanel;
+          const estimatedInvestmentCost = p.estimatedInvestmentCost;
           const html = `
             <div style="font-family: system-ui; font-size: 11px; line-height: 1.45; min-width: 250px;">
               <strong style="font-size: 12px;">${escapeHtml(sourceAddress)}</strong><br/>
@@ -279,6 +281,8 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               <span style="color: #94a3b8;">Sun hours:</span> ${escapeHtml(formatNumber(p.maxSunshineHoursPerYear))} hrs/year<br/>
               <span style="color: #94a3b8;">Panels:</span> ${escapeHtml(formatNumber(maxArrayPanelsCount))}<br/>
               <span style="color: #94a3b8;">System size:</span> ${escapeHtml(formatNumber(maxArrayCapacityKw, 1))} kW DC<br/>
+              <span style="color: #94a3b8;">Est. cost / panel:</span> ${escapeHtml(formatMoney(estimatedInstalledCostPerPanel))}<br/>
+              <span style="color: #94a3b8;">Est. investment:</span> ${escapeHtml(formatMoney(estimatedInvestmentCost))}<br/>
               <span style="color: #94a3b8;">Generation:</span> ${escapeHtml(formatNumber(maxYearlyEnergyDcKwh, 0))} kWh/year<br/>
               <span style="color: #94a3b8;">Carbon offset:</span> ${escapeHtml(formatNumber(p.carbonOffsetKgPerYear, 0))} kg CO2e/year<br/>
               <span style="color: #94a3b8;">Payback:</span> ${escapeHtml(formatNumber(p.paybackYears, 1))} years<br/>
