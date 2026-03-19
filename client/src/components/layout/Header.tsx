@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Database } from "lucide-react";
+import { Database, Zap } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 
 export default function Header() {
@@ -32,6 +32,15 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        <Link href="/">
+          <a
+            data-testid="link-interventions"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            Interventions
+          </a>
+        </Link>
         <Link href="/data">
           <a
             data-testid="link-data-page"
