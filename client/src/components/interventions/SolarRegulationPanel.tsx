@@ -78,15 +78,15 @@ export default function SolarRegulationPanel({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[650px] bg-gray-900 border-l border-gray-800 p-0 flex flex-col">
-        <SheetHeader className="px-6 pt-6 pb-4 border-b border-gray-800">
+      <SheetContent side="right" className="w-full sm:w-[650px] bg-gray-900 border-l border-gray-800 p-0 flex flex-col h-full">
+        <SheetHeader className="px-6 pt-6 pb-4 border-b border-gray-800 flex-shrink-0">
           <SheetTitle className="text-white">Building Solar Regulation</SheetTitle>
           <p className="text-gray-400 text-sm mt-1">Design IPTU Sustentável incentive for commercial buildings</p>
         </SheetHeader>
 
         {/* Instrument Selection - Landing Page */}
         {selectedInstrument === null && (
-          <div className="flex-1 px-6 py-6 overflow-auto">
+          <div className="flex-1 px-6 py-6 overflow-y-auto">
             <h3 className="text-lg font-semibold text-white mb-4">Select Policy Instrument</h3>
             <div className="space-y-3">
               {/* IPTU Sustentável */}
@@ -136,8 +136,8 @@ export default function SolarRegulationPanel({
 
         {/* IPTU Sustentável Content */}
         {selectedInstrument === "iptu" && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-6 pt-4 pb-2">
+          <div className="flex-1 flex flex-col overflow-hidden px-6">
+            <div className="pt-4 pb-2 flex-shrink-0">
               <button
                 onClick={() => {
                   setSelectedInstrument(null);
@@ -154,9 +154,9 @@ export default function SolarRegulationPanel({
               onValueChange={(value) =>
                 setSelectedIPTUTab(value as "geospatial" | "projects" | "next-steps")
               }
-              className="flex-1 flex flex-col px-6 overflow-hidden"
+              className="flex-1 flex flex-col overflow-hidden"
             >
-              <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-800 p-1 flex-shrink-0">
+              <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-800 p-1 flex-shrink-0 -mx-6 px-6">
                 <TabsTrigger value="geospatial" className="text-xs">
                   Geospatial
                 </TabsTrigger>
@@ -169,10 +169,10 @@ export default function SolarRegulationPanel({
               </TabsList>
 
               {/* Tab 1: Geospatial Assessment */}
-              <TabsContent value="geospatial" className="flex-1 flex flex-col overflow-hidden mt-0">
+              <TabsContent value="geospatial" className="flex-1 flex flex-col overflow-hidden mt-0 -mx-6 px-6">
                 <h3 className="text-sm font-semibold text-white mb-3 flex-shrink-0">Neighborhood Assessment</h3>
-                <ScrollArea className="flex-1 overflow-hidden">
-                  <div className="space-y-2 pr-4 h-full">
+                <ScrollArea className="flex-1">
+                  <div className="space-y-2 pr-4">
                     {neighborhoods.map((neighborhood) => (
                       <div
                         key={neighborhood.id}
@@ -216,8 +216,8 @@ export default function SolarRegulationPanel({
                 {/* Neighborhood Detail */}
                 {selectedNeighborhood && (
                   <>
-                    <Separator className="my-4 bg-gray-800" />
-                    <div className="space-y-4">
+                    <Separator className="my-4 bg-gray-800 flex-shrink-0 -mx-6 px-6" />
+                    <div className="space-y-4 flex-shrink-0">
                       <Card className="p-4 bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
                         <div className="flex items-start justify-between mb-3">
                           <h4 className="font-semibold text-white">{selectedNeighborhood.name}</h4>
@@ -315,9 +315,9 @@ export default function SolarRegulationPanel({
               </TabsContent>
 
               {/* Tab 2: Similar Projects */}
-              <TabsContent value="projects" className="flex-1 flex flex-col overflow-hidden mt-0">
+              <TabsContent value="projects" className="flex-1 flex flex-col overflow-hidden mt-0 -mx-6 px-6">
                 <h3 className="text-sm font-semibold text-white mb-3 flex-shrink-0">Reference Projects</h3>
-                <ScrollArea className="flex-1 overflow-hidden">
+                <ScrollArea className="flex-1">
                   <div className="space-y-3 pr-4">
                     {REFERENCE_PROJECTS.map((project) => (
                       <Card key={project.id} className="p-4 bg-gray-800 border-gray-700">
@@ -341,8 +341,8 @@ export default function SolarRegulationPanel({
               </TabsContent>
 
               {/* Tab 3: Next Steps */}
-              <TabsContent value="next-steps" className="flex-1 flex flex-col overflow-hidden mt-0">
-                <ScrollArea className="flex-1 overflow-hidden">
+              <TabsContent value="next-steps" className="flex-1 flex flex-col overflow-hidden mt-0 -mx-6 px-6">
+                <ScrollArea className="flex-1">
                   <div className="space-y-4 pr-4">
                     {/* Primary Action */}
                     <Card className="p-4 bg-gradient-to-br from-amber-900/30 to-orange-900/30 border-amber-700">
