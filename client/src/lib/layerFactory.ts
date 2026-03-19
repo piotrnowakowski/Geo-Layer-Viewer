@@ -74,6 +74,72 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       });
     }
 
+    case "power_infrastructure": {
+      const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+      if (!geoJson?.features) return null;
+
+      const pointFeatures = geoJson.features.filter(
+        (f: any) => f.geometry?.type === "Point"
+      );
+      const lineFeatures = geoJson.features.filter(
+        (f: any) =>
+          f.geometry?.type === "LineString" || f.geometry?.type === "MultiLineString"
+      );
+
+      const group = L.layerGroup();
+
+      if (pointFeatures.length > 0) {
+        L.geoJSON({ type: "FeatureCollection", features: pointFeatures } as any, {
+          pointToLayer: (_feature: any, latlng: L.LatLng) => {
+            return L.circleMarker(latlng, {
+              radius: 5,
+              fillColor: "#eab308",
+              color: "#ca8a04",
+              weight: 1,
+              opacity: 0.9,
+              fillOpacity: 0.8,
+            });
+          },
+          onEachFeature: (feature: any, layer: L.Layer) => {
+            const p = feature.properties || {};
+            const name = p.name || p.nome || p.id || "Substation";
+            const type = p.type || p.tipo || p.obj_type || "substation";
+            const voltage = p.voltage || p.tensao ? ` ${p.voltage || p.tensao}` : "";
+            const html = `
+              <div style="font-family: system-ui; font-size: 11px;">
+                <strong>${name}</strong><br/>
+                <span style="color: #94a3b8;">${type}${voltage}</span>
+              </div>
+            `;
+            (layer as any).bindTooltip(html, { sticky: true });
+          },
+        }).addTo(group);
+      }
+
+      if (lineFeatures.length > 0) {
+        L.geoJSON({ type: "FeatureCollection", features: lineFeatures } as any, {
+          style: {
+            color: "#eab308",
+            weight: 2,
+            opacity: 0.8,
+          },
+          onEachFeature: (feature: any, layer: L.Layer) => {
+            const p = feature.properties || {};
+            const name = p.name || p.nome || p.id || "Transmission line";
+            const voltage = p.voltage || p.tensao ? ` (${p.voltage || p.tensao})` : "";
+            const html = `
+              <div style="font-family: system-ui; font-size: 11px;">
+                <strong>${name}</strong>${voltage}
+              </div>
+            `;
+            (layer as any).bindTooltip(html, { sticky: true });
+          },
+        }).addTo(group);
+      }
+
+      return group;
+    }
+
     case "solar_potential": {
       const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
       if (!geoJson?.features) return null;

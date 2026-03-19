@@ -24,6 +24,7 @@ import {
   Moon,
   Thermometer,
   TrendingUp,
+  Zap,
 } from "lucide-react";
 
 export type LayerSource = "geojson" | "tiles";
@@ -142,6 +143,7 @@ export const LAYER_CONFIGS: LayerConfig[] = [
   { id: "ibge_settlements",    name: "Informal Settlements",    icon: Home,     color: "#f43f5e", source: "geojson", group: "population", available: true,  hasValueTiles: true },
   { id: "transit_routes",      name: "Bus Routes",              icon: Bus,      color: "#06b6d4", source: "geojson", group: "population", available: true,  hasValueTiles: true },
   { id: "transit_stops",       name: "Bus Stops",               icon: MapPin,   color: "#14b8a6", source: "geojson", group: "population", available: true,  hasValueTiles: true },
+  { id: "power_infrastructure", name: "Power Infrastructure (MapBiomas)", icon: Zap, color: "#eab308", source: "geojson", group: "population", available: true, hasValueTiles: true },
   { id: "oef_exposure",        name: "Exposure Score",          icon: Users,    color: "#7b2cbf", source: "tiles",   group: "population", available: false },
 
   // ── OEF Catalog → Hydrology & Terrain ──────────────────────────────────────
