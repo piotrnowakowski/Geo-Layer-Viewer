@@ -7,14 +7,21 @@ import {
 const sampleDataCache = new Map<string, any>();
 
 const MUNICIPAL_BUILDINGS_GEOCODED_API_PATH = "/api/geospatial/municipal-buildings";
-const MUNICIPAL_BUILDINGS_SOLAR_SAMPLE_PATH =
-  "/sample-data/porto-alegre-google-solar-municipal-buildings.json";
+const MUNICIPAL_BUILDINGS_SOLAR_API_PATH = "/api/geospatial/municipal-solar";
 
 async function loadMunicipalBuildingsSolarData(): Promise<any> {
   const cacheKey = MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID;
   if (sampleDataCache.has(cacheKey)) return sampleDataCache.get(cacheKey);
 
-  const solarSource = await loadSampleData(MUNICIPAL_BUILDINGS_SOLAR_SAMPLE_PATH);
+  let solarSource: any;
+  try {
+    solarSource = await loadFromApi(
+      MUNICIPAL_BUILDINGS_SOLAR_API_PATH,
+      "municipal_buildings_solar_source"
+    );
+  } catch {
+    return null;
+  }
   if (!solarSource) return null;
 
   let geocodedSource = sampleDataCache.get("municipal_buildings_geocoded_source");
