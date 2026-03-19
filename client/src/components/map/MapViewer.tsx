@@ -3,12 +3,25 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { LAYER_CONFIGS, type LayerState } from "@/data/layer-configs";
 import { loadBoundaryData, loadLayerData } from "@/data/sample-data-loaders";
+import {
+  MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID,
+  type MunicipalBuildingsSolarPriorityTier,
+} from "@/data/municipal-buildings-solar";
 import { sampleRasterAtPoint, geometryCentroid, linestringMidpoint } from "@/lib/valueTileUtils";
 import { createLayerFromData } from "@/lib/layerFactory";
 import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
 import LegendPanel from "./LegendPanel";
 import ValueTooltip from "./ValueTooltip";
+
+const DEFAULT_MUNICIPAL_SOLAR_TIERS: Record<
+  MunicipalBuildingsSolarPriorityTier,
+  boolean
+> = {
+  high: true,
+  medium: true,
+  low: true,
+};
 
 export default function MapViewer() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +40,11 @@ export default function MapViewer() {
   );
 
   const [mapReady, setMapReady] = useState(false);
+  const [municipalSolarVisibleTiers, setMunicipalSolarVisibleTiers] = useState(
+    DEFAULT_MUNICIPAL_SOLAR_TIERS
+  );
+  const [selectedMunicipalSolarFeature, setSelectedMunicipalSolarFeature] =
+    useState<any | null>(null);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -137,6 +155,10 @@ export default function MapViewer() {
           map.removeLayer(existingLayer);
           layerRefsMap.current.delete(layerId);
         }
+        if (layerId === MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID) {
+          setMunicipalSolarVisibleTiers(DEFAULT_MUNICIPAL_SOLAR_TIERS);
+          setSelectedMunicipalSolarFeature(null);
+        }
         setLayers((prev) =>
           prev.map((l) => (l.id === layerId ? { ...l, enabled: false } : l))
         );
@@ -166,6 +188,38 @@ export default function MapViewer() {
           }
         } catch (err) {
           console.error(`Postprocessed layer ${layerId} failed:`, err);
+          setLayers((prev) =>
+            prev.map((l) => (l.id === layerId ? { ...l, loading: false } : l))
+          );
+        }
+        return;
+      }
+
+      if (layerId === MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID) {
+        setLayers((prev) =>
+          prev.map((l) => (l.id === layerId ? { ...l, loading: true } : l))
+        );
+
+        try {
+          const data = await loadLayerData(layerId);
+          if (!data) {
+            setLayers((prev) =>
+              prev.map((l) => (l.id === layerId ? { ...l, loading: false } : l))
+            );
+            return;
+          }
+
+          setMunicipalSolarVisibleTiers(DEFAULT_MUNICIPAL_SOLAR_TIERS);
+          setSelectedMunicipalSolarFeature(null);
+          setLayers((prev) =>
+            prev.map((l) =>
+              l.id === layerId
+                ? { ...l, enabled: true, loaded: true, loading: false, data }
+                : l
+            )
+          );
+        } catch (error) {
+          console.error(`Failed to load layer ${layerId}:`, error);
           setLayers((prev) =>
             prev.map((l) => (l.id === layerId ? { ...l, loading: false } : l))
           );
@@ -245,6 +299,87 @@ export default function MapViewer() {
     },
     [layers]
   );
+
+  const municipalSolarLayerState =
+    layers.find((layer) => layer.id === MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID) ?? null;
+  const municipalSolarSelectedBuildingId =
+    selectedMunicipalSolarFeature?.properties?.municipalBuildingId ?? null;
+
+  const toggleMunicipalSolarTier = useCallback(
+    (tier: MunicipalBuildingsSolarPriorityTier) => {
+      setMunicipalSolarVisibleTiers((prev) => ({
+        ...prev,
+        [tier]: !prev[tier],
+      }));
+    },
+    []
+  );
+
+  useEffect(() => {
+    const tier = selectedMunicipalSolarFeature?.properties?.priorityTier;
+    if (
+      tier &&
+      typeof tier === "string" &&
+      tier in municipalSolarVisibleTiers &&
+      !municipalSolarVisibleTiers[tier as MunicipalBuildingsSolarPriorityTier]
+    ) {
+      setSelectedMunicipalSolarFeature(null);
+    }
+  }, [municipalSolarVisibleTiers, selectedMunicipalSolarFeature]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const existingLayer = layerRefsMap.current.get(MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID);
+    if (!municipalSolarLayerState?.enabled || !municipalSolarLayerState.data) {
+      if (existingLayer) {
+        map.removeLayer(existingLayer);
+        layerRefsMap.current.delete(MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID);
+      }
+      return;
+    }
+
+    if (existingLayer) {
+      map.removeLayer(existingLayer);
+      layerRefsMap.current.delete(MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID);
+    }
+
+    const visibleTierSet = new Set(
+      Object.entries(municipalSolarVisibleTiers)
+        .filter(([, enabled]) => enabled)
+        .map(([tier]) => tier)
+    );
+
+    const layer = createLayerFromData(
+      MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID,
+      municipalSolarLayerState.data,
+      {
+        municipalSolarVisibleTiers: visibleTierSet,
+        selectedMunicipalSolarBuildingId: municipalSolarSelectedBuildingId,
+        onMunicipalSolarFeatureSelect: (feature) =>
+          setSelectedMunicipalSolarFeature(feature),
+      }
+    );
+
+    if (!layer) return;
+
+    layer.addTo(map);
+    layerRefsMap.current.set(MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID, layer);
+
+    return () => {
+      const currentLayer = layerRefsMap.current.get(MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID);
+      if (currentLayer === layer) {
+        map.removeLayer(layer);
+        layerRefsMap.current.delete(MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID);
+      }
+    };
+  }, [
+    municipalSolarLayerState?.enabled,
+    municipalSolarLayerState?.data,
+    municipalSolarSelectedBuildingId,
+    municipalSolarVisibleTiers,
+  ]);
 
   // Builds a Leaflet layer by filtering vector features against a raster threshold.
   // Runs entirely client-side: loads the source GeoJSON, samples the value tile at
@@ -367,7 +502,20 @@ export default function MapViewer() {
 
         <ValueTooltip mapRef={mapRef} layers={layers} mapReady={mapReady} />
         <EvidenceDrawer layers={layers} onToggleLayer={toggleLayer} />
-        <LegendPanel layers={layers} />
+        <LegendPanel
+          layers={layers}
+          municipalSolarPanel={
+            municipalSolarLayerState?.enabled && municipalSolarLayerState.data
+              ? {
+                  data: municipalSolarLayerState.data,
+                  visibleTiers: municipalSolarVisibleTiers,
+                  onToggleTier: toggleMunicipalSolarTier,
+                  selectedFeature: selectedMunicipalSolarFeature,
+                  onClearSelectedFeature: () => setSelectedMunicipalSolarFeature(null),
+                }
+              : null
+          }
+        />
 
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-[2000]">

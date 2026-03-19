@@ -1,45 +1,40 @@
 import {
-  buildMunicipalSolarPriorityLayers,
-  isMunicipalSolarPriorityLayerId,
-  MUNICIPAL_SOLAR_PRIORITY_LAYER_IDS,
-} from "@/data/google-solar-municipal";
+  buildMunicipalBuildingsSolarLayerData,
+  isMunicipalBuildingsSolarLayerId,
+  MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID,
+} from "@/data/municipal-buildings-solar";
 
 const sampleDataCache = new Map<string, any>();
 
-const GOOGLE_SOLAR_MUNICIPAL_SAMPLE_PATH =
+const MUNICIPAL_BUILDINGS_GEOCODED_API_PATH = "/api/geospatial/municipal-buildings";
+const MUNICIPAL_BUILDINGS_SOLAR_SAMPLE_PATH =
   "/sample-data/porto-alegre-google-solar-municipal-buildings.json";
-const GOOGLE_SOLAR_MUNICIPAL_API_PATH =
-  "/api/geospatial/google-solar-municipal-buildings";
 
-async function loadMunicipalSolarPriorityData(layerId: string): Promise<any> {
-  if (sampleDataCache.has(layerId)) return sampleDataCache.get(layerId);
+async function loadMunicipalBuildingsSolarData(): Promise<any> {
+  const cacheKey = MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID;
+  if (sampleDataCache.has(cacheKey)) return sampleDataCache.get(cacheKey);
 
-  const sourceCacheKey = "google_solar_municipal_source";
-  let sourceData = sampleDataCache.get(sourceCacheKey);
+  const solarSource = await loadSampleData(MUNICIPAL_BUILDINGS_SOLAR_SAMPLE_PATH);
+  if (!solarSource) return null;
 
-  if (!sourceData) {
-    sourceData = await loadSampleData(GOOGLE_SOLAR_MUNICIPAL_SAMPLE_PATH);
-    if (!sourceData) {
-      try {
-        sourceData = await loadFromApi(
-          GOOGLE_SOLAR_MUNICIPAL_API_PATH,
-          sourceCacheKey
-        );
-      } catch {
-        return null;
-      }
+  let geocodedSource = sampleDataCache.get("municipal_buildings_geocoded_source");
+  if (!geocodedSource) {
+    try {
+      geocodedSource = await loadFromApi(
+        MUNICIPAL_BUILDINGS_GEOCODED_API_PATH,
+        "municipal_buildings_geocoded_source"
+      );
+    } catch {
+      geocodedSource = null;
     }
-
-    if (!sourceData) return null;
-    sampleDataCache.set(sourceCacheKey, sourceData);
   }
 
-  const tieredLayers = buildMunicipalSolarPriorityLayers(sourceData);
-  for (const priorityLayerId of MUNICIPAL_SOLAR_PRIORITY_LAYER_IDS) {
-    sampleDataCache.set(priorityLayerId, tieredLayers[priorityLayerId]);
-  }
-
-  return sampleDataCache.get(layerId) ?? null;
+  const layerData = buildMunicipalBuildingsSolarLayerData(
+    geocodedSource,
+    solarSource
+  );
+  sampleDataCache.set(cacheKey, layerData);
+  return layerData;
 }
 
 async function loadFromApi(apiPath: string, cacheKey: string): Promise<any> {
@@ -77,8 +72,8 @@ export async function loadBoundaryData(): Promise<any> {
 }
 
 export async function loadLayerData(layerId: string): Promise<any> {
-  if (isMunicipalSolarPriorityLayerId(layerId)) {
-    return loadMunicipalSolarPriorityData(layerId);
+  if (isMunicipalBuildingsSolarLayerId(layerId)) {
+    return loadMunicipalBuildingsSolarData();
   }
 
   const samplePaths: Record<string, string> = {

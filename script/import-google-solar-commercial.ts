@@ -15,8 +15,11 @@ const DEFAULT_INPUT_FILE = "data/building_type/obm_porto_alegre_buildings_commer
 const DEFAULT_OUTPUT_FILE =
   "client/public/sample-data/porto-alegre-google-solar-commercial-buildings.json";
 const DEFAULT_NEIGHBOURHOODS_FILE = "data/iptu/poa_iptu_neighbourhoods.geojson";
+const DEFAULT_CACHE_FILE = "data/building_type/.cache/porto-alegre-google-solar-commercial-cache.json";
 const API_ENDPOINT = "https://solar.googleapis.com/v1/buildingInsights:findClosest";
 const REQUEST_DELAY_MS = 150;
+const DEFAULT_CONCURRENCY = 4;
+const CACHE_FLUSH_INTERVAL = 10;
 const MAX_RETRIES = 4;
 
 interface GoogleMoney {
@@ -128,11 +131,28 @@ interface ImportOptions {
   inputPath: string;
   outputPath: string;
   neighbourhoodsPath: string;
+  cachePath: string;
   limit: number | null;
   offset: number;
   seedOnly: boolean;
+  concurrency: number;
+  delayMs: number;
   neighbourhoodFilters: string[];
   listNeighbourhoods: boolean;
+}
+
+interface SolarResponseCacheEntry {
+  latitude: number;
+  longitude: number;
+  cachedAt: string;
+  response: GoogleBuildingInsightsResponse;
+}
+
+interface SolarResponseCacheFile {
+  source: string;
+  updatedAt: string;
+  entryCount: number;
+  entries: Record<string, SolarResponseCacheEntry>;
 }
 
 interface UnmatchedRow {
@@ -177,9 +197,12 @@ function parseArgs(argv: string[]): ImportOptions {
   let inputPath = DEFAULT_INPUT_FILE;
   let outputPath = DEFAULT_OUTPUT_FILE;
   let neighbourhoodsPath = DEFAULT_NEIGHBOURHOODS_FILE;
+  let cachePath = DEFAULT_CACHE_FILE;
   let limit: number | null = null;
   let offset = 0;
   let seedOnly = false;
+  let concurrency = DEFAULT_CONCURRENCY;
+  let delayMs = REQUEST_DELAY_MS;
   const neighbourhoodFilters: string[] = [];
   let listNeighbourhoods = false;
 
@@ -197,6 +220,11 @@ function parseArgs(argv: string[]): ImportOptions {
     }
     if ((arg === "--neighbourhood-data" || arg === "--neighborhood-data") && argv[i + 1]) {
       neighbourhoodsPath = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg === "--cache" && argv[i + 1]) {
+      cachePath = argv[i + 1];
       i += 1;
       continue;
     }
@@ -220,6 +248,22 @@ function parseArgs(argv: string[]): ImportOptions {
       seedOnly = true;
       continue;
     }
+    if (arg === "--concurrency" && argv[i + 1]) {
+      const parsed = Number(argv[i + 1]);
+      if (Number.isFinite(parsed) && parsed >= 1) {
+        concurrency = Math.max(1, Math.floor(parsed));
+      }
+      i += 1;
+      continue;
+    }
+    if (arg === "--delay-ms" && argv[i + 1]) {
+      const parsed = Number(argv[i + 1]);
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        delayMs = Math.max(0, Math.floor(parsed));
+      }
+      i += 1;
+      continue;
+    }
     if (
       (arg === "--neighbourhood" || arg === "--neighborhood" || arg === "--bairro") &&
       argv[i + 1]
@@ -237,9 +281,12 @@ function parseArgs(argv: string[]): ImportOptions {
     inputPath: resolveCliPath(inputPath),
     outputPath: resolveCliPath(outputPath),
     neighbourhoodsPath: resolveCliPath(neighbourhoodsPath),
+    cachePath: resolveCliPath(cachePath),
     limit,
     offset,
     seedOnly,
+    concurrency,
+    delayMs,
     neighbourhoodFilters,
     listNeighbourhoods,
   };
@@ -534,6 +581,64 @@ function countRecordsByNeighbourhood(
   );
 }
 
+function createCoordinateCacheKey(latitude: number, longitude: number): string {
+  return `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+}
+
+function countUniqueCoordinateKeys(records: SelectedCommercialRecord[]): number {
+  return new Set(
+    records.map((record) => createCoordinateCacheKey(record.sourceLat, record.sourceLng))
+  ).size;
+}
+
+async function loadResponseCache(
+  cachePath: string
+): Promise<Record<string, SolarResponseCacheEntry>> {
+  try {
+    const raw = await fs.readFile(cachePath, "utf8");
+    const parsed = JSON.parse(raw) as Partial<SolarResponseCacheFile>;
+    return parsed.entries ?? {};
+  } catch {
+    return {};
+  }
+}
+
+async function persistResponseCache(
+  cachePath: string,
+  entries: Record<string, SolarResponseCacheEntry>
+): Promise<void> {
+  const payload: SolarResponseCacheFile = {
+    source: "google-solar-building-insights-cache",
+    updatedAt: new Date().toISOString(),
+    entryCount: Object.keys(entries).length,
+    entries,
+  };
+  await fs.mkdir(path.dirname(cachePath), { recursive: true });
+  await fs.writeFile(cachePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+async function runWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<void>
+): Promise<void> {
+  const workerCount = Math.max(1, Math.min(concurrency, items.length || 1));
+  let nextIndex = 0;
+
+  async function runWorker(): Promise<void> {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      if (currentIndex >= items.length) {
+        return;
+      }
+      await worker(items[currentIndex], currentIndex);
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
+}
+
 async function fetchBuildingInsights(
   apiKey: string,
   latitude: number,
@@ -775,41 +880,100 @@ async function main() {
       ? filteredRecords.slice(options.offset)
       : filteredRecords.slice(options.offset, options.offset + options.limit);
 
-  const features: CommercialSolarFeature[] = [];
-  const unmatched: UnmatchedRow[] = [];
+  const cacheEntries: Record<string, SolarResponseCacheEntry> = options.seedOnly
+    ? {}
+    : await loadResponseCache(options.cachePath);
+  const featureResults = new Array<CommercialSolarFeature | null>(selectedRecords.length).fill(null);
+  const unmatchedResults = new Array<UnmatchedRow | null>(selectedRecords.length).fill(null);
+  const inFlightByKey = new Map<string, Promise<GoogleBuildingInsightsResponse>>();
+  let cacheHitCount = 0;
+  let sharedRequestCount = 0;
+  let apiRequestCount = 0;
+  let dirtyCacheWrites = 0;
+  let cachePersistChain = Promise.resolve();
+
+  const flushCacheIfNeeded = async (force = false) => {
+    if (options.seedOnly) return;
+    if (!force && dirtyCacheWrites < CACHE_FLUSH_INTERVAL) return;
+
+    dirtyCacheWrites = 0;
+    cachePersistChain = cachePersistChain.then(() =>
+      persistResponseCache(options.cachePath, cacheEntries)
+    );
+    await cachePersistChain;
+  };
 
   console.log(
     `[solar-import] ${options.seedOnly ? "Preparing seed overlay" : "Importing Solar API data"} for ${selectedRecords.length} commercial buildings from ${options.inputPath}${
       selectedNeighbourhoods.length > 0
         ? ` in ${selectedNeighbourhoods.join(", ")}`
         : ""
-    }`
+    }${options.seedOnly ? "" : ` with concurrency=${options.concurrency}, delay=${options.delayMs}ms`}`
   );
 
-  for (let index = 0; index < selectedRecords.length; index += 1) {
-    const record = selectedRecords[index];
-
+  await runWithConcurrency(selectedRecords, options.seedOnly ? 1 : options.concurrency, async (record, index) => {
     if (options.seedOnly) {
-      features.push(buildSeedFeature(record));
+      featureResults[index] = buildSeedFeature(record);
       console.log(
         `[solar-import] ${index + 1}/${selectedRecords.length} SEEDED commercialBuildingId=${record.commercialBuildingId}`
       );
-      continue;
+      return;
     }
 
+    const cacheKey = createCoordinateCacheKey(record.sourceLat, record.sourceLng);
+    const cachedEntry = cacheEntries[cacheKey];
+    let shouldDelay = false;
+
     try {
-      const response = await fetchBuildingInsights(
+      if (cachedEntry) {
+        cacheHitCount += 1;
+        featureResults[index] = buildFeature(record, cachedEntry.response);
+        console.log(
+          `[solar-import] ${index + 1}/${selectedRecords.length} CACHED commercialBuildingId=${record.commercialBuildingId}`
+        );
+        return;
+      }
+
+      const existingPromise = inFlightByKey.get(cacheKey);
+      if (existingPromise) {
+        sharedRequestCount += 1;
+        const sharedResponse = await existingPromise;
+        featureResults[index] = buildFeature(record, sharedResponse);
+        console.log(
+          `[solar-import] ${index + 1}/${selectedRecords.length} SHARED commercialBuildingId=${record.commercialBuildingId}`
+        );
+        return;
+      }
+
+      const requestPromise = fetchBuildingInsights(
         apiKey as string,
         record.sourceLat,
         record.sourceLng
       );
-      features.push(buildFeature(record, response));
-      console.log(
-        `[solar-import] ${index + 1}/${selectedRecords.length} OK commercialBuildingId=${record.commercialBuildingId}`
-      );
+      shouldDelay = true;
+      inFlightByKey.set(cacheKey, requestPromise);
+
+      try {
+        const response = await requestPromise;
+        apiRequestCount += 1;
+        cacheEntries[cacheKey] = {
+          latitude: record.sourceLat,
+          longitude: record.sourceLng,
+          cachedAt: new Date().toISOString(),
+          response,
+        };
+        dirtyCacheWrites += 1;
+        featureResults[index] = buildFeature(record, response);
+        console.log(
+          `[solar-import] ${index + 1}/${selectedRecords.length} OK commercialBuildingId=${record.commercialBuildingId}`
+        );
+        await flushCacheIfNeeded();
+      } finally {
+        inFlightByKey.delete(cacheKey);
+      }
     } catch (error) {
       const httpError = error instanceof HttpError ? error : null;
-      unmatched.push({
+      unmatchedResults[index] = {
         commercialBuildingId: record.commercialBuildingId,
         sourceLat: record.sourceLat,
         sourceLng: record.sourceLng,
@@ -820,24 +984,30 @@ async function main() {
         errorCode: httpError?.status ?? null,
         errorStatus: httpError?.payload?.error?.status ?? null,
         errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
+      };
       console.warn(
         `[solar-import] ${index + 1}/${selectedRecords.length} FAILED commercialBuildingId=${record.commercialBuildingId}: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
+    } finally {
+      if (shouldDelay && options.delayMs > 0) {
+        await sleep(options.delayMs);
+      }
     }
+  });
 
-    if (index < selectedRecords.length - 1) {
-      await sleep(REQUEST_DELAY_MS);
-    }
-  }
+  await flushCacheIfNeeded(true);
+
+  const features = featureResults.filter((feature): feature is CommercialSolarFeature => feature !== null);
+  const unmatched = unmatchedResults.filter((row): row is UnmatchedRow => row !== null);
 
   const output = {
     source: options.seedOnly ? "google-solar-building-insights-seed" : "google-solar-building-insights",
     importedAt: new Date().toISOString(),
     inputFile: options.inputPath,
     neighbourhoodsFile: options.neighbourhoodsPath,
+    cacheFile: options.cachePath,
     mode: options.seedOnly ? "seed_only" : "enriched",
     estimatedInvestmentCostModel: getSolarInvestmentModelMetadata(),
     estimatedCarbonOffsetModel: getBrazilSolarCarbonModelMetadata(),
@@ -845,8 +1015,14 @@ async function main() {
     availableNeighbourhoodCount: availableNeighbourhoods.length,
     selectedNeighbourhoods,
     totalRecordsAfterNeighbourhoodFilter: filteredRecords.length,
+    selectedUniqueCoordinateCount: countUniqueCoordinateKeys(selectedRecords),
     selectedOffset: options.offset,
     selectedLimit: options.limit,
+    concurrency: options.seedOnly ? 1 : options.concurrency,
+    delayMs: options.delayMs,
+    cacheHitCount,
+    sharedRequestCount,
+    apiRequestCount,
     featureCount: features.length,
     unmatchedCount: unmatched.length,
     selectedRecordCountByNeighbourhood: countRecordsByNeighbourhood(selectedRecords),

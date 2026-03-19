@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, X } from "lucide-react";
 import type { LayerState } from "@/data/layer-configs";
-import { isMunicipalSolarPriorityLayerId } from "@/data/google-solar-municipal";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  BRAZIL_GRID_EMISSIONS_BASE_YEAR,
-  BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH,
-  BRAZIL_GRID_EMISSIONS_SOURCE_TITLE,
-} from "@shared/solarCarbon";
+  getMunicipalBuildingsSolarAnnualEnergyKwh,
+  getMunicipalBuildingsSolarCapacityKw,
+  getMunicipalBuildingsSolarCarbonOffsetKgPerYear,
+  getMunicipalBuildingsSolarDisplayName,
+  getMunicipalBuildingsSolarInvestmentAmount,
+  getMunicipalBuildingsSolarSavingsAmount,
+  isMunicipalBuildingsSolarLayerId,
+  MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS,
+  MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS,
+  MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_TIERS,
+  type MunicipalBuildingsSolarPriorityTier,
+} from "@/data/municipal-buildings-solar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── Legend type system ────────────────────────────────────────────────────────
 
@@ -68,9 +75,7 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
   // ── Solar (real PVOUT values from 99 neighbourhoods) ───────────────────────
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
-  google_solar_municipal_high: { kind: "point" },
-  google_solar_municipal_medium: { kind: "point" },
-  google_solar_municipal_low: { kind: "point" },
+  municipal_buildings_solar: { kind: "point" },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
   rivers:         { kind: "line"  },
@@ -204,11 +209,7 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   post_bus_heatwave: { kind: "line" },
 };
 
-const LEGEND_INFO: Record<string, LegendInfoItem[]> = {
-  google_solar_municipal_high: [],
-  google_solar_municipal_medium: [],
-  google_solar_municipal_low: [],
-};
+const LEGEND_INFO: Record<string, LegendInfoItem[]> = {};
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -281,36 +282,388 @@ function getLegendDef(layer: LayerState): LegendDef {
 }
 
 function getLegendInfoItems(layer: LayerState): LegendInfoItem[] {
-  if (isMunicipalSolarPriorityLayerId(layer.id)) {
+  if (isMunicipalBuildingsSolarLayerId(layer.id)) {
     const summary = layer.data?.priorityTierSummary;
-    const tier = layer.data?.priorityTier;
-    const tierBucket =
-      tier && summary && typeof summary === "object" ? summary[tier as "high" | "medium" | "low"] : null;
-    const countText =
-      tierBucket && typeof tierBucket.count === "number" && typeof summary?.totalBuildings === "number"
-        ? `${tierBucket.count.toLocaleString()} of ${summary.totalBuildings.toLocaleString()} buildings`
-        : "Tier count updates from the imported municipal solar dataset.";
-
     return [
       {
         label: "Tiering",
         description:
-          `${countText} in this overlay. ${summary?.scoreMethod ?? "Priority score averages normalized yearly DC generation and roof area, then ranks buildings descending into 20/40/40 tiers."}`,
+          summary?.scoreMethod ??
+          "Priority score averages normalized yearly generation and usable roof area, then ranks the portfolio into 20/40/40 tiers.",
       },
       {
-        label: "Generation",
+        label: "Source",
         description:
-          "Each popup includes maxYearlyEnergyDcKwh, the Google Building Insights yearly DC output for the selected maximum-panel layout, plus the roof area used in the priority score.",
+          "The layer uses the real municipal Google Building Insights export in client/public/sample-data/porto-alegre-google-solar-municipal-buildings.json, with geocoded source records added back for the two buildings missing solar enrichment.",
       },
       {
-        label: "Carbon",
+        label: "Portfolio",
         description:
-          `Annual carbon offset defaults to a Brazil screening estimate: maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh (${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE}, base year ${BRAZIL_GRID_EMISSIONS_BASE_YEAR}).`,
+          summary
+            ? `${summary.enrichedBuildings.toLocaleString()} buildings carry solar metrics and ${summary.geocodedOnlyBuildings.toLocaleString()} remain geocoded-only placeholders. Savings and payback are unavailable in the current export because the source dataset contains no financial analysis entries.`
+            : "The municipal solar portfolio combines solar-enriched buildings with geocoded-only placeholders when no solar enrichment is present.",
       },
     ];
   }
 
   return LEGEND_INFO[layer.id] ?? [];
+}
+
+interface MunicipalSolarPanelState {
+  data: any;
+  visibleTiers: Record<MunicipalBuildingsSolarPriorityTier, boolean>;
+  onToggleTier: (tier: MunicipalBuildingsSolarPriorityTier) => void;
+  selectedFeature: any | null;
+  onClearSelectedFeature: () => void;
+}
+
+function formatMetricNumber(value: number | null, digits = 0): string {
+  if (value === null || !Number.isFinite(value)) return "Unavailable";
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+}
+
+function formatMetricMoney(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) return "Unavailable";
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function getMunicipalSolarSelectedFeatures(
+  data: any,
+  visibleTiers: Record<MunicipalBuildingsSolarPriorityTier, boolean>
+): any[] {
+  const features = data?.geoJson?.features;
+  if (!Array.isArray(features)) return [];
+  return features.filter((feature: any) => {
+    const tier = feature?.properties?.priorityTier;
+    return (
+      typeof tier === "string" &&
+      tier in visibleTiers &&
+      visibleTiers[tier as MunicipalBuildingsSolarPriorityTier]
+    );
+  });
+}
+
+function summarizeMunicipalSolarMetrics(features: any[]) {
+  let capacityKw = 0;
+  let capacityCount = 0;
+  let investmentBrl = 0;
+  let investmentCount = 0;
+  let savingsBrl = 0;
+  let savingsCount = 0;
+  let carbonKg = 0;
+  let carbonCount = 0;
+
+  for (const feature of features) {
+    const properties = feature?.properties || {};
+    const capacityValue = getMunicipalBuildingsSolarCapacityKw(properties);
+    if (capacityValue !== null) {
+      capacityKw += capacityValue;
+      capacityCount += 1;
+    }
+
+    const investmentValue = getMunicipalBuildingsSolarInvestmentAmount(properties);
+    if (investmentValue !== null) {
+      investmentBrl += investmentValue;
+      investmentCount += 1;
+    }
+
+    const savingsValue = getMunicipalBuildingsSolarSavingsAmount(properties);
+    if (savingsValue !== null) {
+      savingsBrl += savingsValue;
+      savingsCount += 1;
+    }
+
+    const carbonValue = getMunicipalBuildingsSolarCarbonOffsetKgPerYear(properties);
+    if (carbonValue !== null) {
+      carbonKg += carbonValue;
+      carbonCount += 1;
+    }
+  }
+
+  return {
+    selectedCount: features.length,
+    capacityKw: capacityCount > 0 ? capacityKw : null,
+    capacityCount,
+    investmentBrl: investmentCount > 0 ? investmentBrl : null,
+    investmentCount,
+    savingsBrl: savingsCount > 0 ? savingsBrl : null,
+    savingsCount,
+    carbonKg: carbonCount > 0 ? carbonKg : null,
+    carbonCount,
+  };
+}
+
+function SummaryCard({
+  label,
+  value,
+  subtext,
+  accentColor,
+}: {
+  label: string;
+  value: string;
+  subtext: string;
+  accentColor: string;
+}) {
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-2.5">
+      <div className="flex items-center gap-1.5">
+        <div
+          className="h-1.5 w-1.5 rounded-full shrink-0"
+          style={{ backgroundColor: accentColor }}
+        />
+        <span className="text-[9px] uppercase tracking-wider text-zinc-500">{label}</span>
+      </div>
+      <div className="mt-1 text-sm font-semibold text-zinc-100 leading-tight">{value}</div>
+      <div className="mt-1 text-[9px] leading-snug text-zinc-500">{subtext}</div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <span className="text-[10px] text-zinc-500">{label}</span>
+      <span className="text-[10px] text-right text-zinc-200 leading-snug">{value}</span>
+    </div>
+  );
+}
+
+function MunicipalSolarPanel({
+  panel,
+}: {
+  panel: MunicipalSolarPanelState;
+}) {
+  const summary = panel.data?.priorityTierSummary;
+  const selectedFeatures = getMunicipalSolarSelectedFeatures(panel.data, panel.visibleTiers);
+  const metrics = summarizeMunicipalSolarMetrics(selectedFeatures);
+  const totalBuildings =
+    typeof summary?.totalBuildings === "number" ? summary.totalBuildings : selectedFeatures.length;
+  const selectedProperties = panel.selectedFeature?.properties || null;
+  const selectedTier =
+    selectedProperties?.priorityTier as MunicipalBuildingsSolarPriorityTier | undefined;
+  const selectedTierColor = selectedTier
+    ? MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS[selectedTier]
+    : "#f59e0b";
+  const selectedName = selectedProperties
+    ? getMunicipalBuildingsSolarDisplayName(selectedProperties)
+    : null;
+  const selectedCapacity = selectedProperties
+    ? getMunicipalBuildingsSolarCapacityKw(selectedProperties)
+    : null;
+  const selectedSavings = selectedProperties
+    ? getMunicipalBuildingsSolarSavingsAmount(selectedProperties)
+    : null;
+  const selectedPayback =
+    selectedProperties && typeof selectedProperties.paybackYears === "number"
+      ? `${formatMetricNumber(selectedProperties.paybackYears, 1)} years`
+      : "Unavailable";
+  const selectedEnergy = selectedProperties
+    ? getMunicipalBuildingsSolarAnnualEnergyKwh(selectedProperties)
+    : null;
+  const selectedInvestment = selectedProperties
+    ? getMunicipalBuildingsSolarInvestmentAmount(selectedProperties)
+    : null;
+  const selectedCarbon = selectedProperties
+    ? getMunicipalBuildingsSolarCarbonOffsetKgPerYear(selectedProperties)
+    : null;
+
+  return (
+    <div className="mt-3 border-t border-zinc-800/70 pt-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[11px] font-semibold tracking-wide text-zinc-200">
+            Municipal Building Solar
+          </div>
+          <div className="mt-1 text-[9px] leading-snug text-zinc-500">
+            {metrics.selectedCount.toLocaleString()} of {totalBuildings.toLocaleString()} buildings
+            visible across the selected tiers.
+          </div>
+        </div>
+        <div className="text-[9px] text-right text-zinc-500 max-w-[120px]">
+          Priority score = normalized yearly generation + roof area.
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-1.5">
+        {MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_TIERS.map((tier) => {
+          const bucket = summary?.[tier];
+          const enabled = panel.visibleTiers[tier];
+          return (
+            <button
+              key={tier}
+              type="button"
+              data-testid={`button-municipal-solar-tier-${tier}`}
+              onClick={() => panel.onToggleTier(tier)}
+              className="rounded-lg border px-2 py-2 text-left transition-colors"
+              style={{
+                borderColor: enabled
+                  ? `${MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS[tier]}88`
+                  : "rgba(63,63,70,0.9)",
+                backgroundColor: enabled
+                  ? `${MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS[tier]}16`
+                  : "rgba(24,24,27,0.7)",
+              }}
+            >
+              <div className="text-[10px] font-medium text-zinc-100">
+                {MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS[tier]}
+              </div>
+              <div className="mt-1 text-[9px] text-zinc-500">
+                {typeof bucket?.count === "number"
+                  ? `${bucket.count.toLocaleString()} buildings`
+                  : "No data"}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <SummaryCard
+          label="Total Capacity"
+          value={
+            metrics.capacityKw !== null
+              ? `${formatMetricNumber(metrics.capacityKw, 1)} kW`
+              : "Unavailable"
+          }
+          subtext={
+            metrics.capacityCount > 0
+              ? `${metrics.capacityCount.toLocaleString()} buildings with rooftop sizing`
+              : "No capacity values in the selected set"
+          }
+          accentColor="#f59e0b"
+        />
+        <SummaryCard
+          label="Investment"
+          value={formatMetricMoney(metrics.investmentBrl)}
+          subtext={
+            metrics.investmentCount > 0
+              ? `${metrics.investmentCount.toLocaleString()} buildings with cost estimates`
+              : "No investment estimates in the selected set"
+          }
+          accentColor="#38bdf8"
+        />
+        <SummaryCard
+          label="Savings"
+          value={formatMetricMoney(metrics.savingsBrl)}
+          subtext={
+            metrics.savingsCount > 0
+              ? `${metrics.savingsCount.toLocaleString()} buildings with savings estimates`
+              : "The source export does not include savings values"
+          }
+          accentColor="#22c55e"
+        />
+        <SummaryCard
+          label="CO2"
+          value={
+            metrics.carbonKg !== null
+              ? `${formatMetricNumber(metrics.carbonKg, 0)} kg/yr`
+              : "Unavailable"
+          }
+          subtext={
+            metrics.carbonCount > 0
+              ? `${metrics.carbonCount.toLocaleString()} buildings with annual carbon offset`
+              : "No carbon values in the selected set"
+          }
+          accentColor="#ef4444"
+        />
+      </div>
+
+      <div className="mt-2 text-[9px] leading-snug text-zinc-500">
+        Savings and payback stay unavailable because the current municipal Google Building
+        Insights export contains no financial analysis entries.
+      </div>
+
+      <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/70 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+              Building Detail
+            </div>
+            <div className="mt-1 text-[11px] font-semibold leading-snug text-zinc-100">
+              {selectedName ?? "Click a building on the map"}
+            </div>
+            {selectedProperties && (
+              <div className="mt-1 text-[9px] text-zinc-500">
+                {(selectedProperties.utilizedBy || "Municipal building") +
+                  (selectedTier ? ` · ${MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS[selectedTier]}` : "")}
+              </div>
+            )}
+          </div>
+          {selectedProperties && (
+            <button
+              type="button"
+              data-testid="button-municipal-solar-clear-selection"
+              onClick={panel.onClearSelectedFeature}
+              className="rounded-md border border-zinc-800 p-1 text-zinc-500 hover:text-zinc-200 transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        {selectedProperties ? (
+          <div className="mt-3 space-y-2">
+            <DetailRow
+              label="Score"
+              value={
+                typeof selectedProperties.priorityScore === "number"
+                  ? formatMetricNumber(selectedProperties.priorityScore, 1)
+                  : "Unavailable"
+              }
+            />
+            <DetailRow
+              label="Capacity"
+              value={
+                selectedCapacity !== null
+                  ? `${formatMetricNumber(selectedCapacity, 1)} kW DC`
+                  : "Unavailable"
+              }
+            />
+            <DetailRow
+              label="Generation"
+              value={
+                selectedEnergy !== null
+                  ? `${formatMetricNumber(selectedEnergy, 0)} kWh/year`
+                  : "Unavailable"
+              }
+            />
+            <DetailRow label="Investment" value={formatMetricMoney(selectedInvestment)} />
+            <DetailRow
+              label="CO2"
+              value={
+                selectedCarbon !== null
+                  ? `${formatMetricNumber(selectedCarbon, 0)} kg CO2e/year`
+                  : "Unavailable"
+              }
+            />
+            <DetailRow label="Savings" value={formatMetricMoney(selectedSavings)} />
+            <DetailRow label="Payback" value={selectedPayback} />
+            {selectedProperties.importStatus === "seed_only" && (
+              <div
+                className="rounded-md border border-zinc-800 px-2 py-1.5 text-[9px] leading-snug text-zinc-500"
+                style={{ borderColor: `${selectedTierColor}55` }}
+              >
+                This record only has geocoded municipal registry data. No Google Building
+                Insights solar metrics were returned for it in the current export.
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-3 text-[10px] leading-snug text-zinc-500">
+            Select a building marker to inspect its priority score, capacity, investment,
+            savings availability, and payback availability.
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function LayerRow({ layer }: { layer: LayerState }) {
@@ -355,9 +708,10 @@ function LayerRow({ layer }: { layer: LayerState }) {
 
 interface Props {
   layers: LayerState[];
+  municipalSolarPanel?: MunicipalSolarPanelState | null;
 }
 
-export default function LegendPanel({ layers }: Props) {
+export default function LegendPanel({ layers, municipalSolarPanel }: Props) {
   const [expanded, setExpanded] = useState(true);
 
   const activeLayers = layers.filter((l) => l.enabled && l.available);
@@ -385,6 +739,7 @@ export default function LegendPanel({ layers }: Props) {
               <LayerRow key={layer.id} layer={layer} />
             ))}
           </div>
+          {municipalSolarPanel && <MunicipalSolarPanel panel={municipalSolarPanel} />}
         </div>
       )}
 

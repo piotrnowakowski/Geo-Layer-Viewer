@@ -4,11 +4,13 @@ import {
   getPovertyColor,
 } from "@/data/colors";
 import {
-  getMunicipalSolarPriorityTier,
-  MUNICIPAL_SOLAR_PRIORITY_COLORS,
-  MUNICIPAL_SOLAR_PRIORITY_LABELS,
-} from "@/data/google-solar-municipal";
-import { estimateBrazilSolarCarbonOffsetKgPerYear } from "@shared/solarCarbon";
+  getMunicipalBuildingsSolarAnnualEnergyKwh,
+  getMunicipalBuildingsSolarCapacityKw,
+  getMunicipalBuildingsSolarDisplayName,
+  getMunicipalBuildingsSolarInvestmentAmount,
+  MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS,
+  MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS,
+} from "@/data/municipal-buildings-solar";
 
 function escapeHtml(value: unknown): string {
   return String(value ?? "")
@@ -31,49 +33,21 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
-function formatMoney(value: any): string {
-  if (!value || typeof value.amount !== "number" || !Number.isFinite(value.amount)) return "N/A";
-  const currencyCode = typeof value.currencyCode === "string" && value.currencyCode ? value.currencyCode : "USD";
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: currencyCode,
-    maximumFractionDigits: 0,
-  }).format(value.amount);
-}
-
-function hasMoneyAmount(value: any): boolean {
-  return Boolean(value) && typeof value.amount === "number" && Number.isFinite(value.amount);
-}
-
-function renderPopupRow(label: string, valueHtml: string | null): string {
-  if (!valueHtml) return "";
-  return `<span style="color: #94a3b8;">${label}:</span> ${valueHtml}<br/>`;
-}
-
-function selectMaxPanelConfig(configs: any): any {
-  if (!Array.isArray(configs) || configs.length === 0) return null;
-
-  return configs.reduce((best: any, current: any) => {
-    if (!best) return current;
-    const bestPanels = typeof best?.panelsCount === "number" ? best.panelsCount : -1;
-    const currentPanels = typeof current?.panelsCount === "number" ? current.panelsCount : -1;
-    if (currentPanels !== bestPanels) {
-      return currentPanels > bestPanels ? current : best;
-    }
-
-    const bestEnergy =
-      typeof best?.yearlyEnergyDcKwh === "number" ? best.yearlyEnergyDcKwh : -1;
-    const currentEnergy =
-      typeof current?.yearlyEnergyDcKwh === "number" ? current.yearlyEnergyDcKwh : -1;
-    return currentEnergy > bestEnergy ? current : best;
-  }, null);
-}
-
 function getGeoJson(data: any): any {
   return data?.type === "FeatureCollection" ? data : data?.geoJson || data;
 }
 
-export function createLayerFromData(layerId: string, data: any): L.Layer | null {
+interface CreateLayerOptions {
+  municipalSolarVisibleTiers?: Set<string>;
+  selectedMunicipalSolarBuildingId?: number | string | null;
+  onMunicipalSolarFeatureSelect?: (feature: any) => void;
+}
+
+export function createLayerFromData(
+  layerId: string,
+  data: any,
+  options: CreateLayerOptions = {}
+): L.Layer | null {
   if (!data) return null;
 
   switch (layerId) {
@@ -241,131 +215,88 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       });
     }
 
-    case "google_solar_municipal_high":
-    case "google_solar_municipal_medium":
-    case "google_solar_municipal_low": {
+    case "municipal_buildings_solar": {
       const geoJson = getGeoJson(data);
       if (!geoJson?.features) return null;
-      const tier = getMunicipalSolarPriorityTier(layerId);
-      if (!tier) return null;
-      const tierColor = MUNICIPAL_SOLAR_PRIORITY_COLORS[tier];
-      const tierLabel = MUNICIPAL_SOLAR_PRIORITY_LABELS[tier];
-      const radius = tier === "high" ? 7 : tier === "medium" ? 6 : 5;
+      const visibleTiers = options.municipalSolarVisibleTiers;
+      const selectedBuildingId = options.selectedMunicipalSolarBuildingId ?? null;
+      const filteredFeatures = Array.isArray(geoJson.features)
+        ? geoJson.features.filter((feature: any) => {
+            if (!visibleTiers || visibleTiers.size === 0) return true;
+            const tier = feature?.properties?.priorityTier;
+            return typeof tier === "string" && visibleTiers.has(tier);
+          })
+        : [];
 
-      return L.geoJSON(geoJson, {
-        pointToLayer: (_feature: any, latlng: L.LatLng) => {
-          return L.circleMarker(latlng, {
-            radius,
-            fillColor: tierColor,
-            color: "#fff7ed",
-            weight: 1.2,
-            opacity: 0.95,
-            fillOpacity: 0.9,
-          });
+      if (filteredFeatures.length === 0) {
+        return L.layerGroup();
+      }
+
+      return L.geoJSON(
+        {
+          ...geoJson,
+          features: filteredFeatures,
         },
-        onEachFeature: (feature: any, layer: L.Layer) => {
-          const p = feature.properties || {};
-          const department = p.utilizedBy || "Municipal building";
-          const sourceAddress = p.sourceAddress || p.matchedAddress || "Porto Alegre municipal building";
-          const importStatus = p.importStatus === "seed_only" ? "Seed overlay only" : "Solar API imported";
-          const importMessage = p.importMessage || null;
-          const solarPotential = p.googleBuildingInsights?.solarPotential || null;
-          const maxPanelConfig = selectMaxPanelConfig(solarPotential?.solarPanelConfigs);
-          const priorityScore = isFiniteNumber(p.priorityScore) ? p.priorityScore : null;
-          const priorityRank = isFiniteNumber(p.priorityRank) ? p.priorityRank : null;
-          const priorityRoofAreaM2 = isFiniteNumber(p.priorityRoofAreaM2)
-            ? p.priorityRoofAreaM2
-            : solarPotential?.maxArrayAreaMeters2 ?? null;
-          const priorityAnnualEnergyKwh = isFiniteNumber(p.priorityAnnualEnergyKwh)
-            ? p.priorityAnnualEnergyKwh
-            : null;
-          const totalBuildings = isFiniteNumber(data?.priorityTierSummary?.totalBuildings)
-            ? data.priorityTierSummary.totalBuildings
-            : null;
-          const maxArrayPanelsCount =
-            typeof p.maxArrayPanelsCount === "number"
-              ? p.maxArrayPanelsCount
-              : solarPotential?.maxArrayPanelsCount;
-          const panelCapacityWatts =
-            typeof p.panelCapacityWatts === "number"
-              ? p.panelCapacityWatts
-              : solarPotential?.panelCapacityWatts;
-          const maxYearlyEnergyDcKwh =
-            typeof p.maxYearlyEnergyDcKwh === "number"
-              ? p.maxYearlyEnergyDcKwh
-              : priorityAnnualEnergyKwh !== null
-                ? priorityAnnualEnergyKwh
-              : maxPanelConfig?.yearlyEnergyDcKwh;
-          const maxArrayCapacityKw =
-            typeof maxArrayPanelsCount === "number" && typeof panelCapacityWatts === "number"
-              ? (maxArrayPanelsCount * panelCapacityWatts) / 1000
-              : null;
-          const estimatedInstalledCostPerPanel = p.estimatedInstalledCostPerPanel;
-          const estimatedInvestmentCost = p.estimatedInvestmentCost;
-          const rawCarbonOffsetKgPerYear = isFiniteNumber(p.carbonOffsetKgPerYear)
-            ? p.carbonOffsetKgPerYear
-            : null;
-          const estimatedCarbonOffsetKgPerYear = isFiniteNumber(p.estimatedCarbonOffsetKgPerYear)
-            ? p.estimatedCarbonOffsetKgPerYear
-            : estimateBrazilSolarCarbonOffsetKgPerYear(maxYearlyEnergyDcKwh);
-          const carbonOffsetKgPerYear =
-            rawCarbonOffsetKgPerYear ?? estimatedCarbonOffsetKgPerYear;
-          const carbonOffsetLabel =
-            rawCarbonOffsetKgPerYear !== null ? "Carbon offset" : "Carbon offset (BR est.)";
-          const paybackHtml = isFiniteNumber(p.paybackYears)
-            ? `${escapeHtml(formatNumber(p.paybackYears, 1))} years`
-            : null;
-          const lifetimeSavingsHtml = hasMoneyAmount(p.lifetimeSavings)
-            ? escapeHtml(formatMoney(p.lifetimeSavings))
-            : null;
-          const gridExportHtml =
-            isFiniteNumber(p.percentageExportedToGrid) && isFiniteNumber(p.annualExportedToGridKwh)
-              ? `${escapeHtml(formatNumber(p.percentageExportedToGrid, 1))}% (${escapeHtml(formatNumber(p.annualExportedToGridKwh, 0))} kWh/year)`
-              : null;
-          const html = `
-            <div style="font-family: system-ui; font-size: 11px; line-height: 1.45; min-width: 250px;">
-              <strong style="font-size: 12px;">${escapeHtml(sourceAddress)}</strong><br/>
-              <span style="color: ${tierColor}; font-weight: 700;">${escapeHtml(`${tierLabel} priority`)}</span><br/>
-              <span style="color: #f59e0b; font-weight: 600;">${escapeHtml(department)}</span><br/>
-              <span style="color: #94a3b8;">Status:</span> ${escapeHtml(importStatus)}<br/>
-              ${renderPopupRow("Priority score", priorityScore !== null ? escapeHtml(formatNumber(priorityScore, 2)) : null)}
-              ${renderPopupRow(
-                "Portfolio rank",
-                priorityRank !== null && totalBuildings !== null
-                  ? `#${escapeHtml(formatNumber(priorityRank))} of ${escapeHtml(formatNumber(totalBuildings))}`
-                  : null
-              )}
-              ${renderPopupRow(
-                "Roof area",
-                priorityRoofAreaM2 !== null
-                  ? `${escapeHtml(formatNumber(priorityRoofAreaM2, 1))} m²`
-                  : null
-              )}
-              ${importMessage ? `<span style="color: #94a3b8;">Note:</span> ${escapeHtml(importMessage)}<br/>` : ""}
-              <span style="color: #94a3b8;">Sun hours:</span> ${escapeHtml(formatNumber(p.maxSunshineHoursPerYear))} hrs/year<br/>
-              <span style="color: #94a3b8;">Panels:</span> ${escapeHtml(formatNumber(maxArrayPanelsCount))}<br/>
-              <span style="color: #94a3b8;">System size:</span> ${escapeHtml(formatNumber(maxArrayCapacityKw, 1))} kW DC<br/>
-              <span style="color: #94a3b8;">Est. cost / panel:</span> ${escapeHtml(formatMoney(estimatedInstalledCostPerPanel))}<br/>
-              <span style="color: #94a3b8;">Est. investment:</span> ${escapeHtml(formatMoney(estimatedInvestmentCost))}<br/>
-              <span style="color: #94a3b8;">Generation:</span> ${escapeHtml(formatNumber(maxYearlyEnergyDcKwh, 0))} kWh/year<br/>
-              ${renderPopupRow(
-                carbonOffsetLabel,
-                carbonOffsetKgPerYear !== null
-                  ? `${escapeHtml(formatNumber(carbonOffsetKgPerYear, 0))} kg CO2e/year`
-                  : null
-              )}
-              ${renderPopupRow("Payback", paybackHtml)}
-              ${renderPopupRow("Lifetime savings", lifetimeSavingsHtml)}
-              ${renderPopupRow("Grid export", gridExportHtml)}
-            </div>
-          `;
-          (layer as any).bindTooltip(
-            escapeHtml(`${tierLabel} priority · ${sourceAddress}`),
-            { sticky: true }
-          );
-          (layer as any).bindPopup(html, { maxWidth: 320 });
-        },
-      });
+        {
+          pointToLayer: (feature: any, latlng: L.LatLng) => {
+            const properties = feature?.properties || {};
+            const tier = properties.priorityTier;
+            const tierColor =
+              MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS[
+                tier as keyof typeof MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS
+              ] ?? "#f59e0b";
+            const baseRadius = tier === "high" ? 7 : tier === "medium" ? 6 : 5;
+            const isSelected =
+              selectedBuildingId !== null &&
+              String(properties.municipalBuildingId ?? "") === String(selectedBuildingId);
+
+            const marker = L.circleMarker(latlng, {
+              radius: isSelected ? baseRadius + 1.5 : baseRadius,
+              fillColor: tierColor,
+              color: "#fff7ed",
+              weight: isSelected ? 2 : 1.2,
+              opacity: 0.95,
+              fillOpacity: isSelected ? 1 : 0.9,
+            });
+            if (isSelected) {
+              marker.on("add", () => marker.bringToFront());
+            }
+            return marker;
+          },
+          onEachFeature: (feature: any, layer: L.Layer) => {
+            const p = feature.properties || {};
+            const tier = p.priorityTier;
+            const tierLabel =
+              MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS[
+                tier as keyof typeof MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS
+              ] ?? "Priority";
+            const displayName = getMunicipalBuildingsSolarDisplayName(p);
+            const capacityKw = getMunicipalBuildingsSolarCapacityKw(p);
+            const annualEnergyKwh = getMunicipalBuildingsSolarAnnualEnergyKwh(p);
+            const investmentAmount = getMunicipalBuildingsSolarInvestmentAmount(p);
+            const summaryBits = [
+              isFiniteNumber(p.priorityScore)
+                ? `Score ${formatNumber(p.priorityScore, 1)}`
+                : null,
+              capacityKw !== null ? `${formatNumber(capacityKw, 1)} kW` : null,
+              annualEnergyKwh !== null ? `${formatNumber(annualEnergyKwh, 0)} kWh/yr` : null,
+              investmentAmount !== null ? `BRL ${formatNumber(investmentAmount, 0)}` : null,
+            ].filter(Boolean);
+
+            (layer as any).bindTooltip(
+              escapeHtml(
+                `${tierLabel} · ${displayName}${
+                  summaryBits.length > 0 ? ` · ${summaryBits.join(" · ")}` : ""
+                }`
+              ),
+              { sticky: true }
+            );
+            if (options.onMunicipalSolarFeatureSelect) {
+              layer.on("click", () => options.onMunicipalSolarFeatureSelect?.(feature));
+            }
+          },
+        }
+      );
     }
 
     case "ibge_census": {
