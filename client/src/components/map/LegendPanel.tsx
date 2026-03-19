@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { LayerState } from "@/data/layer-configs";
-import { GOOGLE_SOLAR_OUTPUT_COLORS } from "@/data/colors";
+import { isMunicipalSolarPriorityLayerId } from "@/data/google-solar-municipal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   BRAZIL_GRID_EMISSIONS_BASE_YEAR,
@@ -68,7 +68,9 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
   // ── Solar (real PVOUT values from 99 neighbourhoods) ───────────────────────
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
-  google_solar_municipal: { kind: "gradient", colors: GOOGLE_SOLAR_OUTPUT_COLORS, labels: ["Lower output", "Higher output"] },
+  google_solar_municipal_high: { kind: "point" },
+  google_solar_municipal_medium: { kind: "point" },
+  google_solar_municipal_low: { kind: "point" },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
   rivers:         { kind: "line"  },
@@ -203,23 +205,9 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 };
 
 const LEGEND_INFO: Record<string, LegendInfoItem[]> = {
-  google_solar_municipal: [
-    {
-      label: "Generation",
-      description:
-        "Marker color reflects maxYearlyEnergyDcKwh, the Google Building Insights yearly DC output for the selected maximum-panel layout.",
-    },
-    {
-      label: "Carbon",
-      description:
-        `Annual carbon offset defaults to a Brazil screening estimate: maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh (${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE}, base year ${BRAZIL_GRID_EMISSIONS_BASE_YEAR}).`,
-    },
-    {
-      label: "Finance",
-      description:
-        "Payback, lifetime savings, and grid-export rows are only shown when Google returns solarPotential.financialAnalyses for that building. Empty finance rows are hidden, but the raw API payload is still kept in the dataset.",
-    },
-  ],
+  google_solar_municipal_high: [],
+  google_solar_municipal_medium: [],
+  google_solar_municipal_low: [],
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -289,29 +277,45 @@ function InfoItems({ items }: { items: LegendInfoItem[] }) {
 }
 
 function getLegendDef(layer: LayerState): LegendDef {
-  if (layer.id === "google_solar_municipal") {
-    const geoJson = layer.data?.type === "FeatureCollection" ? layer.data : layer.data?.geoJson || layer.data;
-    const annualEnergyValues = geoJson?.features
-      ?.map((feature: any) => feature?.properties?.maxYearlyEnergyDcKwh)
-      ?.filter((value: any) => typeof value === "number" && Number.isFinite(value));
+  return LEGEND_DEF[layer.id] ?? { kind: "solid" };
+}
 
-    if (Array.isArray(annualEnergyValues) && annualEnergyValues.length > 0) {
-      const minValue = Math.min(...annualEnergyValues);
-      const maxValue = Math.max(...annualEnergyValues);
-      return {
-        kind: "gradient",
-        colors: GOOGLE_SOLAR_OUTPUT_COLORS,
-        labels: [`${Math.round(minValue).toLocaleString()} kWh/yr`, `${Math.round(maxValue).toLocaleString()} kWh/yr`],
-      };
-    }
+function getLegendInfoItems(layer: LayerState): LegendInfoItem[] {
+  if (isMunicipalSolarPriorityLayerId(layer.id)) {
+    const summary = layer.data?.priorityTierSummary;
+    const tier = layer.data?.priorityTier;
+    const tierBucket =
+      tier && summary && typeof summary === "object" ? summary[tier as "high" | "medium" | "low"] : null;
+    const countText =
+      tierBucket && typeof tierBucket.count === "number" && typeof summary?.totalBuildings === "number"
+        ? `${tierBucket.count.toLocaleString()} of ${summary.totalBuildings.toLocaleString()} buildings`
+        : "Tier count updates from the imported municipal solar dataset.";
+
+    return [
+      {
+        label: "Tiering",
+        description:
+          `${countText} in this overlay. ${summary?.scoreMethod ?? "Priority score averages normalized yearly DC generation and roof area, then ranks buildings descending into 20/40/40 tiers."}`,
+      },
+      {
+        label: "Generation",
+        description:
+          "Each popup includes maxYearlyEnergyDcKwh, the Google Building Insights yearly DC output for the selected maximum-panel layout, plus the roof area used in the priority score.",
+      },
+      {
+        label: "Carbon",
+        description:
+          `Annual carbon offset defaults to a Brazil screening estimate: maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh (${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE}, base year ${BRAZIL_GRID_EMISSIONS_BASE_YEAR}).`,
+      },
+    ];
   }
 
-  return LEGEND_DEF[layer.id] ?? { kind: "solid" };
+  return LEGEND_INFO[layer.id] ?? [];
 }
 
 function LayerRow({ layer }: { layer: LayerState }) {
   const def = getLegendDef(layer);
-  const infoItems = LEGEND_INFO[layer.id] ?? [];
+  const infoItems = getLegendInfoItems(layer);
   const { color } = layer;
   const hasValues = layer.hasValueTiles === true;
   const unit = layer.valueEncoding?.unit;

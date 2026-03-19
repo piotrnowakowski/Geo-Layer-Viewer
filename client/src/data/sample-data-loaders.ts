@@ -1,4 +1,46 @@
+import {
+  buildMunicipalSolarPriorityLayers,
+  isMunicipalSolarPriorityLayerId,
+  MUNICIPAL_SOLAR_PRIORITY_LAYER_IDS,
+} from "@/data/google-solar-municipal";
+
 const sampleDataCache = new Map<string, any>();
+
+const GOOGLE_SOLAR_MUNICIPAL_SAMPLE_PATH =
+  "/sample-data/porto-alegre-google-solar-municipal-buildings.json";
+const GOOGLE_SOLAR_MUNICIPAL_API_PATH =
+  "/api/geospatial/google-solar-municipal-buildings";
+
+async function loadMunicipalSolarPriorityData(layerId: string): Promise<any> {
+  if (sampleDataCache.has(layerId)) return sampleDataCache.get(layerId);
+
+  const sourceCacheKey = "google_solar_municipal_source";
+  let sourceData = sampleDataCache.get(sourceCacheKey);
+
+  if (!sourceData) {
+    sourceData = await loadSampleData(GOOGLE_SOLAR_MUNICIPAL_SAMPLE_PATH);
+    if (!sourceData) {
+      try {
+        sourceData = await loadFromApi(
+          GOOGLE_SOLAR_MUNICIPAL_API_PATH,
+          sourceCacheKey
+        );
+      } catch {
+        return null;
+      }
+    }
+
+    if (!sourceData) return null;
+    sampleDataCache.set(sourceCacheKey, sourceData);
+  }
+
+  const tieredLayers = buildMunicipalSolarPriorityLayers(sourceData);
+  for (const priorityLayerId of MUNICIPAL_SOLAR_PRIORITY_LAYER_IDS) {
+    sampleDataCache.set(priorityLayerId, tieredLayers[priorityLayerId]);
+  }
+
+  return sampleDataCache.get(layerId) ?? null;
+}
 
 async function loadFromApi(apiPath: string, cacheKey: string): Promise<any> {
   if (sampleDataCache.has(cacheKey)) return sampleDataCache.get(cacheKey);
@@ -35,6 +77,10 @@ export async function loadBoundaryData(): Promise<any> {
 }
 
 export async function loadLayerData(layerId: string): Promise<any> {
+  if (isMunicipalSolarPriorityLayerId(layerId)) {
+    return loadMunicipalSolarPriorityData(layerId);
+  }
+
   const samplePaths: Record<string, string> = {
     rivers: "/sample-data/porto-alegre-rivers.json",
     grid_flood: "/sample-data/porto-alegre-grid.json",
@@ -43,7 +89,6 @@ export async function loadLayerData(layerId: string): Promise<any> {
     transit_stops: "/sample-data/porto-alegre-transit-stops.json",
     transit_routes: "/sample-data/porto-alegre-transit-routes.json",
     solar_potential: "/sample-data/porto-alegre-solar-neighbourhoods.json",
-    google_solar_municipal: "/sample-data/porto-alegre-google-solar-municipal-buildings.json",
     ibge_census: "/sample-data/porto-alegre-ibge-indicators.json",
     ibge_settlements: "/sample-data/porto-alegre-ibge-settlements.json",
     sites_parks:      "/sample-data/porto-alegre-sites-parks.json",
@@ -68,7 +113,6 @@ export async function loadLayerData(layerId: string): Promise<any> {
     transit_stops: "/api/geospatial/transit-stops",
     transit_routes: "/api/geospatial/transit-routes",
     solar_potential: "/api/geospatial/solar-neighbourhoods",
-    google_solar_municipal: "/api/geospatial/google-solar-municipal-buildings",
     ibge_census: "/api/geospatial/ibge-indicators",
     ibge_settlements: "/api/geospatial/ibge-settlements",
     sites_parks:     "/api/geospatial/sites/sites_parks",

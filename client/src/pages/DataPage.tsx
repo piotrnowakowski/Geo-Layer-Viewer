@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { ArrowLeft, ExternalLink, FlaskConical, CheckCircle2 } from "lucide-react";
 import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS, type LayerConfig } from "@/data/layer-configs";
+import { isMunicipalSolarPriorityLayerId } from "@/data/google-solar-municipal";
 import {
   BRAZIL_GRID_EMISSIONS_BASE_YEAR,
   BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH,
@@ -59,6 +60,10 @@ const ACCESS_COPERNICUS_DEM =
   "using 'aws s3 cp --no-sign-request', then mosaic with gdalwarp. " +
   "Also accessible server-side via Google Earth Engine (asset: COPERNICUS/DEM/GLO30).";
 
+const MUNICIPAL_SOLAR_PRIORITY_METHODODOLOGY = `Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, preserves the raw Google response under googleBuildingInsights, normalizes popup-ready technical fields, derives estimated installed investment from a configurable piecewise-linear BRL cost-per-panel benchmark, derives estimatedCarbonOffsetKgPerYear as maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh using Brazil's ${BRAZIL_GRID_EMISSIONS_BASE_YEAR} electricity-generation average, and then ranks buildings by a composite priority score = 0.5 × normalized maxYearlyEnergyDcKwh + 0.5 × normalized maxArrayAreaMeters2.`;
+
+const MUNICIPAL_SOLAR_PRIORITY_NOTES = `Geometry is a building-center point, not a cadastral footprint. Tiering is recomputed from the imported Google dataset, so High = top 20%, Medium = next 40%, and Low = remaining 40% of ranked buildings. For these Porto Alegre buildings, Google does not currently return financialAnalyses, so payback, lifetime savings, and grid-export rows are hidden when null even though the raw API payload is still stored. estimatedCarbonOffsetKgPerYear is a local screening estimate based on Google yearly DC generation and ${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE} (${BRAZIL_GRID_EMISSIONS_SOURCE_URL}), which reports ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh for Brazil's ${BRAZIL_GRID_EMISSIONS_BASE_YEAR} electricity generation.`;
+
 function getRawDataAccess(layerId: string): string {
   if (layerId.startsWith("oef_chirps_")) return ACCESS_CHIRPS;
   if (layerId.startsWith("oef_era5_")) return ACCESS_ERA5;
@@ -105,8 +110,9 @@ function getInToolValueDescription(layer: LayerConfig): string {
       "GHI_mean (kWh/m²/year), DNI_mean. Hover any neighbourhood polygon to see the values. " +
       "Raw data also available via the Global Solar Atlas API.";
   }
-  if (layer.id === "google_solar_municipal") {
+  if (isMunicipalSolarPriorityLayerId(layer.id)) {
     return "Real values imported from Google Solar Building Insights and stored as GeoJSON point properties: " +
+      "priorityScore, priorityTier, priorityRank, priorityRoofAreaM2, priorityAnnualEnergyKwh, " +
       "maxSunshineHoursPerYear, maxYearlyEnergyDcKwh, estimatedCarbonOffsetKgPerYear, " +
       "estimatedInstalledCostPerPanel, estimatedInvestmentCost, imageryQuality, and imageryDate. " +
       "The raw Google response is preserved under googleBuildingInsights, while finance rows are " +
@@ -146,14 +152,34 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     notes: "PVOUT represents the specific yield of a grid-connected PV system with optimally tilted modules. Typical range in Porto Alegre: 3.8-4.3 kWh/kWp/day.",
   },
   {
-    id: "google_solar_municipal",
-    methodology: `Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, preserves the raw Google response under googleBuildingInsights, normalizes popup-ready technical fields, derives estimated installed investment from a configurable piecewise-linear BRL cost-per-panel benchmark, and derives estimatedCarbonOffsetKgPerYear as maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh using Brazil's ${BRAZIL_GRID_EMISSIONS_BASE_YEAR} electricity-generation average.`,
+    id: "google_solar_municipal_high",
+    methodology: MUNICIPAL_SOLAR_PRIORITY_METHODODOLOGY,
     source: "Google Solar API — Building Insights; local carbon estimate benchmarked to MME / EPE BEN 2025",
     sourceUrl: "https://developers.google.com/maps/documentation/solar/building-insights",
     date: "On-demand snapshot import from current Google Solar coverage",
     resolution: "Individual municipal building points (matched to Google building center)",
-    coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json",
-    notes: `Geometry is a building-center point, not a cadastral footprint. For these Porto Alegre buildings, Google does not currently return financialAnalyses, so payback, lifetime savings, and grid-export rows are hidden when null even though the raw API payload is still stored. estimatedCarbonOffsetKgPerYear is a local screening estimate based on Google yearly DC generation and ${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE} (${BRAZIL_GRID_EMISSIONS_SOURCE_URL}), which reports ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh for Brazil's ${BRAZIL_GRID_EMISSIONS_BASE_YEAR} electricity generation.`,
+    coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json — top 20% priority tier",
+    notes: `High tier only. ${MUNICIPAL_SOLAR_PRIORITY_NOTES}`,
+  },
+  {
+    id: "google_solar_municipal_medium",
+    methodology: MUNICIPAL_SOLAR_PRIORITY_METHODODOLOGY,
+    source: "Google Solar API — Building Insights; local carbon estimate benchmarked to MME / EPE BEN 2025",
+    sourceUrl: "https://developers.google.com/maps/documentation/solar/building-insights",
+    date: "On-demand snapshot import from current Google Solar coverage",
+    resolution: "Individual municipal building points (matched to Google building center)",
+    coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json — middle 40% priority tier",
+    notes: `Medium tier only. ${MUNICIPAL_SOLAR_PRIORITY_NOTES}`,
+  },
+  {
+    id: "google_solar_municipal_low",
+    methodology: MUNICIPAL_SOLAR_PRIORITY_METHODODOLOGY,
+    source: "Google Solar API — Building Insights; local carbon estimate benchmarked to MME / EPE BEN 2025",
+    sourceUrl: "https://developers.google.com/maps/documentation/solar/building-insights",
+    date: "On-demand snapshot import from current Google Solar coverage",
+    resolution: "Individual municipal building points (matched to Google building center)",
+    coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json — lower 40% priority tier",
+    notes: `Low tier only. ${MUNICIPAL_SOLAR_PRIORITY_NOTES}`,
   },
   {
     id: "transit_stops",

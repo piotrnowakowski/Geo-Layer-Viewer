@@ -1,9 +1,13 @@
 import L from "leaflet";
 import {
   getSolarColor,
-  getGoogleSolarOutputColor,
   getPovertyColor,
 } from "@/data/colors";
+import {
+  getMunicipalSolarPriorityTier,
+  MUNICIPAL_SOLAR_PRIORITY_COLORS,
+  MUNICIPAL_SOLAR_PRIORITY_LABELS,
+} from "@/data/google-solar-municipal";
 import { estimateBrazilSolarCarbonOffsetKgPerYear } from "@shared/solarCarbon";
 
 function escapeHtml(value: unknown): string {
@@ -237,27 +241,22 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       });
     }
 
-    case "google_solar_municipal": {
+    case "google_solar_municipal_high":
+    case "google_solar_municipal_medium":
+    case "google_solar_municipal_low": {
       const geoJson = getGeoJson(data);
       if (!geoJson?.features) return null;
-
-      const annualEnergyValues = geoJson.features
-        .map((feature: any) => feature?.properties?.maxYearlyEnergyDcKwh)
-        .filter((value: any) => typeof value === "number" && Number.isFinite(value));
-      const minAnnualEnergy = annualEnergyValues.length > 0 ? Math.min(...annualEnergyValues) : 0;
-      const maxAnnualEnergy = annualEnergyValues.length > 0 ? Math.max(...annualEnergyValues) : 0;
+      const tier = getMunicipalSolarPriorityTier(layerId);
+      if (!tier) return null;
+      const tierColor = MUNICIPAL_SOLAR_PRIORITY_COLORS[tier];
+      const tierLabel = MUNICIPAL_SOLAR_PRIORITY_LABELS[tier];
+      const radius = tier === "high" ? 7 : tier === "medium" ? 6 : 5;
 
       return L.geoJSON(geoJson, {
-        pointToLayer: (feature: any, latlng: L.LatLng) => {
-          const annualEnergy = feature?.properties?.maxYearlyEnergyDcKwh ?? minAnnualEnergy;
-          const color = getGoogleSolarOutputColor(
-            annualEnergy,
-            minAnnualEnergy,
-            maxAnnualEnergy
-          );
+        pointToLayer: (_feature: any, latlng: L.LatLng) => {
           return L.circleMarker(latlng, {
-            radius: 6,
-            fillColor: color,
+            radius,
+            fillColor: tierColor,
             color: "#fff7ed",
             weight: 1.2,
             opacity: 0.95,
@@ -272,6 +271,17 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
           const importMessage = p.importMessage || null;
           const solarPotential = p.googleBuildingInsights?.solarPotential || null;
           const maxPanelConfig = selectMaxPanelConfig(solarPotential?.solarPanelConfigs);
+          const priorityScore = isFiniteNumber(p.priorityScore) ? p.priorityScore : null;
+          const priorityRank = isFiniteNumber(p.priorityRank) ? p.priorityRank : null;
+          const priorityRoofAreaM2 = isFiniteNumber(p.priorityRoofAreaM2)
+            ? p.priorityRoofAreaM2
+            : solarPotential?.maxArrayAreaMeters2 ?? null;
+          const priorityAnnualEnergyKwh = isFiniteNumber(p.priorityAnnualEnergyKwh)
+            ? p.priorityAnnualEnergyKwh
+            : null;
+          const totalBuildings = isFiniteNumber(data?.priorityTierSummary?.totalBuildings)
+            ? data.priorityTierSummary.totalBuildings
+            : null;
           const maxArrayPanelsCount =
             typeof p.maxArrayPanelsCount === "number"
               ? p.maxArrayPanelsCount
@@ -283,6 +293,8 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
           const maxYearlyEnergyDcKwh =
             typeof p.maxYearlyEnergyDcKwh === "number"
               ? p.maxYearlyEnergyDcKwh
+              : priorityAnnualEnergyKwh !== null
+                ? priorityAnnualEnergyKwh
               : maxPanelConfig?.yearlyEnergyDcKwh;
           const maxArrayCapacityKw =
             typeof maxArrayPanelsCount === "number" && typeof panelCapacityWatts === "number"
@@ -313,8 +325,22 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
           const html = `
             <div style="font-family: system-ui; font-size: 11px; line-height: 1.45; min-width: 250px;">
               <strong style="font-size: 12px;">${escapeHtml(sourceAddress)}</strong><br/>
+              <span style="color: ${tierColor}; font-weight: 700;">${escapeHtml(`${tierLabel} priority`)}</span><br/>
               <span style="color: #f59e0b; font-weight: 600;">${escapeHtml(department)}</span><br/>
               <span style="color: #94a3b8;">Status:</span> ${escapeHtml(importStatus)}<br/>
+              ${renderPopupRow("Priority score", priorityScore !== null ? escapeHtml(formatNumber(priorityScore, 2)) : null)}
+              ${renderPopupRow(
+                "Portfolio rank",
+                priorityRank !== null && totalBuildings !== null
+                  ? `#${escapeHtml(formatNumber(priorityRank))} of ${escapeHtml(formatNumber(totalBuildings))}`
+                  : null
+              )}
+              ${renderPopupRow(
+                "Roof area",
+                priorityRoofAreaM2 !== null
+                  ? `${escapeHtml(formatNumber(priorityRoofAreaM2, 1))} m²`
+                  : null
+              )}
               ${importMessage ? `<span style="color: #94a3b8;">Note:</span> ${escapeHtml(importMessage)}<br/>` : ""}
               <span style="color: #94a3b8;">Sun hours:</span> ${escapeHtml(formatNumber(p.maxSunshineHoursPerYear))} hrs/year<br/>
               <span style="color: #94a3b8;">Panels:</span> ${escapeHtml(formatNumber(maxArrayPanelsCount))}<br/>
@@ -333,7 +359,10 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               ${renderPopupRow("Grid export", gridExportHtml)}
             </div>
           `;
-          (layer as any).bindTooltip(escapeHtml(sourceAddress), { sticky: true });
+          (layer as any).bindTooltip(
+            escapeHtml(`${tierLabel} priority · ${sourceAddress}`),
+            { sticky: true }
+          );
           (layer as any).bindPopup(html, { maxWidth: 320 });
         },
       });
