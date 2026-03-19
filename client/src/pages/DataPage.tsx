@@ -108,6 +108,11 @@ function getInToolValueDescription(layer: LayerConfig): string {
       "GHI_mean (kWh/m²/year), DNI_mean. Hover any neighbourhood polygon to see the values. " +
       "Raw data also available via the Global Solar Atlas API.";
   }
+  if (layer.id === "commercial_solar_neighbourhoods") {
+    return "Real values are stored directly on each neighbourhood polygon: commercial_building_count, " +
+      "total_yearly_energy_dc_kwh, total_investment_brl, and total_estimated_co2_savings_tonnes_per_year. " +
+      "The layer reflects the merged set of completed commercial Google Building Insights imports currently available locally.";
+  }
   if (isMunicipalBuildingsSolarLayerId(layer.id)) {
     return "Real values stored as GeoJSON point properties from the municipal solar export: " +
       "priorityScore, priorityTier, maxYearlyEnergyDcKwh, maxArrayPanelsCount, panelCapacityWatts, " +
@@ -155,6 +160,15 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     resolution: "Individual municipal building points with per-building solar properties",
     coverage: "1,340 municipal buildings in the portfolio — 1,338 with solar enrichment and 2 geocoded-only fallbacks",
     notes: MUNICIPAL_BUILDINGS_SOLAR_NOTES,
+  },
+  {
+    id: "commercial_solar_neighbourhoods",
+    methodology: "Commercial Solar by Neighbourhood merges the completed local Google Building Insights commercial building exports into one current building-level file, then aggregates those enriched buildings to IPTU neighbourhood polygons. Totals include summed maxYearlyEnergyDcKwh, summed estimatedInvestmentCost.amount, and summed estimatedCarbonOffsetKgPerYear for every completed neighbourhood import currently present in client/public/sample-data.",
+    source: "Local merged Google Building Insights commercial exports + IPTU neighbourhood polygons",
+    date: "Current local merge snapshot",
+    resolution: "Neighbourhood polygons with totals derived from completed commercial building point imports",
+    coverage: "Current merged subset of Porto Alegre neighbourhoods with completed commercial solar processing",
+    notes: "This is a progress overlay, not yet full-city coverage. As more commercial neighbourhood runs are completed and merged, the same file can be regenerated to expand the overlay.",
   },
   {
     id: "transit_stops",

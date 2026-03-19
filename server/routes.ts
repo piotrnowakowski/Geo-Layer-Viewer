@@ -28,6 +28,7 @@ import {
   listRasterDatasets,
   preloadRasterDatasets,
 } from "./services/cogSamplerService";
+import { buildMunicipalBuildingsSolarLayerData } from "../client/src/data/municipal-buildings-solar";
 import {
   loadLayer,
   listVectorLayers,
@@ -289,6 +290,23 @@ function loadMunicipalBuildingsGeoJson(): any {
   };
 }
 
+async function loadMunicipalSolarLayerData(): Promise<any> {
+  const geocodedSource = loadMunicipalBuildingsGeoJson();
+  let solarSource: any = null;
+
+  try {
+    solarSource = await fetchAndCacheS3GeoJSON("municipal-solar");
+  } catch (error) {
+    console.warn(
+      `[municipal-solar] Falling back to geocoded-only municipal registry: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  return buildMunicipalBuildingsSolarLayerData(geocodedSource, solarSource);
+}
+
 function getBoundsFromBoundary(boundary: any): GeoBounds {
   return {
     minLat: boundary.bbox[0],
@@ -541,7 +559,7 @@ export async function registerRoutes(
 
   app.get("/api/geospatial/municipal-solar", async (_req, res) => {
     try {
-      const data = await fetchAndCacheS3GeoJSON("municipal-solar");
+      const data = await loadMunicipalSolarLayerData();
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });

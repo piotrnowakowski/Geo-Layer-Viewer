@@ -1,5 +1,6 @@
 import L from "leaflet";
 import {
+  getGoogleSolarOutputColor,
   getSolarColor,
   getPovertyColor,
 } from "@/data/colors";
@@ -211,6 +212,65 @@ export function createLayerFromData(
             </div>
           `;
           (layer as any).bindTooltip(html, { sticky: true });
+        },
+      });
+    }
+
+    case "commercial_solar_neighbourhoods": {
+      const geoJson = getGeoJson(data);
+      if (!geoJson?.features) return null;
+
+      const features = Array.isArray(geoJson.features) ? geoJson.features : [];
+      const energyValues = features
+        .map((feature: any) => feature?.properties?.total_yearly_energy_dc_kwh)
+        .filter((value: unknown): value is number => isFiniteNumber(value));
+      const minEnergyKwh = energyValues.length > 0 ? Math.min(...energyValues) : 0;
+      const maxEnergyKwh = energyValues.length > 0 ? Math.max(...energyValues) : 0;
+
+      return L.geoJSON(geoJson, {
+        style: (feature: any) => {
+          const annualEnergyKwh = feature?.properties?.total_yearly_energy_dc_kwh ?? 0;
+          const color = getGoogleSolarOutputColor(
+            annualEnergyKwh,
+            minEnergyKwh,
+            maxEnergyKwh
+          );
+          return {
+            color: "#78350f",
+            fillColor: color,
+            fillOpacity: 0.68,
+            weight: 1.5,
+            opacity: 0.95,
+          };
+        },
+        onEachFeature: (feature: any, layer: L.Layer) => {
+          const p = feature.properties || {};
+          const name = p.neighbourhood_name || p.name || "Neighbourhood";
+          const buildings = formatNumber(p.commercial_building_count, 0);
+          const yearlyEnergyMwh = isFiniteNumber(p.total_yearly_energy_dc_mwh)
+            ? formatNumber(p.total_yearly_energy_dc_mwh, 1)
+            : "N/A";
+          const yearlyEnergyKwh = isFiniteNumber(p.total_yearly_energy_dc_kwh)
+            ? formatNumber(p.total_yearly_energy_dc_kwh, 0)
+            : "N/A";
+          const investmentBrl = isFiniteNumber(p.total_investment_brl)
+            ? formatNumber(p.total_investment_brl, 0)
+            : "N/A";
+          const co2Tonnes = isFiniteNumber(p.total_estimated_co2_savings_tonnes_per_year)
+            ? formatNumber(p.total_estimated_co2_savings_tonnes_per_year, 2)
+            : "N/A";
+          const html = `
+            <div style="font-family: system-ui; font-size: 11px; max-width: 240px;">
+              <strong>${escapeHtml(name)}</strong><br/>
+              Commercial buildings: ${buildings}<br/>
+              Total energy: ${yearlyEnergyMwh} MWh/year<br/>
+              Total energy: ${yearlyEnergyKwh} kWh/year<br/>
+              Total investment: BRL ${investmentBrl}<br/>
+              Total CO2 savings: ${co2Tonnes} t/year
+            </div>
+          `;
+          (layer as any).bindTooltip(html, { sticky: true });
+          (layer as any).bindPopup(html, { maxWidth: 260 });
         },
       });
     }

@@ -20,6 +20,8 @@ const API_ENDPOINT = "https://solar.googleapis.com/v1/buildingInsights:findClose
 const REQUEST_DELAY_MS = 150;
 const DEFAULT_CONCURRENCY = 4;
 const CACHE_FLUSH_INTERVAL = 10;
+const PARTIAL_SAVE_INTERVAL = 25;
+const PARTIAL_SAVE_MIN_MS = 15_000;
 const MAX_RETRIES = 4;
 
 interface GoogleMoney {
@@ -137,6 +139,9 @@ interface ImportOptions {
   seedOnly: boolean;
   concurrency: number;
   delayMs: number;
+  partialSaveEvery: number;
+  partialSaveMinMs: number;
+  includeRawGoogleBuildingInsights: boolean;
   neighbourhoodFilters: string[];
   listNeighbourhoods: boolean;
 }
@@ -203,6 +208,9 @@ function parseArgs(argv: string[]): ImportOptions {
   let seedOnly = false;
   let concurrency = DEFAULT_CONCURRENCY;
   let delayMs = REQUEST_DELAY_MS;
+  let partialSaveEvery = PARTIAL_SAVE_INTERVAL;
+  let partialSaveMinMs = PARTIAL_SAVE_MIN_MS;
+  let includeRawGoogleBuildingInsights = false;
   const neighbourhoodFilters: string[] = [];
   let listNeighbourhoods = false;
 
@@ -226,6 +234,13 @@ function parseArgs(argv: string[]): ImportOptions {
     if (arg === "--cache" && argv[i + 1]) {
       cachePath = argv[i + 1];
       i += 1;
+      continue;
+    }
+    if (
+      arg === "--include-raw-google-building-insights" ||
+      arg === "--include-raw-google-response"
+    ) {
+      includeRawGoogleBuildingInsights = true;
       continue;
     }
     if (arg === "--limit" && argv[i + 1]) {
@@ -264,6 +279,22 @@ function parseArgs(argv: string[]): ImportOptions {
       i += 1;
       continue;
     }
+    if (arg === "--partial-save-every" && argv[i + 1]) {
+      const parsed = Number(argv[i + 1]);
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        partialSaveEvery = Math.max(0, Math.floor(parsed));
+      }
+      i += 1;
+      continue;
+    }
+    if (arg === "--partial-save-min-ms" && argv[i + 1]) {
+      const parsed = Number(argv[i + 1]);
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        partialSaveMinMs = Math.max(0, Math.floor(parsed));
+      }
+      i += 1;
+      continue;
+    }
     if (
       (arg === "--neighbourhood" || arg === "--neighborhood" || arg === "--bairro") &&
       argv[i + 1]
@@ -287,6 +318,9 @@ function parseArgs(argv: string[]): ImportOptions {
     seedOnly,
     concurrency,
     delayMs,
+    partialSaveEvery,
+    partialSaveMinMs,
+    includeRawGoogleBuildingInsights,
     neighbourhoodFilters,
     listNeighbourhoods,
   };
@@ -614,7 +648,33 @@ async function persistResponseCache(
     entries,
   };
   await fs.mkdir(path.dirname(cachePath), { recursive: true });
-  await fs.writeFile(cachePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await fs.writeFile(cachePath, `${JSON.stringify(payload)}\n`, "utf8");
+}
+
+async function writeJsonFileAtomic(
+  filePath: string,
+  payload: unknown,
+  pretty = true
+): Promise<void> {
+  const tempPath = `${filePath}.tmp`;
+  const serialized = pretty
+    ? `${JSON.stringify(payload, null, 2)}\n`
+    : `${JSON.stringify(payload)}\n`;
+
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(tempPath, serialized, "utf8");
+
+  try {
+    await fs.rename(tempPath, filePath);
+  } catch (error) {
+    const code = error instanceof Error && "code" in error ? String((error as any).code) : "";
+    if (code === "EEXIST" || code === "EPERM") {
+      await fs.rm(filePath, { force: true });
+      await fs.rename(tempPath, filePath);
+      return;
+    }
+    throw error;
+  }
 }
 
 async function runWithConcurrency<T>(
@@ -711,7 +771,8 @@ function buildEstimatedInvestmentProperties(
 
 function buildFeature(
   record: SelectedCommercialRecord,
-  response: GoogleBuildingInsightsResponse
+  response: GoogleBuildingInsightsResponse,
+  includeRawGoogleBuildingInsights: boolean
 ): CommercialSolarFeature {
   const matchedCenterLat = response.center?.latitude ?? record.sourceLat;
   const matchedCenterLng = response.center?.longitude ?? record.sourceLng;
@@ -789,12 +850,15 @@ function buildFeature(
       carbonOffsetKgPerYear,
       estimatedCarbonOffsetKgPerYear,
       annualExportedToGridKwh,
-      googleBuildingInsights: response,
+      ...(includeRawGoogleBuildingInsights ? { googleBuildingInsights: response } : {}),
     },
   };
 }
 
-function buildSeedFeature(record: SelectedCommercialRecord): CommercialSolarFeature {
+function buildSeedFeature(
+  record: SelectedCommercialRecord,
+  includeRawGoogleBuildingInsights: boolean
+): CommercialSolarFeature {
   const estimatedInvestment = buildEstimatedInvestmentProperties(null, null);
 
   return {
@@ -841,7 +905,7 @@ function buildSeedFeature(record: SelectedCommercialRecord): CommercialSolarFeat
       carbonOffsetKgPerYear: null,
       estimatedCarbonOffsetKgPerYear: null,
       annualExportedToGridKwh: null,
-      googleBuildingInsights: null,
+      ...(includeRawGoogleBuildingInsights ? { googleBuildingInsights: null } : {}),
     },
   };
 }
@@ -890,17 +954,118 @@ async function main() {
   let sharedRequestCount = 0;
   let apiRequestCount = 0;
   let dirtyCacheWrites = 0;
+  let cachePersistenceDisabled = false;
+  let completedRecordCount = 0;
+  let lastPartialSaveCount = 0;
+  let lastPartialSaveAt = 0;
   let cachePersistChain = Promise.resolve();
+  let outputPersistChain = Promise.resolve();
+
+  const buildOutputPayload = (outputStatus: "partial" | "complete") => {
+    const features = featureResults.filter(
+      (feature): feature is CommercialSolarFeature => feature !== null
+    );
+    const unmatched = unmatchedResults.filter((row): row is UnmatchedRow => row !== null);
+
+    return {
+      source: options.seedOnly
+        ? "google-solar-building-insights-seed"
+        : "google-solar-building-insights",
+      importedAt: new Date().toISOString(),
+      outputStatus,
+      inputFile: options.inputPath,
+      neighbourhoodsFile: options.neighbourhoodsPath,
+      cacheFile: options.cachePath,
+      mode: options.seedOnly ? "seed_only" : "enriched",
+      estimatedInvestmentCostModel: getSolarInvestmentModelMetadata(),
+      estimatedCarbonOffsetModel: getBrazilSolarCarbonModelMetadata(),
+      totalInputFeatures: allRecords.length,
+      availableNeighbourhoodCount: availableNeighbourhoods.length,
+      selectedNeighbourhoods,
+      totalRecordsAfterNeighbourhoodFilter: filteredRecords.length,
+      selectedUniqueCoordinateCount: countUniqueCoordinateKeys(selectedRecords),
+      selectedOffset: options.offset,
+      selectedLimit: options.limit,
+      concurrency: options.seedOnly ? 1 : options.concurrency,
+      delayMs: options.delayMs,
+      partialSaveEvery: options.partialSaveEvery,
+      partialSaveMinMs: options.partialSaveMinMs,
+      includeRawGoogleBuildingInsights: options.includeRawGoogleBuildingInsights,
+      cacheHitCount,
+      sharedRequestCount,
+      apiRequestCount,
+      cachePersistenceDisabled,
+      processedRecordCount: completedRecordCount,
+      pendingRecordCount: Math.max(0, selectedRecords.length - completedRecordCount),
+      featureCount: features.length,
+      unmatchedCount: unmatched.length,
+      selectedRecordCountByNeighbourhood: countRecordsByNeighbourhood(selectedRecords),
+      featureCountByNeighbourhood: countRecordsByNeighbourhood(
+        features.map((feature) => ({
+          neighbourhoodName: feature.properties.neighbourhoodName ?? null,
+        }))
+      ),
+      geoJson: {
+        type: "FeatureCollection" as const,
+        features,
+      },
+      unmatched,
+    };
+  };
 
   const flushCacheIfNeeded = async (force = false) => {
-    if (options.seedOnly) return;
+    if (options.seedOnly || cachePersistenceDisabled) return;
     if (!force && dirtyCacheWrites < CACHE_FLUSH_INTERVAL) return;
+    if (dirtyCacheWrites === 0) return;
 
     dirtyCacheWrites = 0;
-    cachePersistChain = cachePersistChain.then(() =>
-      persistResponseCache(options.cachePath, cacheEntries)
-    );
+    cachePersistChain = cachePersistChain
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          await persistResponseCache(options.cachePath, cacheEntries);
+        } catch (error) {
+          cachePersistenceDisabled = true;
+          console.warn(
+            `[solar-import] Cache checkpoint disabled after write failure: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      });
     await cachePersistChain;
+  };
+
+  const flushPartialOutputIfNeeded = async () => {
+    if (options.partialSaveEvery <= 0 && options.partialSaveMinMs <= 0) return;
+
+    const now = Date.now();
+    const completedSinceLastSave = completedRecordCount - lastPartialSaveCount;
+    const reachedCountThreshold =
+      options.partialSaveEvery > 0 && completedSinceLastSave >= options.partialSaveEvery;
+    const reachedTimeThreshold =
+      options.partialSaveMinMs > 0 &&
+      completedSinceLastSave > 0 &&
+      now - lastPartialSaveAt >= options.partialSaveMinMs;
+
+    if (!reachedCountThreshold && !reachedTimeThreshold) return;
+
+    outputPersistChain = outputPersistChain
+      .catch(() => undefined)
+      .then(async () => {
+        const partialOutput = buildOutputPayload("partial");
+        if (partialOutput.processedRecordCount <= lastPartialSaveCount) return;
+
+        await writeJsonFileAtomic(options.outputPath, partialOutput, false);
+        lastPartialSaveCount = partialOutput.processedRecordCount;
+        lastPartialSaveAt = Date.now();
+
+        console.log(
+          `[solar-import] Checkpoint ${partialOutput.processedRecordCount}/${selectedRecords.length} -> ${options.outputPath}`
+        );
+      });
+
+    await outputPersistChain;
   };
 
   console.log(
@@ -912,22 +1077,30 @@ async function main() {
   );
 
   await runWithConcurrency(selectedRecords, options.seedOnly ? 1 : options.concurrency, async (record, index) => {
-    if (options.seedOnly) {
-      featureResults[index] = buildSeedFeature(record);
-      console.log(
-        `[solar-import] ${index + 1}/${selectedRecords.length} SEEDED commercialBuildingId=${record.commercialBuildingId}`
-      );
-      return;
-    }
-
-    const cacheKey = createCoordinateCacheKey(record.sourceLat, record.sourceLng);
-    const cachedEntry = cacheEntries[cacheKey];
     let shouldDelay = false;
 
     try {
+      if (options.seedOnly) {
+        featureResults[index] = buildSeedFeature(
+          record,
+          options.includeRawGoogleBuildingInsights
+        );
+        console.log(
+          `[solar-import] ${index + 1}/${selectedRecords.length} SEEDED commercialBuildingId=${record.commercialBuildingId}`
+        );
+        return;
+      }
+
+      const cacheKey = createCoordinateCacheKey(record.sourceLat, record.sourceLng);
+      const cachedEntry = cacheEntries[cacheKey];
+
       if (cachedEntry) {
         cacheHitCount += 1;
-        featureResults[index] = buildFeature(record, cachedEntry.response);
+        featureResults[index] = buildFeature(
+          record,
+          cachedEntry.response,
+          options.includeRawGoogleBuildingInsights
+        );
         console.log(
           `[solar-import] ${index + 1}/${selectedRecords.length} CACHED commercialBuildingId=${record.commercialBuildingId}`
         );
@@ -938,7 +1111,11 @@ async function main() {
       if (existingPromise) {
         sharedRequestCount += 1;
         const sharedResponse = await existingPromise;
-        featureResults[index] = buildFeature(record, sharedResponse);
+        featureResults[index] = buildFeature(
+          record,
+          sharedResponse,
+          options.includeRawGoogleBuildingInsights
+        );
         console.log(
           `[solar-import] ${index + 1}/${selectedRecords.length} SHARED commercialBuildingId=${record.commercialBuildingId}`
         );
@@ -963,7 +1140,11 @@ async function main() {
           response,
         };
         dirtyCacheWrites += 1;
-        featureResults[index] = buildFeature(record, response);
+        featureResults[index] = buildFeature(
+          record,
+          response,
+          options.includeRawGoogleBuildingInsights
+        );
         console.log(
           `[solar-import] ${index + 1}/${selectedRecords.length} OK commercialBuildingId=${record.commercialBuildingId}`
         );
@@ -994,55 +1175,19 @@ async function main() {
       if (shouldDelay && options.delayMs > 0) {
         await sleep(options.delayMs);
       }
+      completedRecordCount += 1;
+      await flushPartialOutputIfNeeded();
     }
   });
 
   await flushCacheIfNeeded(true);
+  await outputPersistChain.catch(() => undefined);
 
-  const features = featureResults.filter((feature): feature is CommercialSolarFeature => feature !== null);
-  const unmatched = unmatchedResults.filter((row): row is UnmatchedRow => row !== null);
-
-  const output = {
-    source: options.seedOnly ? "google-solar-building-insights-seed" : "google-solar-building-insights",
-    importedAt: new Date().toISOString(),
-    inputFile: options.inputPath,
-    neighbourhoodsFile: options.neighbourhoodsPath,
-    cacheFile: options.cachePath,
-    mode: options.seedOnly ? "seed_only" : "enriched",
-    estimatedInvestmentCostModel: getSolarInvestmentModelMetadata(),
-    estimatedCarbonOffsetModel: getBrazilSolarCarbonModelMetadata(),
-    totalInputFeatures: allRecords.length,
-    availableNeighbourhoodCount: availableNeighbourhoods.length,
-    selectedNeighbourhoods,
-    totalRecordsAfterNeighbourhoodFilter: filteredRecords.length,
-    selectedUniqueCoordinateCount: countUniqueCoordinateKeys(selectedRecords),
-    selectedOffset: options.offset,
-    selectedLimit: options.limit,
-    concurrency: options.seedOnly ? 1 : options.concurrency,
-    delayMs: options.delayMs,
-    cacheHitCount,
-    sharedRequestCount,
-    apiRequestCount,
-    featureCount: features.length,
-    unmatchedCount: unmatched.length,
-    selectedRecordCountByNeighbourhood: countRecordsByNeighbourhood(selectedRecords),
-    featureCountByNeighbourhood: countRecordsByNeighbourhood(
-      features.map((feature) => ({
-        neighbourhoodName: feature.properties.neighbourhoodName ?? null,
-      }))
-    ),
-    geoJson: {
-      type: "FeatureCollection" as const,
-      features,
-    },
-    unmatched,
-  };
-
-  await fs.mkdir(path.dirname(options.outputPath), { recursive: true });
-  await fs.writeFile(options.outputPath, `${JSON.stringify(output, null, 2)}\n`, "utf8");
+  const output = buildOutputPayload("complete");
+  await writeJsonFileAtomic(options.outputPath, output, true);
 
   console.log(
-    `[solar-import] Wrote ${features.length} features and ${unmatched.length} unmatched rows to ${options.outputPath}`
+    `[solar-import] Wrote ${output.featureCount} features and ${output.unmatchedCount} unmatched rows to ${options.outputPath}`
   );
 }
 

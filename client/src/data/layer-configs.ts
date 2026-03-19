@@ -324,6 +324,17 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     hasValueTiles: true,
     valueEncoding: { type: "numeric", unit: "Solar priority score (0-100)" },
   },
+  {
+    id: "commercial_solar_neighbourhoods",
+    name: "Commercial Solar by Neighbourhood",
+    icon: Sun,
+    color: "#d97706",
+    source: "geojson",
+    group: "buildings",
+    available: true,
+    hasValueTiles: true,
+    valueEncoding: { type: "numeric", unit: "Total yearly energy DC (kWh/year)" },
+  },
 
   // ── Derived → Climate Sites ──────────────────────────────────────────────────
   { id: "sites_parks",       name: "Parks & Green Space",           icon: Trees,         color: "#22c55e", source: "geojson", group: "sites", available: false, hasValueTiles: true },

@@ -74,6 +74,7 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
   // ── Solar (real PVOUT values from 99 neighbourhoods) ───────────────────────
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
+  commercial_solar_neighbourhoods: { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#d97706","#92400e"], labels: ["Lower total", "Higher total"] },
   municipal_buildings_solar: { kind: "point" },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
