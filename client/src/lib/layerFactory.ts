@@ -32,6 +32,25 @@ function formatMoney(value: any): string {
   }).format(value.amount);
 }
 
+function selectMaxPanelConfig(configs: any): any {
+  if (!Array.isArray(configs) || configs.length === 0) return null;
+
+  return configs.reduce((best: any, current: any) => {
+    if (!best) return current;
+    const bestPanels = typeof best?.panelsCount === "number" ? best.panelsCount : -1;
+    const currentPanels = typeof current?.panelsCount === "number" ? current.panelsCount : -1;
+    if (currentPanels !== bestPanels) {
+      return currentPanels > bestPanels ? current : best;
+    }
+
+    const bestEnergy =
+      typeof best?.yearlyEnergyDcKwh === "number" ? best.yearlyEnergyDcKwh : -1;
+    const currentEnergy =
+      typeof current?.yearlyEnergyDcKwh === "number" ? current.yearlyEnergyDcKwh : -1;
+    return currentEnergy > bestEnergy ? current : best;
+  }, null);
+}
+
 function getGeoJson(data: any): any {
   return data?.type === "FeatureCollection" ? data : data?.geoJson || data;
 }
@@ -167,6 +186,24 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
           const sourceAddress = p.sourceAddress || p.matchedAddress || "Porto Alegre municipal building";
           const importStatus = p.importStatus === "seed_only" ? "Seed overlay only" : "Solar API imported";
           const importMessage = p.importMessage || null;
+          const solarPotential = p.googleBuildingInsights?.solarPotential || null;
+          const maxPanelConfig = selectMaxPanelConfig(solarPotential?.solarPanelConfigs);
+          const maxArrayPanelsCount =
+            typeof p.maxArrayPanelsCount === "number"
+              ? p.maxArrayPanelsCount
+              : solarPotential?.maxArrayPanelsCount;
+          const panelCapacityWatts =
+            typeof p.panelCapacityWatts === "number"
+              ? p.panelCapacityWatts
+              : solarPotential?.panelCapacityWatts;
+          const maxYearlyEnergyDcKwh =
+            typeof p.maxYearlyEnergyDcKwh === "number"
+              ? p.maxYearlyEnergyDcKwh
+              : maxPanelConfig?.yearlyEnergyDcKwh;
+          const maxArrayCapacityKw =
+            typeof maxArrayPanelsCount === "number" && typeof panelCapacityWatts === "number"
+              ? (maxArrayPanelsCount * panelCapacityWatts) / 1000
+              : null;
           const html = `
             <div style="font-family: system-ui; font-size: 11px; line-height: 1.45; min-width: 250px;">
               <strong style="font-size: 12px;">${escapeHtml(sourceAddress)}</strong><br/>
@@ -174,6 +211,9 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               <span style="color: #94a3b8;">Status:</span> ${escapeHtml(importStatus)}<br/>
               ${importMessage ? `<span style="color: #94a3b8;">Note:</span> ${escapeHtml(importMessage)}<br/>` : ""}
               <span style="color: #94a3b8;">Sun hours:</span> ${escapeHtml(formatNumber(p.maxSunshineHoursPerYear))} hrs/year<br/>
+              <span style="color: #94a3b8;">Panels:</span> ${escapeHtml(formatNumber(maxArrayPanelsCount))}<br/>
+              <span style="color: #94a3b8;">System size:</span> ${escapeHtml(formatNumber(maxArrayCapacityKw, 1))} kW DC<br/>
+              <span style="color: #94a3b8;">Generation:</span> ${escapeHtml(formatNumber(maxYearlyEnergyDcKwh, 0))} kWh/year<br/>
               <span style="color: #94a3b8;">Carbon offset:</span> ${escapeHtml(formatNumber(p.carbonOffsetKgPerYear, 0))} kg CO2e/year<br/>
               <span style="color: #94a3b8;">Payback:</span> ${escapeHtml(formatNumber(p.paybackYears, 1))} years<br/>
               <span style="color: #94a3b8;">Lifetime savings:</span> ${escapeHtml(formatMoney(p.lifetimeSavings))}<br/>

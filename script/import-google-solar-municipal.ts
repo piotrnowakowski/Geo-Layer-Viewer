@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { loadDotEnvFile } from "../shared/loadDotEnv";
 
 const DEFAULT_INPUT_FILE = "pv_panel_data/Municipal_buildings.geocoded.json";
 const DEFAULT_OUTPUT_FILE =
@@ -60,6 +61,11 @@ interface GoogleFinancialAnalysis {
   panelConfigIndex?: number;
 }
 
+interface GoogleSolarPanelConfig {
+  panelsCount?: number;
+  yearlyEnergyDcKwh?: number;
+}
+
 interface GoogleBuildingInsightsResponse {
   name?: string;
   center?: {
@@ -83,10 +89,17 @@ interface GoogleBuildingInsightsResponse {
   imageryQuality?: string;
   solarPotential?: {
     maxSunshineHoursPerYear?: number;
+    maxArrayPanelsCount?: number;
+    maxArrayAreaMeters2?: number;
     carbonOffsetFactorKgPerMwh?: number;
+    panelCapacityWatts?: number;
+    panelHeightMeters?: number;
+    panelWidthMeters?: number;
+    panelLifetimeYears?: number;
     wholeRoofStats?: {
       sunshineQuantiles?: number[];
     };
+    solarPanelConfigs?: GoogleSolarPanelConfig[];
     financialAnalyses?: GoogleFinancialAnalysis[];
   };
 }
@@ -190,10 +203,19 @@ function parseArgs(argv: string[]): ImportOptions {
 
 function resolveCliPath(input: string): string {
   const trimmed = input.trim();
+  const cwd = process.cwd();
+  const repoName = path.win32.basename(cwd).toLowerCase();
+
   const wslMatch = trimmed.match(/^\/mnt\/([A-Za-z])\/(.*)$/);
   if (wslMatch) {
     const [, drive, rest] = wslMatch;
+    const normalizedWsl = path.posix.normalize(trimmed);
     if (process.platform === "win32") {
+      const marker = `/${repoName}/`;
+      const idx = normalizedWsl.toLowerCase().indexOf(marker);
+      if (idx !== -1) {
+        return normalizedWsl.slice(idx + marker.length).replace(/\//g, "\\");
+      }
       return path.win32.normalize(`${drive.toUpperCase()}:\\${rest.replace(/\//g, "\\")}`);
     }
     return path.posix.normalize(trimmed);
@@ -201,11 +223,20 @@ function resolveCliPath(input: string): string {
 
   const winMatch = trimmed.match(/^([A-Za-z]):[\\/](.*)$/);
   if (winMatch) {
-    if (process.platform === "win32") return path.normalize(trimmed);
+    if (process.platform === "win32") {
+      const normalizedWin = path.win32.normalize(trimmed);
+      const marker = `\\${repoName}\\`;
+      const idx = normalizedWin.toLowerCase().indexOf(marker);
+      if (idx !== -1) {
+        return normalizedWin.slice(idx + marker.length);
+      }
+      return normalizedWin;
+    }
     const [, drive, rest] = winMatch;
     return path.posix.normalize(`/mnt/${drive.toLowerCase()}/${rest.replace(/\\/g, "/")}`);
   }
   if (path.isAbsolute(trimmed)) return trimmed;
+  if (process.platform === "win32") return path.win32.normalize(trimmed);
   return path.resolve(process.cwd(), trimmed);
 }
 
@@ -289,6 +320,25 @@ function selectFinancialAnalysis(
   return analyses.find((analysis) => analysis.defaultBill) ?? analyses[0] ?? null;
 }
 
+function selectMaxPanelConfig(
+  configs: GoogleSolarPanelConfig[] | undefined
+): GoogleSolarPanelConfig | null {
+  if (!configs || configs.length === 0) return null;
+
+  return configs.reduce<GoogleSolarPanelConfig | null>((best, current) => {
+    if (!best) return current;
+    const bestPanels = best.panelsCount ?? -1;
+    const currentPanels = current.panelsCount ?? -1;
+    if (currentPanels !== bestPanels) {
+      return currentPanels > bestPanels ? current : best;
+    }
+
+    const bestEnergy = best.yearlyEnergyDcKwh ?? -1;
+    const currentEnergy = current.yearlyEnergyDcKwh ?? -1;
+    return currentEnergy > bestEnergy ? current : best;
+  }, null);
+}
+
 function buildFeature(
   record: GeocodedRecord,
   response: GoogleBuildingInsightsResponse
@@ -298,10 +348,14 @@ function buildFeature(
   const matchedCenterLat = response.center?.latitude ?? sourceLat;
   const matchedCenterLng = response.center?.longitude ?? sourceLng;
   const analysis = selectFinancialAnalysis(response.solarPotential?.financialAnalyses);
+  const maxPanelConfig = selectMaxPanelConfig(response.solarPotential?.solarPanelConfigs);
   const financialDetails = analysis?.financialDetails;
   const initialAcKwhPerYear = financialDetails?.initialAcKwhPerYear ?? null;
   const percentageExportedToGrid = financialDetails?.percentageExportedToGrid ?? null;
   const carbonOffsetFactorKgPerMwh = response.solarPotential?.carbonOffsetFactorKgPerMwh ?? null;
+  const maxArrayPanelsCount = response.solarPotential?.maxArrayPanelsCount ?? null;
+  const panelCapacityWatts = response.solarPotential?.panelCapacityWatts ?? null;
+  const maxYearlyEnergyDcKwh = maxPanelConfig?.yearlyEnergyDcKwh ?? null;
   const carbonOffsetKgPerYear =
     initialAcKwhPerYear !== null && carbonOffsetFactorKgPerMwh !== null
       ? (initialAcKwhPerYear / 1000) * carbonOffsetFactorKgPerMwh
@@ -337,6 +391,9 @@ function buildFeature(
       statisticalArea: response.statisticalArea ?? null,
       regionCode: response.regionCode ?? null,
       maxSunshineHoursPerYear: response.solarPotential?.maxSunshineHoursPerYear ?? null,
+      maxArrayPanelsCount,
+      panelCapacityWatts,
+      maxYearlyEnergyDcKwh,
       sunshineQuantiles: response.solarPotential?.wholeRoofStats?.sunshineQuantiles ?? [],
       carbonOffsetFactorKgPerMwh,
       importStatus: "enriched",
@@ -351,6 +408,7 @@ function buildFeature(
       lifetimeSavings: normalizeMoney(analysis?.cashPurchaseSavings?.savings?.savingsLifetime),
       carbonOffsetKgPerYear,
       annualExportedToGridKwh,
+      googleBuildingInsights: response,
     },
   };
 }
@@ -385,6 +443,9 @@ function buildSeedFeature(record: GeocodedRecord): MunicipalSolarFeature {
       statisticalArea: null,
       regionCode: null,
       maxSunshineHoursPerYear: null,
+      maxArrayPanelsCount: null,
+      panelCapacityWatts: null,
+      maxYearlyEnergyDcKwh: null,
       sunshineQuantiles: [],
       carbonOffsetFactorKgPerMwh: null,
       importStatus: "seed_only",
@@ -399,11 +460,13 @@ function buildSeedFeature(record: GeocodedRecord): MunicipalSolarFeature {
       lifetimeSavings: null,
       carbonOffsetKgPerYear: null,
       annualExportedToGridKwh: null,
+      googleBuildingInsights: null,
     },
   };
 }
 
 async function main() {
+  await loadDotEnvFile();
   const options = parseArgs(process.argv.slice(2));
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!options.seedOnly && !apiKey) {
