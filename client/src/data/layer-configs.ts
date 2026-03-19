@@ -309,6 +309,17 @@ export const LAYER_CONFIGS: LayerConfig[] = [
 
   // ── Derived → Base Layers ────────────────────────────────────────────────────
   { id: "rivers", name: "Rivers", icon: Droplets, color: "#06b6d4", source: "geojson", group: "base_layers", available: true, hasValueTiles: false },
+  {
+    id: "google_solar_municipal",
+    name: "Municipal Building Solar",
+    icon: Building2,
+    color: "#f59e0b",
+    source: "geojson",
+    group: "base_layers",
+    available: true,
+    hasValueTiles: true,
+    valueEncoding: { type: "numeric", unit: "sunshine hrs/year" },
+  },
 
   // ── Derived → Climate Sites ──────────────────────────────────────────────────
   { id: "sites_parks",       name: "Parks & Green Space",           icon: Trees,         color: "#22c55e", source: "geojson", group: "sites", available: true, hasValueTiles: true },

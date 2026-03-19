@@ -1,8 +1,40 @@
 import L from "leaflet";
 import {
   getSolarColor,
+  getGoogleSolarSunColor,
   getPovertyColor,
 } from "@/data/colors";
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function formatNumber(value: unknown, digits = 0): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "N/A";
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+}
+
+function formatMoney(value: any): string {
+  if (!value || typeof value.amount !== "number" || !Number.isFinite(value.amount)) return "N/A";
+  const currencyCode = typeof value.currencyCode === "string" && value.currencyCode ? value.currencyCode : "USD";
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  }).format(value.amount);
+}
+
+function getGeoJson(data: any): any {
+  return data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+}
 
 export function createLayerFromData(layerId: string, data: any): L.Layer | null {
   if (!data) return null;
@@ -75,7 +107,7 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
     }
 
     case "solar_potential": {
-      const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+      const geoJson = getGeoJson(data);
       if (!geoJson?.features) return null;
       return L.geoJSON(geoJson, {
         style: (feature: any) => {
@@ -106,8 +138,58 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       });
     }
 
+    case "google_solar_municipal": {
+      const geoJson = getGeoJson(data);
+      if (!geoJson?.features) return null;
+
+      const sunshineValues = geoJson.features
+        .map((feature: any) => feature?.properties?.maxSunshineHoursPerYear)
+        .filter((value: any) => typeof value === "number" && Number.isFinite(value));
+      const minSunshine = sunshineValues.length > 0 ? Math.min(...sunshineValues) : 0;
+      const maxSunshine = sunshineValues.length > 0 ? Math.max(...sunshineValues) : 0;
+
+      return L.geoJSON(geoJson, {
+        pointToLayer: (feature: any, latlng: L.LatLng) => {
+          const sunshine = feature?.properties?.maxSunshineHoursPerYear ?? minSunshine;
+          const color = getGoogleSolarSunColor(sunshine, minSunshine, maxSunshine);
+          return L.circleMarker(latlng, {
+            radius: 6,
+            fillColor: color,
+            color: "#fff7ed",
+            weight: 1.2,
+            opacity: 0.95,
+            fillOpacity: 0.9,
+          });
+        },
+        onEachFeature: (feature: any, layer: L.Layer) => {
+          const p = feature.properties || {};
+          const department = p.utilizedBy || "Municipal building";
+          const sourceAddress = p.sourceAddress || p.matchedAddress || "Porto Alegre municipal building";
+          const importStatus = p.importStatus === "seed_only" ? "Seed overlay only" : "Solar API imported";
+          const importMessage = p.importMessage || null;
+          const html = `
+            <div style="font-family: system-ui; font-size: 11px; line-height: 1.45; min-width: 250px;">
+              <strong style="font-size: 12px;">${escapeHtml(sourceAddress)}</strong><br/>
+              <span style="color: #f59e0b; font-weight: 600;">${escapeHtml(department)}</span><br/>
+              <span style="color: #94a3b8;">Status:</span> ${escapeHtml(importStatus)}<br/>
+              ${importMessage ? `<span style="color: #94a3b8;">Note:</span> ${escapeHtml(importMessage)}<br/>` : ""}
+              <span style="color: #94a3b8;">Sun hours:</span> ${escapeHtml(formatNumber(p.maxSunshineHoursPerYear))} hrs/year<br/>
+              <span style="color: #94a3b8;">Carbon offset:</span> ${escapeHtml(formatNumber(p.carbonOffsetKgPerYear, 0))} kg CO2e/year<br/>
+              <span style="color: #94a3b8;">Payback:</span> ${escapeHtml(formatNumber(p.paybackYears, 1))} years<br/>
+              <span style="color: #94a3b8;">Lifetime savings:</span> ${escapeHtml(formatMoney(p.lifetimeSavings))}<br/>
+              <span style="color: #94a3b8;">Grid export:</span> ${escapeHtml(formatNumber(p.percentageExportedToGrid, 1))}% (${escapeHtml(formatNumber(p.annualExportedToGridKwh, 0))} kWh/year)<br/>
+              <span style="color: #94a3b8;">Imagery:</span> ${escapeHtml(p.imageryQuality || "N/A")} · ${escapeHtml(p.imageryDate || "N/A")}<br/>
+              <span style="color: #94a3b8;">Match distance:</span> ${escapeHtml(formatNumber(p.matchDistanceMeters, 1))} m
+            </div>
+          `;
+          (layer as any).bindTooltip(escapeHtml(sourceAddress), { sticky: true });
+          (layer as any).bindPopup(html, { maxWidth: 320 });
+        },
+      });
+    }
+
     case "ibge_census": {
-      const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+      const geoJson = getGeoJson(data);
       if (!geoJson?.features) return null;
       return L.geoJSON(geoJson, {
         style: (feature: any) => {
@@ -147,7 +229,7 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
     }
 
     case "ibge_settlements": {
-      const geoJson = data?.type === "FeatureCollection" ? data : data?.geoJson || data;
+      const geoJson = getGeoJson(data);
       if (!geoJson?.features) return null;
       return L.geoJSON(geoJson, {
         style: {

@@ -396,6 +396,19 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/geospatial/google-solar-municipal-buildings", (_req, res) => {
+    const cacheFile = "porto-alegre-google-solar-municipal-buildings.json";
+    const cached = loadCachedData(cacheFile);
+    if (!cached) {
+      return res.status(404).json({
+        message:
+          "Google Solar municipal dataset not found. Run `npm run solar:import-municipal` first.",
+      });
+    }
+
+    res.json(cached);
+  });
+
   app.get("/api/geospatial/ibge-indicators", async (_req, res) => {
     try {
       const data = await fetchAndCacheS3GeoJSON("ibge-indicators");

@@ -1,0 +1,2920 @@
+{
+  "metadata": {
+    "generatedAt": "2026-03-19T10:10:49Z",
+    "inputPath": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/Municipal_buildings.xlsx",
+    "outputPath": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/Municipal_buildings.geocoded.json",
+    "cachePath": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/.cache/Municipal_buildings.geocode-cache.json",
+    "geocoder": "ArcGIS World Geocoding Service",
+    "delayMs": 50,
+    "totalRows": 1340,
+    "matchedRows": 1340,
+    "unmatchedRows": 0,
+    "sourceFile": "/mnt/d/GitHub/Geo-Layer-Viewer/pv_panel_data/Municipal_buildings.geocoded.json",
+    "subsetOffset": 0,
+    "subsetCount": 100,
+    "sourceMatchedRows": 1340,
+    "generatedFor": "google-solar-test-batch"
+  },
+  "records": [
+    {
+      "item": 1,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua PROF ANTONIO D'AVILA",
+        "number": "211",
+        "neighborhood": "S\u00c9TIMO C\u00c9U",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PROF ANTONIO D'AVILA, 211, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.118759311109,
+        "longitude": -51.250333237793,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PROF ANTONIO D'AVILA, 211, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Professor Ant\u00f4nio D'\u00e1vila 211, Ipanema, Porto Alegre, Rio Grande do Sul, 91920-730, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.57,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91920-730"
+      }
+    },
+    {
+      "item": 2,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua NOSSA SENHORA APARECIDA",
+        "number": "370",
+        "neighborhood": "VILA CONCEI\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua NOSSA SENHORA APARECIDA, 370, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.120019930962,
+        "longitude": -51.256637274649,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua NOSSA SENHORA APARECIDA, 370, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Nossa Senhora Aparecida 370, Vila Concei\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91920-690, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Concei\u00e7\u00e3o",
+        "postalCode": "91920-690"
+      }
+    },
+    {
+      "item": 3,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua PROF EMILIO MEYER",
+        "number": "317/431",
+        "neighborhood": "VILA CONCEI\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PROF EMILIO MEYER, 317/431, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.11962882878,
+        "longitude": -51.254283653048,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PROF EMILIO MEYER, 317, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Professor Em\u00edlio Meyer 317, Vila Concei\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91920-740, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Concei\u00e7\u00e3o",
+        "postalCode": "91920-740"
+      }
+    },
+    {
+      "item": 4,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua DAVID FRANCISCO MAURICIO",
+        "number": "1/45",
+        "neighborhood": "S\u00c9TIMO C\u00c9U",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DAVID FRANCISCO MAURICIO, 1/45, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.124681094013,
+        "longitude": -51.24010630126,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DAVID FRANCISCO MAURICIO, 1, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua David Francisco Maur\u00edcio 1, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-220, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.64,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-220"
+      }
+    },
+    {
+      "item": 5,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida CEL MARCOS",
+        "number": "2111",
+        "neighborhood": "JARDIM ISABEL",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida CEL MARCOS, 2111, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.127328936432,
+        "longitude": -51.243560557867,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida CEL MARCOS, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Cel Marcos, Porto Alegre, Rio Grande do Sul, 91787, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "",
+        "postalCode": "91787"
+      }
+    },
+    {
+      "item": 6,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida CEL MARCOS",
+        "number": "SN",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida CEL MARCOS, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.131763782383,
+        "longitude": -51.237966754837,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida CEL MARCOS, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Cel Marcos, Ipanema, Porto Alegre, Rio Grande do Sul, 91751, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91751"
+      }
+    },
+    {
+      "item": 7,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua PARADISO BIACCHI",
+        "number": "61/207",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PARADISO BIACCHI, 61/207, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.131652755461,
+        "longitude": -51.233794130548,
+        "precision": "area",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PARADISO BIACCHI, 61, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Paradiso Biacchi 61, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-610, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.9,
+        "addrType": "StreetAddressExt",
+        "district": "Ipanema",
+        "postalCode": "91760-610"
+      }
+    },
+    {
+      "item": 8,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida TRAMANDAI",
+        "number": "235/293",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida TRAMANDAI, 235/293, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.133364594543,
+        "longitude": -51.231277751275,
+        "precision": "area",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida TRAMANDAI, 235, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Tramanda\u00ed 235, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-050, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.9,
+        "addrType": "StreetAddressExt",
+        "district": "Ipanema",
+        "postalCode": "91760-050"
+      }
+    },
+    {
+      "item": 9,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua DR ARNALDO DA SILVA FERREIRA",
+        "number": "10/90",
+        "neighborhood": "JARDIM ISABEL",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR ARNALDO DA SILVA FERREIRA, 10/90, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.127228470505,
+        "longitude": -51.231489341111,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR ARNALDO DA SILVA FERREIRA, 10, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Doutor Arnaldo da Silva Ferreira 10, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-240, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-240"
+      }
+    },
+    {
+      "item": 10,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua JIGORO KANO",
+        "number": "2/132",
+        "neighborhood": "JARDIM ISABEL",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JIGORO KANO, 2/132, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.127825772717,
+        "longitude": -51.233356991408,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JIGORO KANO, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Jigoro Kano, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-440, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91760-440"
+      }
+    },
+    {
+      "item": 11,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua JOSE KANAN ARANHA",
+        "number": "1/411",
+        "neighborhood": "JARDIM ISABEL",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JOSE KANAN ARANHA, 1/411, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.12620490083,
+        "longitude": -51.23957912947,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JOSE KANAN ARANHA, 1, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Jos\u00e9 Kanan Aranha 1, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-470, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-470"
+      }
+    },
+    {
+      "item": 12,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida ARLINDO PASQUALINI",
+        "number": "SN",
+        "neighborhood": "JARDIM ISABEL",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida ARLINDO PASQUALINI, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.127184925581,
+        "longitude": -51.231560859563,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida ARLINDO PASQUALINI, JARDIM ISABEL, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Arlindo Pasqualini, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-140, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91760-140"
+      }
+    },
+    {
+      "item": 13,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua PROF CARLOS DE PAULA COUTO",
+        "number": "320/954",
+        "neighborhood": "S\u00c9TIMO C\u00c9U",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PROF CARLOS DE PAULA COUTO, 320/954, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.123595329589,
+        "longitude": -51.230464412137,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PROF CARLOS DE PAULA COUTO, 320, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Professor Carlos de Paula Couto 320, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-660, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.68,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-660"
+      }
+    },
+    {
+      "item": 14,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua DR PEREIRA NETO",
+        "number": "246",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR PEREIRA NETO, 246, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.111679680738,
+        "longitude": -51.249970210894,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR PEREIRA NETO, 246, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Doutor Pereira Neto 246, Tristeza, Porto Alegre, Rio Grande do Sul, 91920-530, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91920-530"
+      }
+    },
+    {
+      "item": 15,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua LANDEL DE MOURA",
+        "number": "821/873",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua LANDEL DE MOURA, 821/873, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.115167000385,
+        "longitude": -51.252367036069,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua LANDEL DE MOURA, 821, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Landel De Moura 821, Porto Alegre, Rio Grande Do Sul, 91920-150, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91920-150"
+      }
+    },
+    {
+      "item": 16,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR PEREIRA NETO",
+        "number": "10",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR PEREIRA NETO, 10, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.110416149764,
+        "longitude": -51.247447740963,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR PEREIRA NETO, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Pereira Neto, Tristeza, Porto Alegre, Rio Grande do Sul, 91920, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Tristeza",
+        "postalCode": "91920"
+      }
+    },
+    {
+      "item": 17,
+      "utilizedBy": "SMAP;SMAMUS",
+      "address": {
+        "street": "Rua PROF XAVIER SIMOES",
+        "number": "SN",
+        "neighborhood": "S\u00c9TIMO C\u00c9U",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PROF XAVIER SIMOES, S\u00c9TIMO C\u00c9U, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.120858304723,
+        "longitude": -51.251615707561,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PROF XAVIER SIMOES, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Professor Xavier Sim\u00f5es, Ipanema, Porto Alegre, Rio Grande do Sul, 91920-790, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91920-790"
+      }
+    },
+    {
+      "item": 18,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua PROF EMILIO MEYER",
+        "number": "71/111",
+        "neighborhood": "VILA CONCEI\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PROF EMILIO MEYER, 71/111, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.119018833871,
+        "longitude": -51.255008126293,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PROF EMILIO MEYER, 71, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Professor Em\u00edlio Meyer 71, Vila Concei\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91920-740, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Concei\u00e7\u00e3o",
+        "postalCode": "91920-740"
+      }
+    },
+    {
+      "item": 19,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua SIMAO BOLIVAR",
+        "number": "2/74",
+        "neighborhood": "VILA CONCEI\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua SIMAO BOLIVAR, 2/74, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.118082416789,
+        "longitude": -51.255220645202,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua SIMAO BOLIVAR, 2, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Sim\u00e3o Bol\u00edvar 2, Vila Concei\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91920-800, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Concei\u00e7\u00e3o",
+        "postalCode": "91920-800"
+      }
+    },
+    {
+      "item": 20,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua LANDEL DE MOURA",
+        "number": "391",
+        "neighborhood": "VILA CONCEI\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua LANDEL DE MOURA, 391, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.116704723345,
+        "longitude": -51.256171643595,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua LANDEL DE MOURA, 391, VILA CONCEI\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Landel de Moura 391, Tristeza, Porto Alegre, Rio Grande do Sul, 91920-150, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91920-150"
+      }
+    },
+    {
+      "item": 21,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida WENCESLAU ESCOBAR",
+        "number": "2721",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida WENCESLAU ESCOBAR, 2721, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.116349945034,
+        "longitude": -51.25380228912,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida WENCESLAU ESCOBAR, 2721, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Wenceslau Escobar 2721, Tristeza, Porto Alegre, Rio Grande do Sul, 91900-225, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91900-225"
+      }
+    },
+    {
+      "item": 22,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua ALMIRANTE INDIO DO BRASIL",
+        "number": "2/46",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ALMIRANTE INDIO DO BRASIL, 2/46, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.113545990107,
+        "longitude": -51.25686464619,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ALMIRANTE INDIO DO BRASIL, 2, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Almirante \u00cdndio do Brasil 2, Tristeza, Porto Alegre, Rio Grande do Sul, 91920, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91920"
+      }
+    },
+    {
+      "item": 23,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida GUAIBA",
+        "number": "4921",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida GUAIBA, 4921, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.099982428176,
+        "longitude": -51.265005295532,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida GUAIBA, 4921, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Gua\u00edba 4921, Vila Assun\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91900-420, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Vila Assun\u00e7\u00e3o",
+        "postalCode": "91900-420"
+      }
+    },
+    {
+      "item": 24,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR BARCELOS",
+        "number": "280/302",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR BARCELOS, 280/302, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.106069450316,
+        "longitude": -51.24916397559,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR BARCELOS, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Barcelos, Tristeza, Porto Alegre, Rio Grande do Sul, 91910-270, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Tristeza",
+        "postalCode": "91910-270"
+      }
+    },
+    {
+      "item": 25,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Praca COMENDADOR SOUZA GOMES",
+        "number": "2/92",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Praca COMENDADOR SOUZA GOMES, 2/92, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.111027418021,
+        "longitude": -51.255578232852,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Praca COMENDADOR SOUZA GOMES, 2, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Pra\u00e7a Comendador Souza Gomes, Tristeza, Porto Alegre, Rio Grande do Sul, 91900-250, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 99.46,
+        "addrType": "StreetName",
+        "district": "Tristeza",
+        "postalCode": "91900-250"
+      }
+    },
+    {
+      "item": 26,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "Avenida WENCESLAU ESCOBAR",
+        "number": "2560",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida WENCESLAU ESCOBAR, 2560, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.116153110647,
+        "longitude": -51.253755840114,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida WENCESLAU ESCOBAR, 2560, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Wenceslau Escobar 2560, Tristeza, Porto Alegre, Rio Grande do Sul, 91900-000, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91900-000"
+      }
+    },
+    {
+      "item": 27,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua CAETE",
+        "number": "150",
+        "neighborhood": "VILA ASSUN\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua CAETE, 150, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103970998947,
+        "longitude": -51.258825963018,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua CAETE, 150, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Caete 150, Porto Alegre, Rio Grande Do Sul, 91900-180, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91900-180"
+      }
+    },
+    {
+      "item": 28,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua PARAGUA",
+        "number": "18/70",
+        "neighborhood": "VILA ASSUN\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PARAGUA, 18/70, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.102853950264,
+        "longitude": -51.258066832856,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PARAGUA, 18, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Paragu\u00e1 18, Vila Assun\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91900-470, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Assun\u00e7\u00e3o",
+        "postalCode": "91900-470"
+      }
+    },
+    {
+      "item": 29,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua GOITACAZ",
+        "number": "230/338",
+        "neighborhood": "VILA ASSUN\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua GOITACAZ, 230/338, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.101422365779,
+        "longitude": -51.264330646248,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua GOITACAZ, 230, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Goitacaz 230, Vila Assun\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91900-400, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Assun\u00e7\u00e3o",
+        "postalCode": "91900-400"
+      }
+    },
+    {
+      "item": 30,
+      "utilizedBy": "DMLU;SMAP",
+      "address": {
+        "street": "Rua COROADOS",
+        "number": "830",
+        "neighborhood": "VILA ASSUN\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua COROADOS, 830, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.099818981299,
+        "longitude": -51.25639495964,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua COROADOS, 830, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Coroados 830, Porto Alegre, Rio Grande Do Sul, 91900-580, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91900-580"
+      }
+    },
+    {
+      "item": 31,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua PARECI",
+        "number": "SN",
+        "neighborhood": "VILA ASSUN\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PARECI, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.100734880158,
+        "longitude": -51.254924605081,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PARECI, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Pareci, Vila Assun\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91900-660, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Vila Assun\u00e7\u00e3o",
+        "postalCode": "91900-660"
+      }
+    },
+    {
+      "item": 32,
+      "utilizedBy": "SMGOV",
+      "address": {
+        "street": "Avenida COPACABANA",
+        "number": "1134",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida COPACABANA, 1134, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.102946981836,
+        "longitude": -51.249775016331,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida COPACABANA, 1134, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Copacabana 1134, Porto Alegre, Rio Grande Do Sul, 91900-050, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91900-050"
+      }
+    },
+    {
+      "item": 33,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua CHAVANTES",
+        "number": "418/568",
+        "neighborhood": "VILA ASSUN\u00c7\u00c3O",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua CHAVANTES, 418/568, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103695437503,
+        "longitude": -51.255541955082,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua CHAVANTES, 418, VILA ASSUN\u00c7\u00c3O, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Chavantes 418, Vila Assun\u00e7\u00e3o, Porto Alegre, Rio Grande do Sul, 91900-030, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Assun\u00e7\u00e3o",
+        "postalCode": "91900-030"
+      }
+    },
+    {
+      "item": 34,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida COPACABANA",
+        "number": "870",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida COPACABANA, 870, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103525335137,
+        "longitude": -51.251430914489,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida COPACABANA, 870, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Copacabana 870, Tristeza, Porto Alegre, Rio Grande do Sul, 91900-050, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91900-050"
+      }
+    },
+    {
+      "item": 35,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR BARCELOS",
+        "number": "1203",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR BARCELOS, 1203, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103254647234,
+        "longitude": -51.241169986464,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR BARCELOS, 1203, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Barcelos 1203, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91910, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91910"
+      }
+    },
+    {
+      "item": 36,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "Rua EMILIA PERRONI FERNANDES",
+        "number": "122",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua EMILIA PERRONI FERNANDES, 122, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.105039649278,
+        "longitude": -51.244976578642,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua EMILIA PERRONI FERNANDES, 122, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Em\u00edlia Perroni Fernandes 122, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91910-295, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91910-295"
+      }
+    },
+    {
+      "item": 37,
+      "utilizedBy": "SMAMUS;SMAP",
+      "address": {
+        "street": "Rua AFONSO ARINOS",
+        "number": "330/554",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua AFONSO ARINOS, 330/554, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.10005289901,
+        "longitude": -51.238578400209,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua AFONSO ARINOS, 330, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Afonso Arinos 330, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91910-350, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91910-350"
+      }
+    },
+    {
+      "item": 38,
+      "utilizedBy": "GP",
+      "address": {
+        "street": "Rua DR BARCELOS",
+        "number": "1691",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR BARCELOS, 1691, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103473449174,
+        "longitude": -51.241000420992,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR BARCELOS, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Barcelos, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91910, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91910"
+      }
+    },
+    {
+      "item": 39,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua TEOTONIA",
+        "number": "SN",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua TEOTONIA, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103346387622,
+        "longitude": -51.242244476572,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua TEOTONIA, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Teot\u00f4nia, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91900-110, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91900-110"
+      }
+    },
+    {
+      "item": 40,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua BRENO BALDO",
+        "number": "2/62",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua BRENO BALDO, 2/62, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103334107194,
+        "longitude": -51.232815175199,
+        "precision": "area",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua BRENO BALDO, 2, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Breno Baldo 2, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-100, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.9,
+        "addrType": "StreetAddressExt",
+        "district": "Cavalhada",
+        "postalCode": "91740-100"
+      }
+    },
+    {
+      "item": 41,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua SILVIO SILVEIRA SOARES",
+        "number": "2711",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua SILVIO SILVEIRA SOARES, 2711, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.104370019447,
+        "longitude": -51.23325101623,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua SILVIO SILVEIRA SOARES, 2711, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Silvio Silveira Soares 2711, Porto Alegre, Rio Grande Do Sul, 91910-460, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.72,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91910-460"
+      }
+    },
+    {
+      "item": 42,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "TRAV ESCOBAR",
+        "number": "554",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "TRAV ESCOBAR, 554, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.105877001819,
+        "longitude": -51.234549037756,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "TRAV ESCOBAR, 554, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Travessa Escobar 554, Porto Alegre, Rio Grande Do Sul, 91910-400, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.72,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91910-400"
+      }
+    },
+    {
+      "item": 43,
+      "utilizedBy": "SMAP;SMAMUS",
+      "address": {
+        "street": "Rua DR PEREIRA NETO",
+        "number": "2087/2145",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR PEREIRA NETO, 2087/2145, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.105463677349,
+        "longitude": -51.23242422163,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR PEREIRA NETO, 2145, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Doutor Pereira Neto 2145, Cavalhada, Porto Alegre, Rio Grande do Sul, 91920-530, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91920-530"
+      }
+    },
+    {
+      "item": 44,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR PEREIRA NETO",
+        "number": "SN",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR PEREIRA NETO, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.10856614686,
+        "longitude": -51.240380118247,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR PEREIRA NETO, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Pereira Neto, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91910, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91910"
+      }
+    },
+    {
+      "item": 45,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR DIAS DE CARVALHO",
+        "number": "SN",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR DIAS DE CARVALHO, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.106659938563,
+        "longitude": -51.248428048534,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR DIAS DE CARVALHO, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Doutor Dias de Carvalho, Tristeza, Porto Alegre, Rio Grande do Sul, 91910-270, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Tristeza",
+        "postalCode": "91910-270"
+      }
+    },
+    {
+      "item": 46,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR BARCELOS",
+        "number": "1091",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR BARCELOS, 1091, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.103118431695,
+        "longitude": -51.241231302801,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR BARCELOS, 1091, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Barcelos 1091, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91910, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91910"
+      }
+    },
+    {
+      "item": 47,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida OTTO NIEMEYER",
+        "number": "990",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida OTTO NIEMEYER, 990, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.109222229589,
+        "longitude": -51.251771306738,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida OTTO NIEMEYER, 990, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Otto Niemeyer 990, Tristeza, Porto Alegre, Rio Grande do Sul, 91910-001, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91910-001"
+      }
+    },
+    {
+      "item": 48,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "TRAV NOVA TRENTO",
+        "number": "SN",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "TRAV NOVA TRENTO, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.109217635335,
+        "longitude": -51.245591943142,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "TRAV NOVA TRENTO, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Travessa Nova Trento, Tristeza, Porto Alegre, Rio Grande do Sul, 91920-540, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Tristeza",
+        "postalCode": "91920-540"
+      }
+    },
+    {
+      "item": 49,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida PROTASIO ALVES",
+        "number": "SN",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida PROTASIO ALVES, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.040320096623,
+        "longitude": -51.161007344375,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida PROTASIO ALVES, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Prot\u00e1sio Alves, Bom Jesus, Porto Alegre, Rio Grande do Sul, 91310-002, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Bom Jesus",
+        "postalCode": "91310-002"
+      }
+    },
+    {
+      "item": 50,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DR PEREIRA NETO",
+        "number": "731/803",
+        "neighborhood": "TRISTEZA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR PEREIRA NETO, 731/803, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.11003093059,
+        "longitude": -51.245141521643,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR PEREIRA NETO, 731, TRISTEZA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Doutor Pereira Neto 731, Tristeza, Porto Alegre, Rio Grande do Sul, 91920-530, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Tristeza",
+        "postalCode": "91920-530"
+      }
+    },
+    {
+      "item": 51,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "Rua PROF DR JOAO PITTA PINHEIRO FILHO",
+        "number": "188",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua PROF DR JOAO PITTA PINHEIRO FILHO, 188, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.108213611404,
+        "longitude": -51.235578326115,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua PROF DR JOAO PITTA PINHEIRO FILHO, 188, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Professor Doutor Jo\u00e3o Pitta Pinheiro Filho 188, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91920-560, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91920-560"
+      }
+    },
+    {
+      "item": 52,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "ESTR VILA MARIA",
+        "number": "495",
+        "neighborhood": "CAMAQU\u00c3",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "ESTR VILA MARIA, 495, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.111507787805,
+        "longitude": -51.233457015948,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "ESTR VILA MARIA, 495, CAMAQU\u00c3, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Beco D 1 Estr Vila Maria 495, Camaqu\u00e3, Porto Alegre, Rio Grande do Sul, 91920-370, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 96.46,
+        "addrType": "StreetAddress",
+        "district": "Camaqu\u00e3",
+        "postalCode": "91920-370"
+      }
+    },
+    {
+      "item": 53,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua ERICO SILVEIRA PEIXOTO",
+        "number": "68/130",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ERICO SILVEIRA PEIXOTO, 68/130, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.131171930365,
+        "longitude": -51.229331135728,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ERICO SILVEIRA PEIXOTO, 68, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua \u00c9rico Silveira Peixoto 68, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-340, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-340"
+      }
+    },
+    {
+      "item": 54,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida CAVALHADA",
+        "number": "6735",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida CAVALHADA, 6735, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.134684010472,
+        "longitude": -51.224388997641,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida CAVALHADA, 6735, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Da Cavalhada 6735, Porto Alegre, Rio Grande Do Sul, 91740-000, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.43,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91740-000"
+      }
+    },
+    {
+      "item": 55,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua ATLANTIDA",
+        "number": "139/191",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ATLANTIDA, 139/191, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.131768625466,
+        "longitude": -51.22652972295,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ATLANTIDA, 139, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Atl\u00e2ntida 139, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-150, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-150"
+      }
+    },
+    {
+      "item": 56,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua DEA COUFAL",
+        "number": "SN",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DEA COUFAL, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.130938343144,
+        "longitude": -51.231024177933,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DEA COUFAL, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dea Coufal, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-020, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91760-020"
+      }
+    },
+    {
+      "item": 57,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua GENNY ZACHIA STEPHANOU",
+        "number": "78/205",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua GENNY ZACHIA STEPHANOU, 78/205, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.126968776135,
+        "longitude": -51.225689623886,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua GENNY ZACHIA STEPHANOU, 78, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Genny Zachia Stephanou 78, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-380, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-380"
+      }
+    },
+    {
+      "item": 58,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida CAVALHADA",
+        "number": "6027",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida CAVALHADA, 6027, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.13463121753,
+        "longitude": -51.22434125174,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida CAVALHADA, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida da Cavalhada, Ipanema, Porto Alegre, Rio Grande do Sul, 91751-830, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91751-830"
+      }
+    },
+    {
+      "item": 59,
+      "utilizedBy": "SMAMUS;SMAP",
+      "address": {
+        "street": "Rua RIMOLO BIAGIO",
+        "number": "SN",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua RIMOLO BIAGIO, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.129582545404,
+        "longitude": -51.226056576528,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua RIMOLO BIAGIO, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Rimolo Biagio, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-024, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91760-024"
+      }
+    },
+    {
+      "item": 60,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida FAMILIA GONCALVES CARNEIRO",
+        "number": "364/442",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida FAMILIA GONCALVES CARNEIRO, 364/442, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.11484976228,
+        "longitude": -51.227904567648,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida FAMILIA GONCALVES CARNEIRO, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Fam\u00edlia Gon\u00e7alves Carneiro, Ipanema, Porto Alegre, Rio Grande do Sul, 91920-250, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91920-250"
+      }
+    },
+    {
+      "item": 61,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "Rua FE",
+        "number": "254/510",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua FE, 254/510, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.096600372805,
+        "longitude": -51.22771812473,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua FE, 254, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida da Cavalhada 254, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-000, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 90.95,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91740-000"
+      }
+    },
+    {
+      "item": 62,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua ARROIO GRANDE",
+        "number": "334/424",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ARROIO GRANDE, 334/424, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.102582172017,
+        "longitude": -51.22935447804,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ARROIO GRANDE, 334, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Arroio Grande 334, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-180, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91740-180"
+      }
+    },
+    {
+      "item": 63,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua JOSUE COSTALUNGA",
+        "number": "2/136",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JOSUE COSTALUNGA, 2/136, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.102262645494,
+        "longitude": -51.227246119307,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JOSUE COSTALUNGA, 2, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Josu\u00e9 Costalunga 2, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-260, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91740-260"
+      }
+    },
+    {
+      "item": 64,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida PAULO PONTES",
+        "number": "150/190",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida PAULO PONTES, 150/190, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.102751079803,
+        "longitude": -51.225234807868,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida PAULO PONTES, 150, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Paulo Pontes 150, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-410, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91740-410"
+      }
+    },
+    {
+      "item": 65,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida PAULO PONTES",
+        "number": "424/528",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida PAULO PONTES, 424/528, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.104557983626,
+        "longitude": -51.226830981312,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida PAULO PONTES, 424, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Paulo Pontes 424, Porto Alegre, Rio Grande Do Sul, 91740-410, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.72,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91740-410"
+      }
+    },
+    {
+      "item": 66,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida CAVALHADA",
+        "number": "3893/3907",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida CAVALHADA, 3893/3907, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.126257123163,
+        "longitude": -51.222506013085,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida CAVALHADA, 3893, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida da Cavalhada 3893, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-001, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91740-001"
+      }
+    },
+    {
+      "item": 67,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "ESTR JOAO VEDANA",
+        "number": "361",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "ESTR JOAO VEDANA, 361, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.122736495374,
+        "longitude": -51.219566982832,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "ESTR JOAO VEDANA, 361, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Adalberto Vedana 361, Vila Nova, Porto Alegre, Rio Grande do Sul, 91750-630, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 95.49,
+        "addrType": "StreetAddress",
+        "district": "Vila Nova",
+        "postalCode": "91750-630"
+      }
+    },
+    {
+      "item": 68,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida JOSE CORREA DA SILVA",
+        "number": "316/396",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida JOSE CORREA DA SILVA, 316/396, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.106301294219,
+        "longitude": -51.224740793128,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida JOSE CORREA DA SILVA, 316, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Jos\u00e9 Corr\u00eaa da Silva 316, Cavalhada, Porto Alegre, Rio Grande do Sul, 91740-380, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91740-380"
+      }
+    },
+    {
+      "item": 69,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua BERTHA LEONORA MUCKLER",
+        "number": "1",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua BERTHA LEONORA MUCKLER, 1, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.104887462111,
+        "longitude": -51.219805401195,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua BERTHA LEONORA MUCKLER, 1, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Bertha Leonora Muckler 1, Nonoai, Porto Alegre, Rio Grande do Sul, 91740-329, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Nonoai",
+        "postalCode": "91740-329"
+      }
+    },
+    {
+      "item": 70,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua LIDER COMUNITARIO JOAO DA SILVA",
+        "number": "60",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua LIDER COMUNITARIO JOAO DA SILVA, 60, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.107436948186,
+        "longitude": -51.217926465948,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua LIDER COMUNITARIO JOAO DA SILVA, 60, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua L\u00edder Comunit\u00e1rio Jo\u00e3o da Silva 60, Nonoai, Porto Alegre, Rio Grande do Sul, 91740-630, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Nonoai",
+        "postalCode": "91740-630"
+      }
+    },
+    {
+      "item": 71,
+      "utilizedBy": "SMED",
+      "address": {
+        "street": "Rua AMAPA",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua AMAPA, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.108983062091,
+        "longitude": -51.212455294133,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua AMAPA, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Amap\u00e1, Vila Nova, Porto Alegre, Rio Grande do Sul, 91740-460, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Vila Nova",
+        "postalCode": "91740-460"
+      }
+    },
+    {
+      "item": 72,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "Rua GERVASIO DA ROSA",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua GERVASIO DA ROSA, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.109192118874,
+        "longitude": -51.218074461741,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua GERVASIO DA ROSA, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Gerv\u00e1sio da Rosa, Vila Nova, Porto Alegre, Rio Grande do Sul, 91740-540, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Vila Nova",
+        "postalCode": "91740-540"
+      }
+    },
+    {
+      "item": 73,
+      "utilizedBy": "SMAP;SMAMUS",
+      "address": {
+        "street": "Rua JOAQUIM DE CARVALHO",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JOAQUIM DE CARVALHO, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.117743069253,
+        "longitude": -51.220426707376,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JOAQUIM DE CARVALHO, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Joaquim de Carvalho, Vila Nova, Porto Alegre, Rio Grande do Sul, 91740-840, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Vila Nova",
+        "postalCode": "91740-840"
+      }
+    },
+    {
+      "item": 74,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua CEL OCTAVIANO PINTO SOARES",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua CEL OCTAVIANO PINTO SOARES, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.115101449576,
+        "longitude": -51.219744908291,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua CEL OCTAVIANO PINTO SOARES, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Coronel Octaviano Pinto Soares, Vila Nova, Porto Alegre, Rio Grande do Sul, 91740-860, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Vila Nova",
+        "postalCode": "91740-860"
+      }
+    },
+    {
+      "item": 75,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua CINCO MIL OITENTA SETE",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua CINCO MIL OITENTA SETE, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -27.684448250888,
+        "longitude": -51.462299260992,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua CINCO MIL OITENTA SETE, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Cinco, Vila Nova, Barrac\u00e3o, Rio Grande do Sul, 95370-000, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 85.66,
+        "addrType": "StreetName",
+        "district": "Vila Nova",
+        "postalCode": "95370-000"
+      }
+    },
+    {
+      "item": 76,
+      "utilizedBy": "SMAP;SMAMUS",
+      "address": {
+        "street": "Rua CRISTIANE VON SALTIEL",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua CRISTIANE VON SALTIEL, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.1148493,
+        "longitude": -51.1807341,
+        "precision": "area",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua CRISTIANE VON SALTIEL, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Vila Nova, Porto Alegre, Rio Grande do Sul, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 85.57,
+        "addrType": "Locality",
+        "district": "Vila Nova",
+        "postalCode": ""
+      }
+    },
+    {
+      "item": 77,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua DR EGYDIO MICHAELSEN",
+        "number": "127/275",
+        "neighborhood": "CAVALHADA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR EGYDIO MICHAELSEN, 127/275, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.131385903856,
+        "longitude": -51.221766605574,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR EGYDIO MICHAELSEN, 127, CAVALHADA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Doutor Egydio Michaelsen 127, Cavalhada, Porto Alegre, Rio Grande do Sul, 91751-140, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Cavalhada",
+        "postalCode": "91751-140"
+      }
+    },
+    {
+      "item": 78,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua CINCO MIL SETENTA SEIS",
+        "number": "SN",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua CINCO MIL SETENTA SEIS, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.137992850569,
+        "longitude": -51.21447618176,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua CINCO MIL SETENTA SEIS, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Cinco, Aberta dos Morros, Porto Alegre, Rio Grande do Sul, 91751-690, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 90.03,
+        "addrType": "StreetName",
+        "district": "Aberta dos Morros",
+        "postalCode": "91751-690"
+      }
+    },
+    {
+      "item": 79,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua ATILIO SUPERTTI",
+        "number": "SN",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ATILIO SUPERTTI, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.122662179439,
+        "longitude": -51.212113672653,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ATILIO SUPERTTI, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua At\u00edlio Supertti, Vila Nova, Porto Alegre, Rio Grande do Sul, 91750-200, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Vila Nova",
+        "postalCode": "91750-200"
+      }
+    },
+    {
+      "item": 80,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua ROMEU DE VASCONCELLOS ROSA",
+        "number": "20",
+        "neighborhood": "VILA NOVA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ROMEU DE VASCONCELLOS ROSA, 20, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.129368275552,
+        "longitude": -51.216309999251,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ROMEU DE VASCONCELLOS ROSA, 20, VILA NOVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Romeu de Vasconcellos Rosa 20, Vila Nova, Porto Alegre, Rio Grande do Sul, 91751-370, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Vila Nova",
+        "postalCode": "91751-370"
+      }
+    },
+    {
+      "item": 81,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua FELIPE CORREA DA SILVA",
+        "number": "SN",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua FELIPE CORREA DA SILVA, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.138394165221,
+        "longitude": -51.219673378505,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua FELIPE CORREA DA SILVA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Felipe Correa da Silva, Aberta dos Morros, Porto Alegre, Rio Grande do Sul, 91751-155, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Aberta dos Morros",
+        "postalCode": "91751-155"
+      }
+    },
+    {
+      "item": 82,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua SINAI",
+        "number": "23",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua SINAI, 23, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.139812119389,
+        "longitude": -51.215402767209,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua SINAI, 23, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Sinai 23, Aberta dos Morros, Porto Alegre, Rio Grande do Sul, 91751-720, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "StreetAddress",
+        "district": "Aberta dos Morros",
+        "postalCode": "91751-720"
+      }
+    },
+    {
+      "item": 83,
+      "utilizedBy": "SMAMUS;SMED",
+      "address": {
+        "street": "Rua JORGE OSCAR GAY DA FONSECA",
+        "number": "SN",
+        "neighborhood": "ESP\u00cdRITO SANTO",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JORGE OSCAR GAY DA FONSECA, ESP\u00cdRITO SANTO, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.146087936019,
+        "longitude": -51.214835803533,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JORGE OSCAR GAY DA FONSECA, ESP\u00cdRITO SANTO, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Jorge Oscar Gay da Fonseca, Esp\u00edrito Santo, Porto Alegre, Rio Grande do Sul, 91770, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Esp\u00edrito Santo",
+        "postalCode": "91770"
+      }
+    },
+    {
+      "item": 84,
+      "utilizedBy": "SMAMUS;SMAP",
+      "address": {
+        "street": "Rua DOS ARACHANES",
+        "number": "500",
+        "neighborhood": "ESP\u00cdRITO SANTO",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DOS ARACHANES, 500, ESP\u00cdRITO SANTO, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.14735598124,
+        "longitude": -51.219985983903,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DOS ARACHANES, 500, ESP\u00cdRITO SANTO, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Arachanes 500, Porto Alegre, Rio Grande Do Sul, 91770-130, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91770-130"
+      }
+    },
+    {
+      "item": 85,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua ENG TITO MARQUES FERNANDES",
+        "number": "409",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ENG TITO MARQUES FERNANDES, 409, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.141266989587,
+        "longitude": -51.222423022251,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ENG TITO MARQUES FERNANDES, 409, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Engenheiro Tito Marques Fernandes 409, Porto Alegre, Rio Grande Do Sul, 91760-110, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91760-110"
+      }
+    },
+    {
+      "item": 86,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua COMENDADOR CASTRO",
+        "number": "325/367",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua COMENDADOR CASTRO, 325/367, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.136465142834,
+        "longitude": -51.226833420642,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua COMENDADOR CASTRO, 325, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Comendador Castro 325, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-200, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-200"
+      }
+    },
+    {
+      "item": 87,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida IMPERIAL",
+        "number": "1/80",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida IMPERIAL, 1/80, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.137054129345,
+        "longitude": -51.228908261256,
+        "precision": "area",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida IMPERIAL, 1, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Imperial 1, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-400, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.9,
+        "addrType": "StreetAddressExt",
+        "district": "Ipanema",
+        "postalCode": "91760-400"
+      }
+    },
+    {
+      "item": 88,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua LARANJEIRAS",
+        "number": "SN",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua LARANJEIRAS, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.136200707251,
+        "longitude": -51.228894415998,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua LARANJEIRAS, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua das Laranjeiras, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-500, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91760-500"
+      }
+    },
+    {
+      "item": 89,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida TRAMANDAI",
+        "number": "984",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida TRAMANDAI, 984, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.137829679785,
+        "longitude": -51.225085839123,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida TRAMANDAI, 984, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Tramanda\u00ed 984, Ipanema, Porto Alegre, Rio Grande do Sul, 91760-050, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Ipanema",
+        "postalCode": "91760-050"
+      }
+    },
+    {
+      "item": 90,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua DR PIO ANGELO",
+        "number": "201",
+        "neighborhood": "IPANEMA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua DR PIO ANGELO, 201, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.137431891699,
+        "longitude": -51.226753658255,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua DR PIO ANGELO, 201, IPANEMA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Dr Pio Angelo, Ipanema, Porto Alegre, Rio Grande do Sul, 91751, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.09,
+        "addrType": "StreetName",
+        "district": "Ipanema",
+        "postalCode": "91751"
+      }
+    },
+    {
+      "item": 91,
+      "utilizedBy": "SMS",
+      "address": {
+        "street": "Avenida GUARUJA",
+        "number": "190",
+        "neighborhood": "GUARUJ\u00c1",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida GUARUJA, 190, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.155075001603,
+        "longitude": -51.222365019481,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida GUARUJA, 190, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Guaruja 190, Porto Alegre, Rio Grande Do Sul, 91770-050, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.4,
+        "addrType": "PointAddress",
+        "district": "Porto Alegre",
+        "postalCode": "91770-050"
+      }
+    },
+    {
+      "item": 92,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Avenida MINUANOS",
+        "number": "68/252",
+        "neighborhood": "ESP\u00cdRITO SANTO",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida MINUANOS, 68/252, ESP\u00cdRITO SANTO, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.14996504508,
+        "longitude": -51.224571349612,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida MINUANOS, 68, ESP\u00cdRITO SANTO, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua dos Minuanos 68, Esp\u00edrito Santo, Porto Alegre, Rio Grande do Sul, 91770-540, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 98.47,
+        "addrType": "StreetAddress",
+        "district": "Esp\u00edrito Santo",
+        "postalCode": "91770-540"
+      }
+    },
+    {
+      "item": 93,
+      "utilizedBy": "SMAP;DMLU",
+      "address": {
+        "street": "Avenida GUAIBA",
+        "number": "SN",
+        "neighborhood": "GUARUJ\u00c1",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida GUAIBA, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.155229673418,
+        "longitude": -51.225202051398,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida GUAIBA, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Gua\u00edba, Guaruj\u00e1, Porto Alegre, Rio Grande do Sul, 91770, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Guaruj\u00e1",
+        "postalCode": "91770"
+      }
+    },
+    {
+      "item": 94,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida GUAIBA",
+        "number": "SN",
+        "neighborhood": "SERRARIA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida GUAIBA, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.160849822677,
+        "longitude": -51.227439719022,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida GUAIBA, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Gua\u00edba, Serraria, Porto Alegre, Rio Grande do Sul, 91770-110, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetName",
+        "district": "Serraria",
+        "postalCode": "91770-110"
+      }
+    },
+    {
+      "item": 95,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua ARGEMIRO OGANDO CORREA",
+        "number": "158/172",
+        "neighborhood": "SERRARIA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua ARGEMIRO OGANDO CORREA, 158/172, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.163816348543,
+        "longitude": -51.228027025459,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua ARGEMIRO OGANDO CORREA, 158, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Argemiro Ogando Correa 158, Serraria, Porto Alegre, Rio Grande do Sul, 91770-810, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Serraria",
+        "postalCode": "91770-810"
+      }
+    },
+    {
+      "item": 96,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Avenida GUAIBA",
+        "number": "107",
+        "neighborhood": "SERRARIA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Avenida GUAIBA, 107, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.160765472553,
+        "longitude": -51.22746419165,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Avenida GUAIBA, 107, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Avenida Gua\u00edba 107, Serraria, Porto Alegre, Rio Grande do Sul, 91770-110, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Serraria",
+        "postalCode": "91770-110"
+      }
+    },
+    {
+      "item": 97,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua LUIZ MAESTRI",
+        "number": "1/61",
+        "neighborhood": "SERRARIA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua LUIZ MAESTRI, 1/61, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.161493577532,
+        "longitude": -51.221575461401,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua LUIZ MAESTRI, 1, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Luiz Maestri 1, Serraria, Porto Alegre, Rio Grande do Sul, 91770-520, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Serraria",
+        "postalCode": "91770-520"
+      }
+    },
+    {
+      "item": 98,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua MONSENHOR ANDRE PEDRO FRANK",
+        "number": "10/60",
+        "neighborhood": "SERRARIA",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua MONSENHOR ANDRE PEDRO FRANK, 10/60, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.160519869685,
+        "longitude": -51.226412617023,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua MONSENHOR ANDRE PEDRO FRANK, 10, SERRARIA, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Monsenhor Andr\u00e9 Pedro Frank 10, Serraria, Porto Alegre, Rio Grande do Sul, 91770-560, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Serraria",
+        "postalCode": "91770-560"
+      }
+    },
+    {
+      "item": 99,
+      "utilizedBy": "SMAP",
+      "address": {
+        "street": "Rua JACUNDA",
+        "number": "333/365",
+        "neighborhood": "GUARUJ\u00c1",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JACUNDA, 333/365, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.155785536073,
+        "longitude": -51.221566694014,
+        "precision": "address",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JACUNDA, 333, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Jacund\u00e1 333, Guaruj\u00e1, Porto Alegre, Rio Grande do Sul, 91770-430, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 100,
+        "addrType": "StreetAddress",
+        "district": "Guaruj\u00e1",
+        "postalCode": "91770-430"
+      }
+    },
+    {
+      "item": 100,
+      "utilizedBy": "SMAMUS",
+      "address": {
+        "street": "Rua JACICOEMA",
+        "number": "1/45",
+        "neighborhood": "GUARUJ\u00c1",
+        "city": "Porto Alegre",
+        "state": "Rio Grande do Sul",
+        "country": "Brazil",
+        "formatted": "Rua JACICOEMA, 1/45, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil"
+      },
+      "location": {
+        "latitude": -30.156156072707,
+        "longitude": -51.22057106535,
+        "precision": "street",
+        "source": "ArcGIS World Geocoding Service"
+      },
+      "match": {
+        "status": "matched",
+        "queryUsed": "Rua JACICOEMA, 1, GUARUJ\u00c1, Porto Alegre, Rio Grande do Sul, Brazil",
+        "matchedAddress": "Rua Jacicoema, Guaruj\u00e1, Porto Alegre, Rio Grande do Sul, 91770-420, BRA",
+        "provider": "ArcGIS World Geocoding Service",
+        "score": 99.31,
+        "addrType": "StreetName",
+        "district": "Guaruj\u00e1",
+        "postalCode": "91770-420"
+      }
+    }
+  ]
+}

@@ -99,6 +99,12 @@ function getInToolValueDescription(layer: LayerConfig): string {
       "GHI_mean (kWh/m²/year), DNI_mean. Hover any neighbourhood polygon to see the values. " +
       "Raw data also available via the Global Solar Atlas API.";
   }
+  if (layer.id === "google_solar_municipal") {
+    return "Real values imported from Google Solar Building Insights and stored as GeoJSON point properties: " +
+      "maxSunshineHoursPerYear, carbonOffsetKgPerYear, paybackYears, lifetimeSavings, " +
+      "percentageExportedToGrid, annualExportedToGridKwh, imageryQuality, and imageryDate. " +
+      "Click any municipal building point to see the full Solar API-derived popup.";
+  }
   if (layer.id === "ibge_census") {
     return "Real values available as GeoJSON feature properties: poverty_rate (0–1), population_total, " +
       "pct_low_income, pct_high_income, pct_piped_water, pct_formal_sewage, pop_density_km² " +
@@ -131,6 +137,16 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     resolution: "Source: 250m raster; aggregated to neighbourhood polygons",
     coverage: "99 Porto Alegre neighbourhoods",
     notes: "PVOUT represents the specific yield of a grid-connected PV system with optimally tilted modules. Typical range in Porto Alegre: 3.8-4.3 kWh/kWp/day.",
+  },
+  {
+    id: "google_solar_municipal",
+    methodology: "Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, selects the default financial analysis (or the first available scenario), and stores normalized popup-ready fields including sun hours, payback, lifetime savings, carbon offset, and annual exported electricity.",
+    source: "Google Solar API — Building Insights, joined to Porto Alegre municipal building coordinates",
+    sourceUrl: "https://developers.google.com/maps/documentation/solar/building-insights",
+    date: "On-demand snapshot import from current Google Solar coverage",
+    resolution: "Individual municipal building points (matched to Google building center)",
+    coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json",
+    notes: "Geometry is a building-center point, not a cadastral footprint. Financial fields come from the selected Building Insights analysis scenario and may be null when Google returns no viable panel configuration.",
   },
   {
     id: "transit_stops",

@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { LayerState } from "@/data/layer-configs";
+import { GOOGLE_SOLAR_SUN_COLORS } from "@/data/colors";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── Legend type system ────────────────────────────────────────────────────────
 
@@ -18,6 +20,11 @@ interface PointDef { kind: "point" }
 interface SolidDef { kind: "solid" }
 
 type LegendDef = GradientDef | CategoricalDef | LineDef | PointDef | SolidDef;
+
+interface LegendInfoItem {
+  label: string;
+  description: string;
+}
 
 // ── OEF CUSTOM HAZARD COLORMAP (pixel-sampled) ────────────────────────────────
 //
@@ -55,6 +62,7 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
   // ── Solar (real PVOUT values from 99 neighbourhoods) ───────────────────────
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
+  google_solar_municipal: { kind: "gradient", colors: GOOGLE_SOLAR_SUN_COLORS, labels: ["Lower sun", "Higher sun"] },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
   rivers:         { kind: "line"  },
@@ -188,6 +196,31 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   post_bus_heatwave: { kind: "line" },
 };
 
+const LEGEND_INFO: Record<string, LegendInfoItem[]> = {
+  google_solar_municipal: [
+    {
+      label: "Sun Hours",
+      description:
+        "Marker color reflects solarPotential.maxSunshineHoursPerYear from Google Building Insights.",
+    },
+    {
+      label: "Carbon",
+      description:
+        "Annual carbon offset = initialAcKwhPerYear / 1000 multiplied by carbonOffsetFactorKgPerMwh.",
+    },
+    {
+      label: "Payback",
+      description:
+        "Payback period comes from the selected financialAnalyses[i].cashPurchaseSavings.paybackYears scenario.",
+    },
+    {
+      label: "Grid",
+      description:
+        "Grid export uses financialAnalyses[i].financialDetails.percentageExportedToGrid and annual exported kWh.",
+    },
+  ],
+};
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function GradientBar({ colors, labels, unit }: { colors: string[]; labels: [string, string]; unit?: string }) {
@@ -228,8 +261,56 @@ function CategoricalItems({ items }: { items: { color: string; label: string }[]
   );
 }
 
+function InfoItems({ items }: { items: LegendInfoItem[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mt-2 ml-5 flex flex-wrap gap-1.5">
+      {items.map((item) => (
+        <Tooltip key={item.label}>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              data-testid={`legend-info-${item.label.toLowerCase().replaceAll(/\s+/g, "-")}`}
+              className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              <Info className="h-2.5 w-2.5" />
+              <span>{item.label}</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-[10px] leading-snug">
+            {item.description}
+          </TooltipContent>
+        </Tooltip>
+      ))}
+    </div>
+  );
+}
+
+function getLegendDef(layer: LayerState): LegendDef {
+  if (layer.id === "google_solar_municipal") {
+    const geoJson = layer.data?.type === "FeatureCollection" ? layer.data : layer.data?.geoJson || layer.data;
+    const sunshineValues = geoJson?.features
+      ?.map((feature: any) => feature?.properties?.maxSunshineHoursPerYear)
+      ?.filter((value: any) => typeof value === "number" && Number.isFinite(value));
+
+    if (Array.isArray(sunshineValues) && sunshineValues.length > 0) {
+      const minValue = Math.min(...sunshineValues);
+      const maxValue = Math.max(...sunshineValues);
+      return {
+        kind: "gradient",
+        colors: GOOGLE_SOLAR_SUN_COLORS,
+        labels: [`${Math.round(minValue)} hrs/yr`, `${Math.round(maxValue)} hrs/yr`],
+      };
+    }
+  }
+
+  return LEGEND_DEF[layer.id] ?? { kind: "solid" };
+}
+
 function LayerRow({ layer }: { layer: LayerState }) {
-  const def: LegendDef = LEGEND_DEF[layer.id] ?? { kind: "solid" };
+  const def = getLegendDef(layer);
+  const infoItems = LEGEND_INFO[layer.id] ?? [];
   const { color } = layer;
   const hasValues = layer.hasValueTiles === true;
   const unit = layer.valueEncoding?.unit;
@@ -260,6 +341,7 @@ function LayerRow({ layer }: { layer: LayerState }) {
 
       {def.kind === "gradient"    && <GradientBar colors={def.colors} labels={def.labels} unit={hasValues ? unit : undefined} />}
       {def.kind === "categorical" && <CategoricalItems items={def.items} />}
+      <InfoItems items={infoItems} />
     </div>
   );
 }
