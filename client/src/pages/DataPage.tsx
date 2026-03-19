@@ -60,7 +60,7 @@ const MUNICIPAL_BUILDINGS_SOLAR_METHODOLOGY =
   "High, Medium, and Low priority are exposed as tier filters inside the legend-side panel rather than as separate layers.";
 
 const MUNICIPAL_BUILDINGS_SOLAR_NOTES =
-  "Estimated capacity, investment, and annual CO2 offset are available for most buildings. Savings and payback remain unavailable because the current Google Building Insights export contains no financialAnalyses entries. Two buildings (IDs 374 and 998) fall back to geocoded-only points with no solar metrics.";
+  "Estimated capacity, investment, and annual CO2 offset are available for most buildings. Payback remains unavailable because the current Google Building Insights export contains no financialAnalyses entries. Two buildings (IDs 374 and 998) fall back to geocoded-only points with no solar metrics.";
 
 function getRawDataAccess(layerId: string): string {
   if (layerId.startsWith("oef_chirps_")) return ACCESS_CHIRPS;
@@ -112,7 +112,7 @@ function getInToolValueDescription(layer: LayerConfig): string {
     return "Real values stored as GeoJSON point properties from the municipal solar export: " +
       "priorityScore, priorityTier, maxYearlyEnergyDcKwh, maxArrayPanelsCount, panelCapacityWatts, " +
       "estimatedInvestmentCost, estimatedCarbonOffsetKgPerYear, sourceAddress, matchedAddress, and utilizedBy. " +
-      "Click any building marker to inspect the detail card. Savings and payback are currently unavailable in the source export.";
+      "Click any building marker to inspect the detail card. Payback is currently unavailable in the source export.";
   }
   if (layer.id === "ibge_census") {
     return "Real values available as GeoJSON feature properties: poverty_rate (0–1), population_total, " +

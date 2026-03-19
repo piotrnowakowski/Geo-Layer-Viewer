@@ -176,12 +176,6 @@ export function getMunicipalBuildingsSolarInvestmentAmount(properties: any): num
   return value.amount;
 }
 
-export function getMunicipalBuildingsSolarSavingsAmount(properties: any): number | null {
-  const value = properties?.lifetimeSavings;
-  if (!hasMoneyAmount(value)) return null;
-  return value.amount;
-}
-
 export function getMunicipalBuildingsSolarCarbonOffsetKgPerYear(properties: any): number | null {
   return firstFiniteNumber(
     properties?.carbonOffsetKgPerYear,
@@ -435,7 +429,6 @@ export function buildMunicipalBuildingsSolarLayerData(
             priorityRoofAreaM2: rankedFeature.roofAreaM2,
             priorityCapacityKw: getMunicipalBuildingsSolarCapacityKw(properties),
             priorityInvestmentBrl: getMunicipalBuildingsSolarInvestmentAmount(properties),
-            prioritySavingsBrl: getMunicipalBuildingsSolarSavingsAmount(properties),
             priorityCarbonOffsetKgPerYear:
               getMunicipalBuildingsSolarCarbonOffsetKgPerYear(properties),
           },

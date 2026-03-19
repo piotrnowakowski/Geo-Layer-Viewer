@@ -16,7 +16,8 @@
     "solar:list-commercial-neighbourhoods": "tsx script/import-google-solar-commercial.ts --list-neighbourhoods",
     "solar:import-commercial": "tsx script/import-google-solar-commercial.ts",
     "solar:import-commercial:test10": "tsx script/import-google-solar-commercial.ts --limit 10",
-    "solar:seed-commercial:test10": "tsx script/import-google-solar-commercial.ts --seed-only --limit 10"
+    "solar:seed-commercial:test10": "tsx script/import-google-solar-commercial.ts --seed-only --limit 10",
+    "solar:aggregate-commercial-neighbourhoods": "tsx script/aggregate-google-solar-commercial-neighbourhoods.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -7,7 +7,6 @@ import {
   getMunicipalBuildingsSolarCarbonOffsetKgPerYear,
   getMunicipalBuildingsSolarDisplayName,
   getMunicipalBuildingsSolarInvestmentAmount,
-  getMunicipalBuildingsSolarSavingsAmount,
   isMunicipalBuildingsSolarLayerId,
   MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS,
   MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS,
@@ -300,7 +299,7 @@ function getLegendInfoItems(layer: LayerState): LegendInfoItem[] {
         label: "Portfolio",
         description:
           summary
-            ? `${summary.enrichedBuildings.toLocaleString()} buildings carry solar metrics and ${summary.geocodedOnlyBuildings.toLocaleString()} remain geocoded-only placeholders. Savings and payback are unavailable in the current export because the source dataset contains no financial analysis entries.`
+            ? `${summary.enrichedBuildings.toLocaleString()} buildings carry solar metrics and ${summary.geocodedOnlyBuildings.toLocaleString()} remain geocoded-only placeholders. Payback is unavailable in the current export because the source dataset contains no financial analysis entries.`
             : "The municipal solar portfolio combines solar-enriched buildings with geocoded-only placeholders when no solar enrichment is present.",
       },
     ];
@@ -355,8 +354,6 @@ function summarizeMunicipalSolarMetrics(features: any[]) {
   let capacityCount = 0;
   let investmentBrl = 0;
   let investmentCount = 0;
-  let savingsBrl = 0;
-  let savingsCount = 0;
   let carbonKg = 0;
   let carbonCount = 0;
 
@@ -374,12 +371,6 @@ function summarizeMunicipalSolarMetrics(features: any[]) {
       investmentCount += 1;
     }
 
-    const savingsValue = getMunicipalBuildingsSolarSavingsAmount(properties);
-    if (savingsValue !== null) {
-      savingsBrl += savingsValue;
-      savingsCount += 1;
-    }
-
     const carbonValue = getMunicipalBuildingsSolarCarbonOffsetKgPerYear(properties);
     if (carbonValue !== null) {
       carbonKg += carbonValue;
@@ -393,8 +384,6 @@ function summarizeMunicipalSolarMetrics(features: any[]) {
     capacityCount,
     investmentBrl: investmentCount > 0 ? investmentBrl : null,
     investmentCount,
-    savingsBrl: savingsCount > 0 ? savingsBrl : null,
-    savingsCount,
     carbonKg: carbonCount > 0 ? carbonKg : null,
     carbonCount,
   };
@@ -456,9 +445,6 @@ function MunicipalSolarPanel({
     : null;
   const selectedCapacity = selectedProperties
     ? getMunicipalBuildingsSolarCapacityKw(selectedProperties)
-    : null;
-  const selectedSavings = selectedProperties
-    ? getMunicipalBuildingsSolarSavingsAmount(selectedProperties)
     : null;
   const selectedPayback =
     selectedProperties && typeof selectedProperties.paybackYears === "number"
@@ -550,16 +536,6 @@ function MunicipalSolarPanel({
           accentColor="#38bdf8"
         />
         <SummaryCard
-          label="Savings"
-          value={formatMetricMoney(metrics.savingsBrl)}
-          subtext={
-            metrics.savingsCount > 0
-              ? `${metrics.savingsCount.toLocaleString()} buildings with savings estimates`
-              : "The source export does not include savings values"
-          }
-          accentColor="#22c55e"
-        />
-        <SummaryCard
           label="CO2"
           value={
             metrics.carbonKg !== null
@@ -576,8 +552,8 @@ function MunicipalSolarPanel({
       </div>
 
       <div className="mt-2 text-[9px] leading-snug text-zinc-500">
-        Savings and payback stay unavailable because the current municipal Google Building
-        Insights export contains no financial analysis entries.
+        Payback stays unavailable because the current municipal Google Building Insights
+        export contains no financial analysis entries.
       </div>
 
       <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/70 p-3">
@@ -643,7 +619,6 @@ function MunicipalSolarPanel({
                   : "Unavailable"
               }
             />
-            <DetailRow label="Savings" value={formatMetricMoney(selectedSavings)} />
             <DetailRow label="Payback" value={selectedPayback} />
             {selectedProperties.importStatus === "seed_only" && (
               <div
@@ -658,7 +633,7 @@ function MunicipalSolarPanel({
         ) : (
           <div className="mt-3 text-[10px] leading-snug text-zinc-500">
             Select a building marker to inspect its priority score, capacity, investment,
-            savings availability, and payback availability.
+            CO2 offset, and payback availability.
           </div>
         )}
       </div>
