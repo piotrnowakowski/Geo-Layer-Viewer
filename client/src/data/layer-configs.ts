@@ -371,4 +371,15 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     available: true,
     hasValueTiles: false,
   },
+  {
+    id: "iptu-neighbourhoods",
+    name: "IPTU by Neighbourhood",
+    icon: MapPinned,
+    color: "#8B5CF6",
+    source: "geojson",
+    group: "base_layers",
+    available: true,
+    hasValueTiles: true,
+    valueEncoding: { type: "numeric", unit: "R$" },
+  },
 ];

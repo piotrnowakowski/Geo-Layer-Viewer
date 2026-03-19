@@ -160,6 +160,7 @@ const S3_GEOJSON_URLS: Record<string, string> = {
   "ibge-indicators": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2010/porto_alegre/porto_alegre_indicators.geojson",
   "ibge-settlements": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2024/porto_alegre/poa_informal_settlements.geojson",
   "mapbiomas-power-infrastructure": "https://geo-test-api.s3.us-east-1.amazonaws.com/mapbiomass_energy_infra/energy_infrastructure.geojson",
+  "iptu-neighbourhoods": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2010/porto_alegre/poa_iptu_neighbourhoods.geojson",
 };
 
 const S3_CACHE_FILES: Record<string, string> = {
@@ -169,6 +170,7 @@ const S3_CACHE_FILES: Record<string, string> = {
   "ibge-indicators": "porto-alegre-ibge-indicators.json",
   "ibge-settlements": "porto-alegre-ibge-settlements.json",
   "mapbiomas-power-infrastructure": "porto-alegre-mapbiomas-power-infrastructure.json",
+  "iptu-neighbourhoods": "poa-iptu-neighbourhoods.json",
 };
 
 function getSampleDataPath(filename: string): string {
@@ -434,6 +436,15 @@ export async function registerRoutes(
   app.get("/api/geospatial/mapbiomas-power-infrastructure", async (_req, res) => {
     try {
       const data = await fetchAndCacheS3GeoJSON("mapbiomas-power-infrastructure");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/iptu-neighbourhoods", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("iptu-neighbourhoods");
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });

@@ -64,6 +64,7 @@ const LEGEND_DEF: Record<string, LegendDef> = {
   // ── IBGE & social (real measured values) ────────────────────────────────────
   ibge_census:    { kind: "gradient", colors: ["#ede9fe","#c084fc","#a855f7","#7e22ce","#3b0764"], labels: ["2%", "35% poverty rate"] },
   ibge_settlements: { kind: "solid" },
+  "iptu-neighbourhoods": { kind: "gradient", colors: ["#dbeafe","#93c5fd","#3b82f6","#1d4ed8","#1e3a8a"], labels: ["Low", "High IPTU value"] },
 
   // ── Solar (real PVOUT values from 99 neighbourhoods) ───────────────────────
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },

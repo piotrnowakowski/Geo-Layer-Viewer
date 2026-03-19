@@ -57,6 +57,7 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_flood2024:    "/sample-data/porto-alegre-flood-2024.json",
     power_infrastructure: "/sample-data/porto-alegre-mapbiomas-power-infrastructure.json",
     "obm-buildings":    "/sample-data/porto-alegre-buildings-commercial.json",
+    "iptu-neighbourhoods": "/sample-data/poa-iptu-neighbourhoods.json",
   };
 
   const apiPaths: Record<string, string> = {
@@ -80,6 +81,7 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_flood_zones: "/api/geospatial/sites/sites_flood_zones",
     power_infrastructure: "/api/geospatial/mapbiomas-power-infrastructure",
     "obm-buildings":   "/api/geospatial/buildings/commercial",
+    "iptu-neighbourhoods": "/api/geospatial/iptu-neighbourhoods",
   };
 
   const samplePath = samplePaths[layerId];

@@ -403,6 +403,47 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       });
     }
 
+    case "iptu-neighbourhoods": {
+      const geoJson = getGeoJson(data);
+      if (!geoJson?.features) return null;
+      return L.geoJSON(geoJson, {
+        style: (feature: any) => {
+          const p = feature.properties || {};
+          const totalIPTU = p.iptu_lancado_rs || 0;
+          // Normalize to 0-1 scale (adjust max based on your data)
+          const maxIPTU = 111539396; // From visual inspection of data (Petrópolis max)
+          const normalized = Math.min(totalIPTU / maxIPTU, 1);
+          
+          // Blue gradient: light to dark
+          const colors = ["#dbeafe","#93c5fd","#3b82f6","#1d4ed8","#1e3a8a"];
+          const colorIndex = Math.floor(normalized * (colors.length - 1));
+          
+          return {
+            color: "#1e40af",
+            fillColor: colors[colorIndex],
+            fillOpacity: 0.65,
+            weight: 1.5,
+            opacity: 0.9,
+          };
+        },
+        onEachFeature: (feature: any, layer: L.Layer) => {
+          const p = feature.properties || {};
+          const name = p.neighbourhood_name || "Unknown";
+          const iptuTotal = (p.total_rs || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+          const registros = p.registros || 0;
+          const html = `
+            <div style="font-family: system-ui; font-size: 11px; max-width: 200px;">
+              <strong>${name}</strong><br/>
+              Total: ${iptuTotal}<br/>
+              Properties: ${registros}
+            </div>
+          `;
+          (layer as any).bindTooltip(html, { sticky: true });
+          (layer as any).bindPopup(html);
+        },
+      });
+    }
+
     case "sites_flood2024": {
       const geoJson = data?.geoJson || data;
       if (!geoJson?.features) return null;
