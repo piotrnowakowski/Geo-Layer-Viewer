@@ -91,7 +91,7 @@ export default function MunicipalSolarPanel({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[500px] bg-gray-900 border-l border-gray-800 p-0 flex flex-col">
+      <SheetContent side="right" className="w-full sm:w-[650px] bg-gray-900 border-l border-gray-800 p-0 flex flex-col">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-gray-800">
           <SheetTitle className="text-white">Municipal Solar Portfolio</SheetTitle>
           <p className="text-gray-400 text-sm mt-1">Select priority buildings for rooftop solar</p>
@@ -103,9 +103,9 @@ export default function MunicipalSolarPanel({
             setSelectedTab(value as "high" | "medium" | "low");
             setSelectedBuilding(null);
           }}
-          className="flex-1 flex flex-col px-6 pt-6 overflow-hidden"
+          className="flex-1 flex flex-col px-6 pt-6 pb-6 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-800 p-1">
+          <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-800 p-1 flex-shrink-0">
             <TabsTrigger value="high" className="text-xs">
               High Priority ({buildingsByTier.high.length})
             </TabsTrigger>
@@ -118,7 +118,7 @@ export default function MunicipalSolarPanel({
           </TabsList>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6 flex-shrink-0">
             <Card className="p-3 bg-gray-800 border-gray-700">
               <div className="text-xs text-gray-400">Total Capacity</div>
               <div className="text-lg font-bold text-blue-400">{stats.totalCapacity.toFixed(1)} MWp</div>
@@ -137,14 +137,14 @@ export default function MunicipalSolarPanel({
             </Card>
           </div>
 
-          <Separator className="my-4 bg-gray-800" />
+          <Separator className="my-4 bg-gray-800 flex-shrink-0" />
 
           {/* Building List */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <h3 className="text-sm font-semibold text-white mb-3">
+            <h3 className="text-sm font-semibold text-white mb-3 flex-shrink-0">
               Buildings ({currentTierBuildings.length})
             </h3>
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 overflow-hidden">
               <div className="space-y-2 pr-4">
                 {currentTierBuildings.map((building) => (
                   <div
@@ -191,8 +191,8 @@ export default function MunicipalSolarPanel({
           {/* Building Detail Card */}
           {selectedBuilding && (
             <>
-              <Separator className="my-4 bg-gray-800" />
-              <Card className="p-4 bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 mb-4">
+              <Separator className="my-4 bg-gray-800 flex-shrink-0" />
+              <Card className="p-4 bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 flex-shrink-0">
                 <h4 className="font-semibold text-white mb-3">{selectedBuilding.name}</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -240,7 +240,7 @@ export default function MunicipalSolarPanel({
             </>
           )}
 
-          <TabsContent value={selectedTab} className="mt-0">
+          <TabsContent value={selectedTab} className="mt-0 flex-shrink-0">
             <Button
               onClick={handleSelectScope}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6"
