@@ -1,6 +1,12 @@
 import { Link } from "wouter";
 import { ArrowLeft, ExternalLink, FlaskConical, CheckCircle2 } from "lucide-react";
 import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS, type LayerConfig } from "@/data/layer-configs";
+import {
+  BRAZIL_GRID_EMISSIONS_BASE_YEAR,
+  BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH,
+  BRAZIL_GRID_EMISSIONS_SOURCE_TITLE,
+  BRAZIL_GRID_EMISSIONS_SOURCE_URL,
+} from "@shared/solarCarbon";
 
 interface LayerDataInfo {
   id: string;
@@ -101,10 +107,10 @@ function getInToolValueDescription(layer: LayerConfig): string {
   }
   if (layer.id === "google_solar_municipal") {
     return "Real values imported from Google Solar Building Insights and stored as GeoJSON point properties: " +
-      "maxSunshineHoursPerYear, carbonOffsetKgPerYear, paybackYears, lifetimeSavings, " +
-      "estimatedInstalledCostPerPanel, estimatedInvestmentCost, " +
-      "percentageExportedToGrid, annualExportedToGridKwh, imageryQuality, and imageryDate. " +
-      "Click any municipal building point to see the full Solar API-derived popup.";
+      "maxSunshineHoursPerYear, maxYearlyEnergyDcKwh, estimatedCarbonOffsetKgPerYear, " +
+      "estimatedInstalledCostPerPanel, estimatedInvestmentCost, imageryQuality, and imageryDate. " +
+      "The raw Google response is preserved under googleBuildingInsights, while finance rows are " +
+      "only shown when Google provides financialAnalyses for that building.";
   }
   if (layer.id === "ibge_census") {
     return "Real values available as GeoJSON feature properties: poverty_rate (0–1), population_total, " +
@@ -141,13 +147,13 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
   },
   {
     id: "google_solar_municipal",
-    methodology: "Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, selects the default financial analysis (or the first available scenario), and stores normalized popup-ready fields including sun hours, payback, lifetime savings, carbon offset, annual exported electricity, and an estimated installed investment derived from a configurable piecewise-linear BRL cost-per-panel benchmark.",
-    source: "Google Solar API — Building Insights, joined to Porto Alegre municipal building coordinates",
+    methodology: `Point-based municipal building solar screening imported from the Google Solar API Building Insights endpoint. The importer reads the geocoded municipal buildings registry, requests the closest building insight for each matched coordinate, preserves the raw Google response under googleBuildingInsights, normalizes popup-ready technical fields, derives estimated installed investment from a configurable piecewise-linear BRL cost-per-panel benchmark, and derives estimatedCarbonOffsetKgPerYear as maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh using Brazil's ${BRAZIL_GRID_EMISSIONS_BASE_YEAR} electricity-generation average.`,
+    source: "Google Solar API — Building Insights; local carbon estimate benchmarked to MME / EPE BEN 2025",
     sourceUrl: "https://developers.google.com/maps/documentation/solar/building-insights",
     date: "On-demand snapshot import from current Google Solar coverage",
     resolution: "Individual municipal building points (matched to Google building center)",
     coverage: "Porto Alegre municipal buildings from pv_panel_data/Municipal_buildings.geocoded.json",
-    notes: "Geometry is a building-center point, not a cadastral footprint. Financial fields come from the selected Building Insights analysis scenario and may be null when Google returns no viable panel configuration. Estimated investment fields are derived locally from a 400 W reference-panel benchmark table using piecewise linear interpolation and are not returned by Google.",
+    notes: `Geometry is a building-center point, not a cadastral footprint. For these Porto Alegre buildings, Google does not currently return financialAnalyses, so payback, lifetime savings, and grid-export rows are hidden when null even though the raw API payload is still stored. estimatedCarbonOffsetKgPerYear is a local screening estimate based on Google yearly DC generation and ${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE} (${BRAZIL_GRID_EMISSIONS_SOURCE_URL}), which reports ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh for Brazil's ${BRAZIL_GRID_EMISSIONS_BASE_YEAR} electricity generation.`,
   },
   {
     id: "transit_stops",

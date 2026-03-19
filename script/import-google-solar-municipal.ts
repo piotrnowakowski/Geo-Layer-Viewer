@@ -2,6 +2,10 @@ import fs from "fs/promises";
 import path from "path";
 import { loadDotEnvFile } from "../shared/loadDotEnv";
 import {
+  estimateBrazilSolarCarbonOffsetKgPerYear,
+  getBrazilSolarCarbonModelMetadata,
+} from "../shared/solarCarbon";
+import {
   estimateSolarInvestment,
   getSolarInvestmentModelMetadata,
 } from "./lib/solarInvestmentModel";
@@ -377,6 +381,8 @@ function buildFeature(
     maxArrayPanelsCount,
     panelCapacityWatts
   );
+  const estimatedCarbonOffsetKgPerYear =
+    estimateBrazilSolarCarbonOffsetKgPerYear(maxYearlyEnergyDcKwh);
   const carbonOffsetKgPerYear =
     initialAcKwhPerYear !== null && carbonOffsetFactorKgPerMwh !== null
       ? (initialAcKwhPerYear / 1000) * carbonOffsetFactorKgPerMwh
@@ -429,6 +435,7 @@ function buildFeature(
       paybackYears: analysis?.cashPurchaseSavings?.paybackYears ?? null,
       lifetimeSavings: normalizeMoney(analysis?.cashPurchaseSavings?.savings?.savingsLifetime),
       carbonOffsetKgPerYear,
+      estimatedCarbonOffsetKgPerYear,
       annualExportedToGridKwh,
       googleBuildingInsights: response,
     },
@@ -483,6 +490,7 @@ function buildSeedFeature(record: GeocodedRecord): MunicipalSolarFeature {
       paybackYears: null,
       lifetimeSavings: null,
       carbonOffsetKgPerYear: null,
+      estimatedCarbonOffsetKgPerYear: null,
       annualExportedToGridKwh: null,
       googleBuildingInsights: null,
     },
@@ -572,6 +580,7 @@ async function main() {
     inputFile: options.inputPath,
     mode: options.seedOnly ? "seed_only" : "enriched",
     estimatedInvestmentCostModel: getSolarInvestmentModelMetadata(),
+    estimatedCarbonOffsetModel: getBrazilSolarCarbonModelMetadata(),
     totalMatchedRecords: matchedRecords.length,
     selectedOffset: options.offset,
     selectedLimit: options.limit,

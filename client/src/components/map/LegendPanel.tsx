@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { LayerState } from "@/data/layer-configs";
-import { GOOGLE_SOLAR_SUN_COLORS } from "@/data/colors";
+import { GOOGLE_SOLAR_OUTPUT_COLORS } from "@/data/colors";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  BRAZIL_GRID_EMISSIONS_BASE_YEAR,
+  BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH,
+  BRAZIL_GRID_EMISSIONS_SOURCE_TITLE,
+} from "@shared/solarCarbon";
 
 // ── Legend type system ────────────────────────────────────────────────────────
 
@@ -62,7 +67,7 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 
   // ── Solar (real PVOUT values from 99 neighbourhoods) ───────────────────────
   solar_potential:  { kind: "gradient", colors: ["#fef3c7","#fde68a","#fbbf24","#f59e0b","#b45309"], labels: ["4.0", "4.1 kWh/kWp/d"] },
-  google_solar_municipal: { kind: "gradient", colors: GOOGLE_SOLAR_SUN_COLORS, labels: ["Lower sun", "Higher sun"] },
+  google_solar_municipal: { kind: "gradient", colors: GOOGLE_SOLAR_OUTPUT_COLORS, labels: ["Lower output", "Higher output"] },
 
   // ── Geometry layers ─────────────────────────────────────────────────────────
   rivers:         { kind: "line"  },
@@ -199,24 +204,19 @@ const LEGEND_DEF: Record<string, LegendDef> = {
 const LEGEND_INFO: Record<string, LegendInfoItem[]> = {
   google_solar_municipal: [
     {
-      label: "Sun Hours",
+      label: "Generation",
       description:
-        "Marker color reflects solarPotential.maxSunshineHoursPerYear from Google Building Insights.",
+        "Marker color reflects maxYearlyEnergyDcKwh, the Google Building Insights yearly DC output for the selected maximum-panel layout.",
     },
     {
       label: "Carbon",
       description:
-        "Annual carbon offset = initialAcKwhPerYear / 1000 multiplied by carbonOffsetFactorKgPerMwh.",
+        `Annual carbon offset defaults to a Brazil screening estimate: maxYearlyEnergyDcKwh / 1000 × ${BRAZIL_GRID_EMISSIONS_FACTOR_KG_CO2E_PER_MWH} kg CO2e/MWh (${BRAZIL_GRID_EMISSIONS_SOURCE_TITLE}, base year ${BRAZIL_GRID_EMISSIONS_BASE_YEAR}).`,
     },
     {
-      label: "Payback",
+      label: "Finance",
       description:
-        "Payback period comes from the selected financialAnalyses[i].cashPurchaseSavings.paybackYears scenario.",
-    },
-    {
-      label: "Grid",
-      description:
-        "Grid export uses financialAnalyses[i].financialDetails.percentageExportedToGrid and annual exported kWh.",
+        "Payback, lifetime savings, and grid-export rows are only shown when Google returns solarPotential.financialAnalyses for that building. Empty finance rows are hidden, but the raw API payload is still kept in the dataset.",
     },
   ],
 };
@@ -290,17 +290,17 @@ function InfoItems({ items }: { items: LegendInfoItem[] }) {
 function getLegendDef(layer: LayerState): LegendDef {
   if (layer.id === "google_solar_municipal") {
     const geoJson = layer.data?.type === "FeatureCollection" ? layer.data : layer.data?.geoJson || layer.data;
-    const sunshineValues = geoJson?.features
-      ?.map((feature: any) => feature?.properties?.maxSunshineHoursPerYear)
+    const annualEnergyValues = geoJson?.features
+      ?.map((feature: any) => feature?.properties?.maxYearlyEnergyDcKwh)
       ?.filter((value: any) => typeof value === "number" && Number.isFinite(value));
 
-    if (Array.isArray(sunshineValues) && sunshineValues.length > 0) {
-      const minValue = Math.min(...sunshineValues);
-      const maxValue = Math.max(...sunshineValues);
+    if (Array.isArray(annualEnergyValues) && annualEnergyValues.length > 0) {
+      const minValue = Math.min(...annualEnergyValues);
+      const maxValue = Math.max(...annualEnergyValues);
       return {
         kind: "gradient",
-        colors: GOOGLE_SOLAR_SUN_COLORS,
-        labels: [`${Math.round(minValue)} hrs/yr`, `${Math.round(maxValue)} hrs/yr`],
+        colors: GOOGLE_SOLAR_OUTPUT_COLORS,
+        labels: [`${Math.round(minValue).toLocaleString()} kWh/yr`, `${Math.round(maxValue).toLocaleString()} kWh/yr`],
       };
     }
   }

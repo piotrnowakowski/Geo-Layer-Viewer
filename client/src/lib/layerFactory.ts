@@ -1,9 +1,10 @@
 import L from "leaflet";
 import {
   getSolarColor,
-  getGoogleSolarSunColor,
+  getGoogleSolarOutputColor,
   getPovertyColor,
 } from "@/data/colors";
+import { estimateBrazilSolarCarbonOffsetKgPerYear } from "@shared/solarCarbon";
 
 function escapeHtml(value: unknown): string {
   return String(value ?? "")
@@ -22,6 +23,10 @@ function formatNumber(value: unknown, digits = 0): string {
   });
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 function formatMoney(value: any): string {
   if (!value || typeof value.amount !== "number" || !Number.isFinite(value.amount)) return "N/A";
   const currencyCode = typeof value.currencyCode === "string" && value.currencyCode ? value.currencyCode : "USD";
@@ -30,6 +35,15 @@ function formatMoney(value: any): string {
     currency: currencyCode,
     maximumFractionDigits: 0,
   }).format(value.amount);
+}
+
+function hasMoneyAmount(value: any): boolean {
+  return Boolean(value) && typeof value.amount === "number" && Number.isFinite(value.amount);
+}
+
+function renderPopupRow(label: string, valueHtml: string | null): string {
+  if (!valueHtml) return "";
+  return `<span style="color: #94a3b8;">${label}:</span> ${valueHtml}<br/>`;
 }
 
 function selectMaxPanelConfig(configs: any): any {
@@ -227,16 +241,20 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       const geoJson = getGeoJson(data);
       if (!geoJson?.features) return null;
 
-      const sunshineValues = geoJson.features
-        .map((feature: any) => feature?.properties?.maxSunshineHoursPerYear)
+      const annualEnergyValues = geoJson.features
+        .map((feature: any) => feature?.properties?.maxYearlyEnergyDcKwh)
         .filter((value: any) => typeof value === "number" && Number.isFinite(value));
-      const minSunshine = sunshineValues.length > 0 ? Math.min(...sunshineValues) : 0;
-      const maxSunshine = sunshineValues.length > 0 ? Math.max(...sunshineValues) : 0;
+      const minAnnualEnergy = annualEnergyValues.length > 0 ? Math.min(...annualEnergyValues) : 0;
+      const maxAnnualEnergy = annualEnergyValues.length > 0 ? Math.max(...annualEnergyValues) : 0;
 
       return L.geoJSON(geoJson, {
         pointToLayer: (feature: any, latlng: L.LatLng) => {
-          const sunshine = feature?.properties?.maxSunshineHoursPerYear ?? minSunshine;
-          const color = getGoogleSolarSunColor(sunshine, minSunshine, maxSunshine);
+          const annualEnergy = feature?.properties?.maxYearlyEnergyDcKwh ?? minAnnualEnergy;
+          const color = getGoogleSolarOutputColor(
+            annualEnergy,
+            minAnnualEnergy,
+            maxAnnualEnergy
+          );
           return L.circleMarker(latlng, {
             radius: 6,
             fillColor: color,
@@ -272,6 +290,26 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               : null;
           const estimatedInstalledCostPerPanel = p.estimatedInstalledCostPerPanel;
           const estimatedInvestmentCost = p.estimatedInvestmentCost;
+          const rawCarbonOffsetKgPerYear = isFiniteNumber(p.carbonOffsetKgPerYear)
+            ? p.carbonOffsetKgPerYear
+            : null;
+          const estimatedCarbonOffsetKgPerYear = isFiniteNumber(p.estimatedCarbonOffsetKgPerYear)
+            ? p.estimatedCarbonOffsetKgPerYear
+            : estimateBrazilSolarCarbonOffsetKgPerYear(maxYearlyEnergyDcKwh);
+          const carbonOffsetKgPerYear =
+            rawCarbonOffsetKgPerYear ?? estimatedCarbonOffsetKgPerYear;
+          const carbonOffsetLabel =
+            rawCarbonOffsetKgPerYear !== null ? "Carbon offset" : "Carbon offset (BR est.)";
+          const paybackHtml = isFiniteNumber(p.paybackYears)
+            ? `${escapeHtml(formatNumber(p.paybackYears, 1))} years`
+            : null;
+          const lifetimeSavingsHtml = hasMoneyAmount(p.lifetimeSavings)
+            ? escapeHtml(formatMoney(p.lifetimeSavings))
+            : null;
+          const gridExportHtml =
+            isFiniteNumber(p.percentageExportedToGrid) && isFiniteNumber(p.annualExportedToGridKwh)
+              ? `${escapeHtml(formatNumber(p.percentageExportedToGrid, 1))}% (${escapeHtml(formatNumber(p.annualExportedToGridKwh, 0))} kWh/year)`
+              : null;
           const html = `
             <div style="font-family: system-ui; font-size: 11px; line-height: 1.45; min-width: 250px;">
               <strong style="font-size: 12px;">${escapeHtml(sourceAddress)}</strong><br/>
@@ -284,10 +322,15 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
               <span style="color: #94a3b8;">Est. cost / panel:</span> ${escapeHtml(formatMoney(estimatedInstalledCostPerPanel))}<br/>
               <span style="color: #94a3b8;">Est. investment:</span> ${escapeHtml(formatMoney(estimatedInvestmentCost))}<br/>
               <span style="color: #94a3b8;">Generation:</span> ${escapeHtml(formatNumber(maxYearlyEnergyDcKwh, 0))} kWh/year<br/>
-              <span style="color: #94a3b8;">Carbon offset:</span> ${escapeHtml(formatNumber(p.carbonOffsetKgPerYear, 0))} kg CO2e/year<br/>
-              <span style="color: #94a3b8;">Payback:</span> ${escapeHtml(formatNumber(p.paybackYears, 1))} years<br/>
-              <span style="color: #94a3b8;">Lifetime savings:</span> ${escapeHtml(formatMoney(p.lifetimeSavings))}<br/>
-              <span style="color: #94a3b8;">Grid export:</span> ${escapeHtml(formatNumber(p.percentageExportedToGrid, 1))}% (${escapeHtml(formatNumber(p.annualExportedToGridKwh, 0))} kWh/year)<br/>
+              ${renderPopupRow(
+                carbonOffsetLabel,
+                carbonOffsetKgPerYear !== null
+                  ? `${escapeHtml(formatNumber(carbonOffsetKgPerYear, 0))} kg CO2e/year`
+                  : null
+              )}
+              ${renderPopupRow("Payback", paybackHtml)}
+              ${renderPopupRow("Lifetime savings", lifetimeSavingsHtml)}
+              ${renderPopupRow("Grid export", gridExportHtml)}
               <span style="color: #94a3b8;">Imagery:</span> ${escapeHtml(p.imageryQuality || "N/A")} · ${escapeHtml(p.imageryDate || "N/A")}<br/>
               <span style="color: #94a3b8;">Match distance:</span> ${escapeHtml(formatNumber(p.matchDistanceMeters, 1))} m
             </div>
