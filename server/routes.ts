@@ -9,6 +9,8 @@ import { getBuildingData } from "./services/buildingService";
 import { getPopulationData } from "./services/worldpopService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import { fetchSiteLayer, SITE_LAYER_CONFIGS } from "./services/osmSitesService";
+import { getPowerLinesData } from "./services/powerLinesService";
+import { getBuildingsData, getBuildingTypeColors, getCommercialBuildingsData } from "./services/buildingsDataService";
 import { getFlood2024Data } from "./services/flood2024Service";
 import { getElderlyPopulationData } from "./services/elderlyService";
 import {
@@ -529,6 +531,33 @@ export async function registerRoutes(
       const data = await fetchSiteLayer(layerId, bounds);
       saveSampleData(cacheFile, data);
       res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/buildings", async (_req, res) => {
+    try {
+      const data = await getBuildingsData();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/buildings/commercial", async (_req, res) => {
+    try {
+      const data = await getCommercialBuildingsData();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/building-colors", async (_req, res) => {
+    try {
+      const colors = getBuildingTypeColors();
+      res.json(colors);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

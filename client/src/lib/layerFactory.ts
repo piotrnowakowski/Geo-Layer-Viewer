@@ -568,6 +568,46 @@ export function createLayerFromData(layerId: string, data: any): L.Layer | null 
       return group;
     }
 
+    case "obm-buildings": {
+      const geoJson = getGeoJson(data);
+      if (!geoJson?.features) return null;
+      
+      const buildingTypeColors: Record<string, string> = {
+        "Residential (single-family)": "#3B82F6",     // Blue
+        "Multi-family residential": "#06B6D4",        // Cyan
+        "Commercial": "#F59E0B",                      // Amber
+        "Industrial": "#8B5CF6",                      // Purple
+        "Agricultural": "#22C55E",                    // Green
+        "Education": "#EC4899",                       // Pink
+        "Government": "#DC2626",                      // Red
+        "Assembly": "#F97316",                        // Orange
+        "Mixed-use": "#14B8A6",                       // Teal
+      };
+      
+      return L.geoJSON(geoJson, {
+        pointToLayer: (feature: any, latlng) => {
+          const buildingType = feature.properties?.building_type || "Unknown";
+          const color = buildingTypeColors[buildingType] || feature.properties?.color || "#6B7280";
+          return L.circleMarker(latlng, {
+            radius: 4,
+            fillOpacity: 0.8,
+            weight: 0.5,
+            opacity: 0.9,
+            color,
+            fillColor: color,
+          });
+        },
+        onEachFeature: (feature: any, layer: L.Layer) => {
+          const buildingType = feature.properties?.building_type || "Unknown";
+          const height = feature.properties?.height ? ` (${feature.properties.height}m)` : "";
+          const source = feature.properties?.source ? ` [${feature.properties.source}]` : "";
+          const popupText = `<strong>${buildingType}</strong>${height}${source}`;
+          (layer as any).bindPopup(popupText);
+          (layer as any).bindTooltip(buildingType, { sticky: true });
+        },
+      });
+    }
+
     default:
       return null;
   }

@@ -69,7 +69,7 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
           {LAYER_SECTIONS.map((section) => {
             const sectionGroups = LAYER_GROUPS.filter((g) => g.section === section.id);
             const sectionLayers = layers.filter((l) =>
-              sectionGroups.some((g) => g.id === l.group)
+              sectionGroups.some((g) => g.id === l.group) && l.available
             );
             if (sectionLayers.length === 0) return null;
 
@@ -97,7 +97,7 @@ export default function EvidenceDrawer({ layers, onToggleLayer }: EvidenceDrawer
                 {/* Sub-groups inside section */}
                 <div className="pl-0 space-y-2.5">
                   {sectionGroups.map((group) => {
-                    const groupLayers = layers.filter((l) => l.group === group.id);
+                    const groupLayers = layers.filter((l) => l.group === group.id && l.available);
                     if (groupLayers.length === 0) return null;
 
                     return (
