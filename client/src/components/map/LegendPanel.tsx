@@ -472,7 +472,7 @@ function MunicipalSolarPanel({
             visible across the selected tiers.
           </div>
         </div>
-        <div className="text-[9px] text-right text-zinc-500 max-w-[120px]">
+        <div className="text-[9px] text-right text-zinc-500 max-w-[156px]">
           Priority score = normalized yearly generation + roof area.
         </div>
       </div>
@@ -694,7 +694,7 @@ export default function LegendPanel({ layers, municipalSolarPanel }: Props) {
 
   return (
     <div
-      className="site-explorer-panel absolute bottom-0 right-4 z-[1001] w-52 rounded-t-xl overflow-hidden flex flex-col"
+      className="site-explorer-panel absolute bottom-0 right-4 z-[1001] w-[min(22rem,calc(100vw-2rem))] rounded-t-xl overflow-hidden flex flex-col"
       style={{
         backgroundColor: "rgba(12, 12, 16, 0.93)",
         backdropFilter: "blur(10px)",

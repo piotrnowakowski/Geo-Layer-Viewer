@@ -13,3 +13,6 @@ iptu/iptu_2025.csv
 iptu/iptu_2025_cleaned.csv
 client/public/sample-data/porto-alegre-google-solar-commercial-buildings.json
 client/public/sample-data/porto-alegre-google-solar-municipal-buildings.json
+client/public/sample-data/porto-alegre-google-solar-commercial-buildings.*.json
+pv_panel_data/*.json
+data/building_type/.cache/
