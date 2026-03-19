@@ -10,7 +10,7 @@ import { getPopulationData } from "./services/worldpopService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import { fetchSiteLayer, SITE_LAYER_CONFIGS } from "./services/osmSitesService";
 import { getPowerLinesData } from "./services/powerLinesService";
-import { getBuildingsData, getBuildingTypeColors, getCommercialBuildingsData } from "./services/buildingsDataService";
+import { getBuildingsData, getBuildingTypeColors, getCommercialBuildingsData, getIPTUNeighbourhoodsData } from "./services/buildingsDataService";
 import { getFlood2024Data } from "./services/flood2024Service";
 import { getElderlyPopulationData } from "./services/elderlyService";
 import {
@@ -444,7 +444,7 @@ export async function registerRoutes(
 
   app.get("/api/geospatial/iptu-neighbourhoods", async (_req, res) => {
     try {
-      const data = await fetchAndCacheS3GeoJSON("iptu-neighbourhoods");
+      const data = await getIPTUNeighbourhoodsData();
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });

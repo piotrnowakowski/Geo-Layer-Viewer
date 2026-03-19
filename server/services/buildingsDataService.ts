@@ -8,6 +8,13 @@ export interface BuildingsData {
   geoJson: any;
 }
 
+export interface IPTUNeighbourhoodsData {
+  layerId: string;
+  label: string;
+  featureCount: number;
+  geoJson: any;
+}
+
 const BUILDINGS_CONFIG = {
   layerId: "obm-buildings",
   label: "OBM Buildings (Porto Alegre)",
@@ -119,4 +126,39 @@ export async function getCommercialBuildingsData(): Promise<BuildingsData> {
 
 export function getBuildingTypeColors(): Record<string, string> {
   return BUILDING_TYPE_COLORS;
+}
+
+let cachedIPTUData: IPTUNeighbourhoodsData | null = null;
+
+export async function getIPTUNeighbourhoodsData(): Promise<IPTUNeighbourhoodsData> {
+  // Return cached data if available
+  if (cachedIPTUData) {
+    return cachedIPTUData;
+  }
+
+  try {
+    // Load GeoJSON file from Geo-Layer-Viewer data directory
+    const dataFilePath = path.join(process.cwd(), "data/iptu/poa_iptu_neighbourhoods.geojson");
+    const fileContent = fs.readFileSync(dataFilePath, "utf-8");
+    const geoJson = JSON.parse(fileContent);
+
+    if (!geoJson.features || !Array.isArray(geoJson.features)) {
+      throw new Error("Invalid GeoJSON: no features array found");
+    }
+
+    console.log(`Loaded ${geoJson.features.length} IPTU neighbourhood features`);
+
+    cachedIPTUData = {
+      layerId: "iptu-neighbourhoods",
+      label: "IPTU by Neighbourhood",
+      featureCount: geoJson.features.length,
+      geoJson,
+    };
+
+    console.log(`IPTU neighbourhoods data cached: ${cachedIPTUData.featureCount} features`);
+    return cachedIPTUData;
+  } catch (error: any) {
+    console.error("Failed to load IPTU neighbourhoods data:", error);
+    throw new Error(`Failed to load IPTU neighbourhoods data: ${error.message}`);
+  }
 }
