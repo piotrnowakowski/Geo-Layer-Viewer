@@ -34,6 +34,11 @@ interface MergeOptions {
   listInputs: boolean;
 }
 
+interface CarbonOffsetModel {
+  gridEmissionFactorKgCo2ePerMwh?: unknown;
+  gridEmissionFactorKgCo2ePerKwh?: unknown;
+}
+
 function toStringValue(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -154,6 +159,52 @@ function stripRawGoogleBuildingInsights(feature: GeoJsonFeature): GeoJsonFeature
   };
 }
 
+function getEstimatedCarbonFactorKgPerKwh(model: unknown): number | null {
+  if (!model || typeof model !== "object") return null;
+
+  const candidate = model as CarbonOffsetModel;
+  if (
+    typeof candidate.gridEmissionFactorKgCo2ePerKwh === "number" &&
+    Number.isFinite(candidate.gridEmissionFactorKgCo2ePerKwh)
+  ) {
+    return candidate.gridEmissionFactorKgCo2ePerKwh;
+  }
+
+  if (
+    typeof candidate.gridEmissionFactorKgCo2ePerMwh === "number" &&
+    Number.isFinite(candidate.gridEmissionFactorKgCo2ePerMwh)
+  ) {
+    return candidate.gridEmissionFactorKgCo2ePerMwh / 1000;
+  }
+
+  return null;
+}
+
+function normalizeEstimatedCarbonOffset(
+  feature: GeoJsonFeature,
+  estimatedCarbonOffsetModel: unknown
+): GeoJsonFeature {
+  const properties = feature.properties ?? {};
+  const maxYearlyEnergyDcKwh = properties.maxYearlyEnergyDcKwh;
+  const carbonFactorKgPerKwh = getEstimatedCarbonFactorKgPerKwh(estimatedCarbonOffsetModel);
+
+  if (
+    typeof maxYearlyEnergyDcKwh !== "number" ||
+    !Number.isFinite(maxYearlyEnergyDcKwh) ||
+    carbonFactorKgPerKwh === null
+  ) {
+    return feature;
+  }
+
+  return {
+    ...feature,
+    properties: {
+      ...properties,
+      estimatedCarbonOffsetKgPerYear: maxYearlyEnergyDcKwh * carbonFactorKgPerKwh,
+    },
+  };
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const inputPaths =
@@ -229,7 +280,9 @@ async function main() {
     }
   }
 
-  const features = Array.from(mergedFeatures.values()).sort(compareFeatureOrder);
+  const features = Array.from(mergedFeatures.values())
+    .map((feature) => normalizeEstimatedCarbonOffset(feature, estimatedCarbonOffsetModel))
+    .sort(compareFeatureOrder);
   const featureCountByNeighbourhood: Record<string, number> = {};
   for (const feature of features) {
     const neighbourhoodName = getNeighbourhoodName(feature);
