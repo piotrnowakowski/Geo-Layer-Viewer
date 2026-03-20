@@ -25,6 +25,34 @@ export function getSolarColor(pvout: number): string {
   return '#fef3c7';
 }
 
+export const GOOGLE_SOLAR_OUTPUT_COLORS = ['#fef3c7', '#fde68a', '#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+
+export function getGoogleSolarOutputColor(
+  annualEnergyKwh: number,
+  minAnnualEnergyKwh: number,
+  maxAnnualEnergyKwh: number
+): string {
+  if (!Number.isFinite(annualEnergyKwh)) return GOOGLE_SOLAR_OUTPUT_COLORS[0];
+  if (
+    !Number.isFinite(minAnnualEnergyKwh) ||
+    !Number.isFinite(maxAnnualEnergyKwh) ||
+    maxAnnualEnergyKwh <= minAnnualEnergyKwh
+  ) {
+    return GOOGLE_SOLAR_OUTPUT_COLORS[3];
+  }
+
+  const normalized = Math.min(
+    1,
+    Math.max(0, (annualEnergyKwh - minAnnualEnergyKwh) / (maxAnnualEnergyKwh - minAnnualEnergyKwh))
+  );
+  if (normalized >= 0.9) return GOOGLE_SOLAR_OUTPUT_COLORS[5];
+  if (normalized >= 0.7) return GOOGLE_SOLAR_OUTPUT_COLORS[4];
+  if (normalized >= 0.5) return GOOGLE_SOLAR_OUTPUT_COLORS[3];
+  if (normalized >= 0.3) return GOOGLE_SOLAR_OUTPUT_COLORS[2];
+  if (normalized >= 0.15) return GOOGLE_SOLAR_OUTPUT_COLORS[1];
+  return GOOGLE_SOLAR_OUTPUT_COLORS[0];
+}
+
 export function getPovertyColor(rate: number): string {
   if (rate >= 0.15) return '#581c87';
   if (rate >= 0.10) return '#7e22ce';

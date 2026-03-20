@@ -4,11 +4,21 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "pv:municipal-buildings": "python3 script/convert_municipal_buildings.py",
+    "solar:import-municipal": "tsx script/import-google-solar-municipal.ts",
+    "solar:import-municipal:test100": "tsx script/import-google-solar-municipal.ts --limit 100",
+    "solar:seed-municipal:test100": "tsx script/import-google-solar-municipal.ts --seed-only --limit 100",
+    "solar:list-commercial-neighbourhoods": "tsx script/import-google-solar-commercial.ts --list-neighbourhoods",
+    "solar:import-commercial": "tsx script/import-google-solar-commercial.ts",
+    "solar:import-commercial:test10": "tsx script/import-google-solar-commercial.ts --limit 10",
+    "solar:seed-commercial:test10": "tsx script/import-google-solar-commercial.ts --seed-only --limit 10",
+    "solar:aggregate-commercial-neighbourhoods": "tsx script/aggregate-google-solar-commercial-neighbourhoods.ts",
+    "solar:merge-commercial": "tsx script/merge-google-solar-commercial.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -97,13 +107,15 @@
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.20",
+    "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.8",
     "esbuild": "^0.25.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.5",
     "typescript": "5.6.3",
-    "vite": "^7.3.0"
+    "vite": "^7.3.0",
+    "xlsx": "^0.18.5"
   },
   "overrides": {
     "drizzle-kit": {

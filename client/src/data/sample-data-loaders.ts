@@ -1,4 +1,59 @@
+import {
+  buildMunicipalBuildingsSolarLayerData,
+  isMunicipalBuildingsSolarLayerId,
+  MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID,
+} from "@/data/municipal-buildings-solar";
+
 const sampleDataCache = new Map<string, any>();
+
+const MUNICIPAL_BUILDINGS_GEOCODED_API_PATH = "/api/geospatial/municipal-buildings";
+const MUNICIPAL_BUILDINGS_SOLAR_API_PATH = "/api/geospatial/municipal-solar";
+const MUNICIPAL_BUILDINGS_SOLAR_SAMPLE_PATH =
+  "/sample-data/porto-alegre-google-solar-municipal-buildings.json";
+
+async function loadMunicipalBuildingsSolarData(): Promise<any> {
+  const cacheKey = MUNICIPAL_BUILDINGS_SOLAR_LAYER_ID;
+  if (sampleDataCache.has(cacheKey)) return sampleDataCache.get(cacheKey);
+
+  let solarSource: any = null;
+  try {
+    solarSource = await loadFromApi(
+      MUNICIPAL_BUILDINGS_SOLAR_API_PATH,
+      "municipal_buildings_solar_source"
+    );
+  } catch {
+    solarSource = await loadSampleData(MUNICIPAL_BUILDINGS_SOLAR_SAMPLE_PATH);
+  }
+  if (solarSource) {
+    sampleDataCache.set("municipal_buildings_solar_source", solarSource);
+  }
+
+  if (solarSource?.source === "municipal-buildings-solar" && solarSource?.geoJson?.features) {
+    sampleDataCache.set(cacheKey, solarSource);
+    return solarSource;
+  }
+
+  let geocodedSource = sampleDataCache.get("municipal_buildings_geocoded_source");
+  if (!geocodedSource) {
+    try {
+      geocodedSource = await loadFromApi(
+        MUNICIPAL_BUILDINGS_GEOCODED_API_PATH,
+        "municipal_buildings_geocoded_source"
+      );
+    } catch {
+      geocodedSource = null;
+    }
+  }
+
+  if (!solarSource && !geocodedSource) return null;
+
+  const layerData = buildMunicipalBuildingsSolarLayerData(
+    geocodedSource,
+    solarSource
+  );
+  sampleDataCache.set(cacheKey, layerData);
+  return layerData;
+}
 
 async function loadFromApi(apiPath: string, cacheKey: string): Promise<any> {
   if (sampleDataCache.has(cacheKey)) return sampleDataCache.get(cacheKey);
@@ -35,6 +90,10 @@ export async function loadBoundaryData(): Promise<any> {
 }
 
 export async function loadLayerData(layerId: string): Promise<any> {
+  if (isMunicipalBuildingsSolarLayerId(layerId)) {
+    return loadMunicipalBuildingsSolarData();
+  }
+
   const samplePaths: Record<string, string> = {
     rivers: "/sample-data/porto-alegre-rivers.json",
     grid_flood: "/sample-data/porto-alegre-grid.json",
@@ -43,6 +102,8 @@ export async function loadLayerData(layerId: string): Promise<any> {
     transit_stops: "/sample-data/porto-alegre-transit-stops.json",
     transit_routes: "/sample-data/porto-alegre-transit-routes.json",
     solar_potential: "/sample-data/porto-alegre-solar-neighbourhoods.json",
+    commercial_solar_neighbourhoods:
+      "/sample-data/porto-alegre-google-solar-commercial-neighbourhoods.current.json",
     ibge_census: "/sample-data/porto-alegre-ibge-indicators.json",
     ibge_settlements: "/sample-data/porto-alegre-ibge-settlements.json",
     sites_parks:      "/sample-data/porto-alegre-sites-parks.json",
@@ -54,6 +115,9 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_vacant:       "/sample-data/porto-alegre-sites-vacant.json",
     sites_flood_zones:  "/sample-data/porto-alegre-sites-flood_zones.json",
     sites_flood2024:    "/sample-data/porto-alegre-flood-2024.json",
+    power_infrastructure: "/sample-data/porto-alegre-mapbiomas-power-infrastructure.json",
+    "obm-buildings":    "/sample-data/porto-alegre-buildings-commercial.json",
+    "iptu-neighbourhoods": "/sample-data/poa-iptu-neighbourhoods.json",
   };
 
   const apiPaths: Record<string, string> = {
@@ -74,6 +138,9 @@ export async function loadLayerData(layerId: string): Promise<any> {
     sites_social:    "/api/geospatial/sites/sites_social",
     sites_vacant:      "/api/geospatial/sites/sites_vacant",
     sites_flood_zones: "/api/geospatial/sites/sites_flood_zones",
+    power_infrastructure: "/api/geospatial/mapbiomas-power-infrastructure",
+    "obm-buildings":   "/api/geospatial/buildings/commercial",
+    "iptu-neighbourhoods": "/api/geospatial/iptu-neighbourhoods",
   };
 
   const samplePath = samplePaths[layerId];

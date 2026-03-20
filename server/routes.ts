@@ -9,6 +9,7 @@ import { getBuildingData } from "./services/buildingService";
 import { getPopulationData } from "./services/worldpopService";
 import { getElevationData, computeElevationMetrics } from "./services/copernicusService";
 import { fetchSiteLayer, SITE_LAYER_CONFIGS } from "./services/osmSitesService";
+import { getBuildingsData, getBuildingTypeColors, getCommercialBuildingsData, getIPTUNeighbourhoodsData } from "./services/buildingsDataService";
 import { getFlood2024Data } from "./services/flood2024Service";
 import { getElderlyPopulationData } from "./services/elderlyService";
 import {
@@ -27,6 +28,7 @@ import {
   listRasterDatasets,
   preloadRasterDatasets,
 } from "./services/cogSamplerService";
+import { buildMunicipalBuildingsSolarLayerData } from "../client/src/data/municipal-buildings-solar";
 import {
   loadLayer,
   listVectorLayers,
@@ -157,6 +159,10 @@ const S3_GEOJSON_URLS: Record<string, string> = {
   "solar-neighbourhoods": "https://geo-test-api.s3.us-east-1.amazonaws.com/global_solar_atlas/release/v2/poa_solar_neighbourhoods.geojson",
   "ibge-indicators": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2010/porto_alegre/porto_alegre_indicators.geojson",
   "ibge-settlements": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2024/porto_alegre/poa_informal_settlements.geojson",
+  "mapbiomas-power-infrastructure": "https://geo-test-api.s3.us-east-1.amazonaws.com/mapbiomass_energy_infra/energy_infrastructure.geojson",
+  "iptu-neighbourhoods": "https://geo-test-api.s3.us-east-1.amazonaws.com/br_ibge/release/2010/porto_alegre/poa_iptu_neighbourhoods.geojson",
+  "municipal-solar": "https://geo-test-api.s3.us-east-1.amazonaws.com/poa-data/porto-alegre-google-solar-municipal-buildings.json",
+  "commercial-solar": "https://geo-test-api.s3.us-east-1.amazonaws.com/poa-data/porto-alegre-google-solar-commercial-buildings.json",
 };
 
 const S3_CACHE_FILES: Record<string, string> = {
@@ -165,6 +171,10 @@ const S3_CACHE_FILES: Record<string, string> = {
   "solar-neighbourhoods": "porto-alegre-solar-neighbourhoods.json",
   "ibge-indicators": "porto-alegre-ibge-indicators.json",
   "ibge-settlements": "porto-alegre-ibge-settlements.json",
+  "mapbiomas-power-infrastructure": "porto-alegre-mapbiomas-power-infrastructure.json",
+  "iptu-neighbourhoods": "poa-iptu-neighbourhoods.json",
+  "municipal-solar": "porto-alegre-google-solar-municipal-buildings.json",
+  "commercial-solar": "porto-alegre-google-solar-commercial-buildings.json",
 };
 
 function getSampleDataPath(filename: string): string {
@@ -189,6 +199,112 @@ function loadCachedData(filename: string): any | null {
     }
   }
   return null;
+}
+
+function loadMunicipalBuildingsGeoJson(): any {
+  const filePath = path.resolve(
+    process.cwd(),
+    "pv_panel_data",
+    "Municipal_buildings.geocoded.json"
+  );
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(
+      "Municipal buildings geocoded file not found at pv_panel_data/Municipal_buildings.geocoded.json"
+    );
+  }
+
+  const raw = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const records = Array.isArray(raw?.records) ? raw.records : [];
+
+  const features = records.flatMap((record: any) => {
+    const latitude = record?.location?.latitude;
+    const longitude = record?.location?.longitude;
+
+    if (
+      typeof latitude !== "number" ||
+      !Number.isFinite(latitude) ||
+      typeof longitude !== "number" ||
+      !Number.isFinite(longitude)
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude],
+        },
+        properties: {
+          municipalBuildingId: record?.item ?? null,
+          utilizedBy: typeof record?.utilizedBy === "string" ? record.utilizedBy : null,
+          sourceStreet: record?.address?.street ?? null,
+          sourceNumber: record?.address?.number ?? null,
+          sourceNeighborhood: record?.address?.neighborhood ?? null,
+          sourceCity: record?.address?.city ?? null,
+          sourceState: record?.address?.state ?? null,
+          sourceCountry: record?.address?.country ?? null,
+          sourceAddress: record?.address?.formatted ?? null,
+          locationPrecision: record?.location?.precision ?? null,
+          locationSource: record?.location?.source ?? null,
+          matchStatus: record?.match?.status ?? null,
+          matchQueryUsed: record?.match?.queryUsed ?? null,
+          matchedAddress: record?.match?.matchedAddress ?? null,
+          matchedPostalCode: record?.match?.postalCode ?? null,
+          matchProvider: record?.match?.provider ?? null,
+          matchScore:
+            typeof record?.match?.score === "number" &&
+            Number.isFinite(record.match.score)
+              ? record.match.score
+              : null,
+          matchAddrType: record?.match?.addrType ?? null,
+          matchDistrict: record?.match?.district ?? null,
+        },
+      },
+    ];
+  });
+
+  return {
+    source: "municipal-buildings-geocoded",
+    inputFile: "pv_panel_data/Municipal_buildings.geocoded.json",
+    generatedAt: raw?.metadata?.generatedAt ?? null,
+    geocoder: raw?.metadata?.geocoder ?? null,
+    totalRows:
+      typeof raw?.metadata?.totalRows === "number"
+        ? raw.metadata.totalRows
+        : records.length,
+    matchedRows:
+      typeof raw?.metadata?.matchedRows === "number"
+        ? raw.metadata.matchedRows
+        : features.length,
+    unmatchedRows:
+      typeof raw?.metadata?.unmatchedRows === "number"
+        ? raw.metadata.unmatchedRows
+        : 0,
+    geoJson: {
+      type: "FeatureCollection",
+      features,
+    },
+  };
+}
+
+async function loadMunicipalSolarLayerData(): Promise<any> {
+  const geocodedSource = loadMunicipalBuildingsGeoJson();
+  let solarSource: any = null;
+
+  try {
+    solarSource = await fetchAndCacheS3GeoJSON("municipal-solar");
+  } catch (error) {
+    console.warn(
+      `[municipal-solar] Falling back to geocoded-only municipal registry: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  return buildMunicipalBuildingsSolarLayerData(geocodedSource, solarSource);
 }
 
 function getBoundsFromBoundary(boundary: any): GeoBounds {
@@ -396,6 +512,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/geospatial/municipal-buildings", (_req, res) => {
+    try {
+      const data = loadMunicipalBuildingsGeoJson();
+      res.json(data);
+    } catch (error: any) {
+      res.status(404).json({ message: error.message });
+    }
+  });
+
   app.get("/api/geospatial/ibge-indicators", async (_req, res) => {
     try {
       const data = await fetchAndCacheS3GeoJSON("ibge-indicators");
@@ -408,6 +533,42 @@ export async function registerRoutes(
   app.get("/api/geospatial/ibge-settlements", async (_req, res) => {
     try {
       const data = await fetchAndCacheS3GeoJSON("ibge-settlements");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/mapbiomas-power-infrastructure", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("mapbiomas-power-infrastructure");
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/iptu-neighbourhoods", async (_req, res) => {
+    try {
+      const data = await getIPTUNeighbourhoodsData();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/municipal-solar", async (_req, res) => {
+    try {
+      const data = await loadMunicipalSolarLayerData();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/commercial-solar", async (_req, res) => {
+    try {
+      const data = await fetchAndCacheS3GeoJSON("commercial-solar");
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -505,6 +666,33 @@ export async function registerRoutes(
       const data = await fetchSiteLayer(layerId, bounds);
       saveSampleData(cacheFile, data);
       res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/buildings", async (_req, res) => {
+    try {
+      const data = await getBuildingsData();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/buildings/commercial", async (_req, res) => {
+    try {
+      const data = await getCommercialBuildingsData();
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/geospatial/building-colors", async (_req, res) => {
+    try {
+      const colors = getBuildingTypeColors();
+      res.json(colors);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { ArrowLeft, ExternalLink, FlaskConical, CheckCircle2 } from "lucide-react";
 import { LAYER_CONFIGS, LAYER_GROUPS, LAYER_SECTIONS, type LayerConfig } from "@/data/layer-configs";
+import { isMunicipalBuildingsSolarLayerId } from "@/data/municipal-buildings-solar";
 
 interface LayerDataInfo {
   id: string;
@@ -53,6 +54,14 @@ const ACCESS_COPERNICUS_DEM =
   "using 'aws s3 cp --no-sign-request', then mosaic with gdalwarp. " +
   "Also accessible server-side via Google Earth Engine (asset: COPERNICUS/DEM/GLO30).";
 
+const MUNICIPAL_BUILDINGS_SOLAR_METHODOLOGY =
+  "Municipal Building Solar combines the geocoded municipal registry at pv_panel_data/Municipal_buildings.geocoded.json with the real Google Building Insights export stored at client/public/sample-data/porto-alegre-google-solar-municipal-buildings.json. " +
+  "The viewer merges the 1,338 solar-enriched buildings with the two municipal records missing solar enrichment, then ranks the full portfolio by a composite score: 0.5 × normalized maxYearlyEnergyDcKwh + 0.5 × normalized roof area. " +
+  "High, Medium, and Low priority are exposed as tier filters inside the legend-side panel rather than as separate layers.";
+
+const MUNICIPAL_BUILDINGS_SOLAR_NOTES =
+  "Estimated capacity, investment, and annual CO2 offset are available for most buildings. Payback remains unavailable because the current Google Building Insights export contains no financialAnalyses entries. Two buildings (IDs 374 and 998) fall back to geocoded-only points with no solar metrics.";
+
 function getRawDataAccess(layerId: string): string {
   if (layerId.startsWith("oef_chirps_")) return ACCESS_CHIRPS;
   if (layerId.startsWith("oef_era5_")) return ACCESS_ERA5;
@@ -99,6 +108,17 @@ function getInToolValueDescription(layer: LayerConfig): string {
       "GHI_mean (kWh/m²/year), DNI_mean. Hover any neighbourhood polygon to see the values. " +
       "Raw data also available via the Global Solar Atlas API.";
   }
+  if (layer.id === "commercial_solar_neighbourhoods") {
+    return "Real values are stored directly on each neighbourhood polygon: commercial_building_count, " +
+      "total_yearly_energy_dc_kwh, total_investment_brl, and total_estimated_co2_savings_tonnes_per_year. " +
+      "The layer reflects the merged set of completed commercial Google Building Insights imports currently available locally.";
+  }
+  if (isMunicipalBuildingsSolarLayerId(layer.id)) {
+    return "Real values stored as GeoJSON point properties from the municipal solar export: " +
+      "priorityScore, priorityTier, maxYearlyEnergyDcKwh, maxArrayPanelsCount, panelCapacityWatts, " +
+      "estimatedInvestmentCost, estimatedCarbonOffsetKgPerYear, sourceAddress, matchedAddress, and utilizedBy. " +
+      "Click any building marker to inspect the detail card. Payback is currently unavailable in the source export.";
+  }
   if (layer.id === "ibge_census") {
     return "Real values available as GeoJSON feature properties: poverty_rate (0–1), population_total, " +
       "pct_low_income, pct_high_income, pct_piped_water, pct_formal_sewage, pop_density_km² " +
@@ -131,6 +151,24 @@ const LAYER_DATA_INFO: LayerDataInfo[] = [
     resolution: "Source: 250m raster; aggregated to neighbourhood polygons",
     coverage: "99 Porto Alegre neighbourhoods",
     notes: "PVOUT represents the specific yield of a grid-connected PV system with optimally tilted modules. Typical range in Porto Alegre: 3.8-4.3 kWh/kWp/day.",
+  },
+  {
+    id: "municipal_buildings_solar",
+    methodology: MUNICIPAL_BUILDINGS_SOLAR_METHODOLOGY,
+    source: "Google Building Insights municipal export + ArcGIS-geocoded municipal registry",
+    date: "Imported 2026-03-19",
+    resolution: "Individual municipal building points with per-building solar properties",
+    coverage: "1,340 municipal buildings in the portfolio — 1,338 with solar enrichment and 2 geocoded-only fallbacks",
+    notes: MUNICIPAL_BUILDINGS_SOLAR_NOTES,
+  },
+  {
+    id: "commercial_solar_neighbourhoods",
+    methodology: "Commercial Solar by Neighbourhood merges the completed local Google Building Insights commercial building exports into one current building-level file, then aggregates those enriched buildings to IPTU neighbourhood polygons. Totals include summed maxYearlyEnergyDcKwh, summed estimatedInvestmentCost.amount, and summed estimatedCarbonOffsetKgPerYear for every completed neighbourhood import currently present in client/public/sample-data.",
+    source: "Local merged Google Building Insights commercial exports + IPTU neighbourhood polygons",
+    date: "Current local merge snapshot",
+    resolution: "Neighbourhood polygons with totals derived from completed commercial building point imports",
+    coverage: "Current merged subset of Porto Alegre neighbourhoods with completed commercial solar processing",
+    notes: "This is a progress overlay, not yet full-city coverage. As more commercial neighbourhood runs are completed and merged, the same file can be regenerated to expand the overlay.",
   },
   {
     id: "transit_stops",
