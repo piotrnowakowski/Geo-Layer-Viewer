@@ -28,21 +28,22 @@
     ]
   },
   "estimatedCarbonOffsetModel": {
-    "formula": "estimatedCarbonOffsetKgPerYear = maxYearlyEnergyDcKwh / 1000 * 59.9",
+    "formula": "estimatedCarbonOffsetKgPerYear = maxYearlyEnergyDcKwh * 0.8",
     "generationField": "solarPotential.solarPanelConfigs[*].yearlyEnergyDcKwh (maximum panel layout)",
     "outputUnit": "kg CO2e/year",
-    "gridEmissionFactorKgCo2ePerMwh": 59.9,
-    "gridEmissionFactorBaseYear": 2024,
-    "source": "MME / EPE Balanço Energético Nacional 2025 (ano base 2024)",
-    "sourceUrl": "https://www.gov.br/mme/pt-br/assuntos/noticias/brasil-avanca-na-descarbonizacao-da-matriz-energetica"
+    "gridEmissionFactorKgCo2ePerMwh": 800,
+    "gridEmissionFactorBaseYear": null,
+    "source": "User-provided 0.8 kg CO2e/kWh factor",
+    "sourceUrl": "",
+    "gridEmissionFactorKgCo2ePerKwh": 0.8
   },
   "summary": {
     "totalCommercialBuildingCount": 538,
     "totalYearlyEnergyDcKwh": 108231408.557,
     "totalYearlyEnergyDcMwh": 108231.409,
     "totalInvestmentBrl": 38651067.58,
-    "totalEstimatedCo2SavingsKgPerYear": 6483061.373,
-    "totalEstimatedCo2SavingsTonnesPerYear": 6483.061,
+    "totalEstimatedCo2SavingsKgPerYear": 86585126.846,
+    "totalEstimatedCo2SavingsTonnesPerYear": 86585.127,
     "totalGoogleCo2SavingsKgPerYear": 0,
     "totalGoogleCo2SavingsTonnesPerYear": 0,
     "unassignedBuildingCount": 0,
@@ -752,8 +753,8 @@
           "total_yearly_energy_dc_kwh": 45320032.528,
           "total_yearly_energy_dc_mwh": 45320.033,
           "total_investment_brl": 18575068.61,
-          "total_estimated_co2_savings_kg_per_year": 2714669.948,
-          "total_estimated_co2_savings_tonnes_per_year": 2714.67,
+          "total_estimated_co2_savings_kg_per_year": 36256026.022,
+          "total_estimated_co2_savings_tonnes_per_year": 36256.026,
           "total_google_co2_savings_kg_per_year": 0,
           "total_google_co2_savings_tonnes_per_year": 0,
           "investment_currency_code": "BRL"
@@ -2099,8 +2100,8 @@
           "total_yearly_energy_dc_kwh": 62911376.029,
           "total_yearly_energy_dc_mwh": 62911.376,
           "total_investment_brl": 20075998.97,
-          "total_estimated_co2_savings_kg_per_year": 3768391.424,
-          "total_estimated_co2_savings_tonnes_per_year": 3768.391,
+          "total_estimated_co2_savings_kg_per_year": 50329100.823,
+          "total_estimated_co2_savings_tonnes_per_year": 50329.101,
           "total_google_co2_savings_kg_per_year": 0,
           "total_google_co2_savings_tonnes_per_year": 0,
           "investment_currency_code": "BRL"

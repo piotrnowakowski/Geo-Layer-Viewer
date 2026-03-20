@@ -9421,8 +9421,8 @@
         "total_rs": 10297499.29,
         "registros": 2800,
         "commercial_buildings_count": 13,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 8806768.54,
+        "tax_per_commercial_building": 677443.73
       }
     },
     {
@@ -12283,7 +12283,7 @@
         "total_rs": 880471.05,
         "registros": 682,
         "commercial_buildings_count": 0,
-        "iptu_total_tax": null,
+        "iptu_total_tax": 804276.68,
         "tax_per_commercial_building": null
       }
     },
@@ -12488,7 +12488,7 @@
         "total_rs": 880471.05,
         "registros": 682,
         "commercial_buildings_count": 0,
-        "iptu_total_tax": null,
+        "iptu_total_tax": 804276.68,
         "tax_per_commercial_building": null
       }
     },
@@ -31465,8 +31465,8 @@
         "total_rs": 12116898.98,
         "registros": 12440,
         "commercial_buildings_count": 72,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 10818733.44,
+        "tax_per_commercial_building": 150260.19
       }
     },
     {
@@ -33136,8 +33136,8 @@
         "total_rs": 1147183.62,
         "registros": 1235,
         "commercial_buildings_count": 15,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 1111045.1,
+        "tax_per_commercial_building": 74069.67
       }
     },
     {
@@ -35329,8 +35329,8 @@
         "total_rs": 20987322.88,
         "registros": 5565,
         "commercial_buildings_count": 18,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 20023813.48,
+        "tax_per_commercial_building": 1112434.08
       }
     },
     {
@@ -49747,8 +49747,8 @@
         "total_rs": 4630438.15,
         "registros": 11441,
         "commercial_buildings_count": 8,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 4424643.0,
+        "tax_per_commercial_building": 553080.38
       }
     },
     {
@@ -58573,8 +58573,8 @@
         "total_rs": 2912113.21,
         "registros": 2730,
         "commercial_buildings_count": 9,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 2785812.17,
+        "tax_per_commercial_building": 309534.69
       }
     },
     {
@@ -60970,8 +60970,8 @@
         "total_rs": 63860788.78,
         "registros": 19945,
         "commercial_buildings_count": 261,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 61356220.68,
+        "tax_per_commercial_building": 235081.31
       }
     },
     {
@@ -63397,8 +63397,8 @@
         "total_rs": 8529643.92,
         "registros": 3265,
         "commercial_buildings_count": 29,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 8004811.01,
+        "tax_per_commercial_building": 276027.97
       }
     },
     {
@@ -68950,8 +68950,8 @@
         "total_rs": 5563649.67,
         "registros": 5108,
         "commercial_buildings_count": 3,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 5169728.34,
+        "tax_per_commercial_building": 1723242.78
       }
     },
     {
@@ -72569,8 +72569,8 @@
         "total_rs": 95138665.47,
         "registros": 51780,
         "commercial_buildings_count": 527,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 90872302.7,
+        "tax_per_commercial_building": 172433.21
       }
     },
     {
@@ -73556,8 +73556,8 @@
         "total_rs": 40820269.08,
         "registros": 15830,
         "commercial_buildings_count": 33,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 38505126.85,
+        "tax_per_commercial_building": 1166822.03
       }
     },
     {
@@ -76517,8 +76517,8 @@
         "total_rs": 7161697.41,
         "registros": 8284,
         "commercial_buildings_count": 29,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 6628265.27,
+        "tax_per_commercial_building": 228560.87
       }
     },
     {
@@ -76798,7 +76798,7 @@
         "total_rs": 4382427.14,
         "registros": 3705,
         "commercial_buildings_count": 0,
-        "iptu_total_tax": null,
+        "iptu_total_tax": 4203056.32,
         "tax_per_commercial_building": null
       }
     },
@@ -77119,8 +77119,8 @@
         "total_rs": 55049156.24,
         "registros": 32578,
         "commercial_buildings_count": 348,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 52490017.75,
+        "tax_per_commercial_building": 150833.38
       }
     },
     {
@@ -78033,8 +78033,8 @@
         "total_rs": 4820938.59,
         "registros": 4549,
         "commercial_buildings_count": 12,
-        "iptu_total_tax": null,
-        "tax_per_commercial_building": null
+        "iptu_total_tax": 4502147.18,
+        "tax_per_commercial_building": 375178.93
       }
     },
     {
