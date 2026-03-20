@@ -13,6 +13,7 @@ import Header from "@/components/layout/Header";
 import EvidenceDrawer from "./EvidenceDrawer";
 import LegendPanel from "./LegendPanel";
 import ValueTooltip from "./ValueTooltip";
+import InterventionsContainer from "@/components/interventions/InterventionsContainer";
 
 const DEFAULT_MUNICIPAL_SOLAR_TIERS: Record<
   MunicipalBuildingsSolarPriorityTier,
@@ -516,6 +517,8 @@ export default function MapViewer() {
               : null
           }
         />
+
+        <InterventionsContainer map={mapRef.current} />
 
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-[2000]">
