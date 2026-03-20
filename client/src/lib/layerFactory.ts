@@ -280,11 +280,21 @@ export function createLayerFromData(
       if (!geoJson?.features) return null;
       const visibleTiers = options.municipalSolarVisibleTiers;
       const selectedBuildingId = options.selectedMunicipalSolarBuildingId ?? null;
+      const renderOrder: Record<string, number> = {
+        unscored: 0,
+        low: 1,
+        medium: 2,
+        high: 3,
+      };
       const filteredFeatures = Array.isArray(geoJson.features)
         ? geoJson.features.filter((feature: any) => {
-            if (!visibleTiers || visibleTiers.size === 0) return true;
+            if (!visibleTiers) return true;
             const tier = feature?.properties?.priorityTier;
             return typeof tier === "string" && visibleTiers.has(tier);
+          }).sort((a: any, b: any) => {
+            const aTier = a?.properties?.priorityTier;
+            const bTier = b?.properties?.priorityTier;
+            return (renderOrder[aTier] ?? 0) - (renderOrder[bTier] ?? 0);
           })
         : [];
 
@@ -336,7 +346,7 @@ export function createLayerFromData(
             const investmentAmount = getMunicipalBuildingsSolarInvestmentAmount(p);
             const summaryBits = [
               isFiniteNumber(p.priorityScore)
-                ? `Score ${formatNumber(p.priorityScore, 1)}`
+                ? `${formatNumber(p.priorityScore, 0)} panels`
                 : null,
               capacityKw !== null ? `${formatNumber(capacityKw, 1)} kW` : null,
               annualEnergyKwh !== null ? `${formatNumber(annualEnergyKwh, 0)} kWh/yr` : null,

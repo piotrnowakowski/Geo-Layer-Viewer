@@ -289,18 +289,18 @@ function getLegendInfoItems(layer: LayerState): LegendInfoItem[] {
         label: "Tiering",
         description:
           summary?.scoreMethod ??
-          "Priority score averages normalized yearly generation and usable roof area, then ranks the portfolio into 20/40/40 tiers.",
+          "Tiering uses maxArrayPanelsCount only. Buildings are ranked descending by the number of PV panels they can host: top 20% High, next 50% Medium, remaining 30% Low. Records without panel counts remain unscored.",
       },
       {
         label: "Source",
         description:
-          "The layer uses the real municipal Google Building Insights export in client/public/sample-data/porto-alegre-google-solar-municipal-buildings.json, with geocoded source records added back for the two buildings missing solar enrichment.",
+          "The layer uses the real municipal Google Building Insights export in client/public/sample-data/porto-alegre-google-solar-municipal-buildings.json, with the geocoded municipal registry merged back in for records that still lack solar enrichment.",
       },
       {
         label: "Portfolio",
         description:
           summary
-            ? `${summary.enrichedBuildings.toLocaleString()} buildings carry solar metrics and ${summary.geocodedOnlyBuildings.toLocaleString()} remain geocoded-only placeholders. Payback is unavailable in the current export because the source dataset contains no financial analysis entries.`
+            ? `${summary.enrichedBuildings.toLocaleString()} buildings currently carry solar metrics and ${summary.geocodedOnlyBuildings.toLocaleString()} remain unscored registry placeholders. Payback is unavailable in the current export because the source dataset contains no financial analysis entries.`
             : "The municipal solar portfolio combines solar-enriched buildings with geocoded-only placeholders when no solar enrichment is present.",
       },
     ];
@@ -435,6 +435,10 @@ function MunicipalSolarPanel({
   const metrics = summarizeMunicipalSolarMetrics(selectedFeatures);
   const totalBuildings =
     typeof summary?.totalBuildings === "number" ? summary.totalBuildings : selectedFeatures.length;
+  const selectedScoredCount = selectedFeatures.filter(
+    (feature: any) => feature?.properties?.priorityTier !== "unscored"
+  ).length;
+  const selectedUnscoredCount = selectedFeatures.length - selectedScoredCount;
   const selectedProperties = panel.selectedFeature?.properties || null;
   const selectedTier =
     selectedProperties?.priorityTier as MunicipalBuildingsSolarPriorityTier | undefined;
@@ -470,15 +474,22 @@ function MunicipalSolarPanel({
           </div>
           <div className="mt-1 text-[9px] leading-snug text-zinc-500">
             {metrics.selectedCount.toLocaleString()} of {totalBuildings.toLocaleString()} buildings
-            visible across the selected tiers.
+            included in the selected tiers.
+          </div>
+          <div className="mt-1 text-[9px] leading-snug text-zinc-500">
+            {selectedScoredCount.toLocaleString()} tiered by panel count
+            {selectedUnscoredCount > 0
+              ? ` · ${selectedUnscoredCount.toLocaleString()} unscored registry records`
+              : ""}
           </div>
         </div>
         <div className="text-[9px] text-right text-zinc-500 max-w-[156px]">
-          Priority score = normalized yearly generation + roof area.
+          Tiers are based on max PV panel count. Only scored buildings contribute to
+          capacity, investment, and CO2 totals.
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-1.5">
+      <div className="mt-3 grid grid-cols-2 gap-1.5">
         {MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_TIERS.map((tier) => {
           const bucket = summary?.[tier];
           const enabled = panel.visibleTiers[tier];
@@ -503,7 +514,9 @@ function MunicipalSolarPanel({
               </div>
               <div className="mt-1 text-[9px] text-zinc-500">
                 {typeof bucket?.count === "number"
-                  ? `${bucket.count.toLocaleString()} buildings`
+                  ? tier === "unscored"
+                    ? `${bucket.count.toLocaleString()} buildings`
+                    : `${bucket.count.toLocaleString()} scored buildings`
                   : "No data"}
               </div>
             </button>
@@ -557,6 +570,13 @@ function MunicipalSolarPanel({
         export contains no financial analysis entries.
       </div>
 
+      {selectedUnscoredCount > 0 && (
+        <div className="mt-2 text-[9px] leading-snug text-zinc-500">
+          Unscored buildings are real municipal registry points with location data, but they
+          do not carry Google solar enrichment in the current municipal export.
+        </div>
+      )}
+
       <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/70 p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -588,10 +608,10 @@ function MunicipalSolarPanel({
         {selectedProperties ? (
           <div className="mt-3 space-y-2">
             <DetailRow
-              label="Score"
+              label="Max Panels"
               value={
                 typeof selectedProperties.priorityScore === "number"
-                  ? formatMetricNumber(selectedProperties.priorityScore, 1)
+                  ? formatMetricNumber(selectedProperties.priorityScore, 0)
                   : "Unavailable"
               }
             />

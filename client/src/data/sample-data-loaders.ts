@@ -29,8 +29,9 @@ async function loadMunicipalBuildingsSolarData(): Promise<any> {
   }
 
   if (solarSource?.source === "municipal-buildings-solar" && solarSource?.geoJson?.features) {
-    sampleDataCache.set(cacheKey, solarSource);
-    return solarSource;
+    const layerData = buildMunicipalBuildingsSolarLayerData(null, solarSource);
+    sampleDataCache.set(cacheKey, layerData);
+    return layerData;
   }
 
   let geocodedSource = sampleDataCache.get("municipal_buildings_geocoded_source");

@@ -1,6 +1,5 @@
 import { Link } from "wouter";
-import { Database, Sun, Zap } from "lucide-react";
-import { SiGithub } from "react-icons/si";
+import { Map, Sun } from "lucide-react";
 
 export default function Header() {
   return (
@@ -34,11 +33,11 @@ export default function Header() {
       <div className="flex items-center gap-2">
         <Link href="/">
           <a
-            data-testid="link-interventions"
+            data-testid="link-map-page"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors"
           >
-            <Zap className="w-3.5 h-3.5" />
-            Interventions
+            <Map className="w-3.5 h-3.5" />
+            Map
           </a>
         </Link>
         <Link href="/solar-regulation">
@@ -50,25 +49,6 @@ export default function Header() {
             Solar Demo
           </a>
         </Link>
-        <Link href="/data">
-          <a
-            data-testid="link-data-page"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors"
-          >
-            <Database className="w-3.5 h-3.5" />
-            Data
-          </a>
-        </Link>
-        <a
-          href="https://github.com/joaquinOEF/Geo-Layer-Viewer"
-          target="_blank"
-          rel="noopener noreferrer"
-          data-testid="link-github-repo"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors"
-        >
-          <SiGithub className="w-3.5 h-3.5" />
-          GitHub
-        </a>
       </div>
     </header>
   );

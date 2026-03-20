@@ -34,6 +34,24 @@ server/
 
 ---
 
+## Municipal solar data caveat
+
+As of `2026-03-20`, the current municipal solar layer is a **hybrid** of two real datasets:
+
+- `pv_panel_data/Municipal_buildings.geocoded.json` — the full municipal registry geocoded locally (`1340` matched rows)
+- `s3://geo-test-api/poa-data/porto-alegre-google-solar-municipal-buildings.json` — the current Google Solar municipal export, which is **not** a full-municipality enrichment
+
+Important confirmed facts:
+
+- The S3 object `poa-data/porto-alegre-google-solar-municipal-buildings.json` is about `5.5 MB`
+- Its JSON header currently contains `totalMatchedRecords: 1340`, `selectedLimit: 100`, and `featureCount: 100`
+- The local cache copy at `client/public/sample-data/porto-alegre-google-solar-municipal-buildings.json` matches that same limited export
+- The server route `/api/geospatial/municipal-solar` merges that 100-record enriched solar export with the 1340-row geocoded registry, so the frontend can show `100` scored buildings plus `1240` unscored registry records
+
+Do **not** describe the current municipal solar layer as a full 1340-building solar-enriched dataset unless the municipal S3 object is replaced with a true full-run export.
+
+---
+
 ## Layer taxonomy
 
 Every layer belongs to exactly one **group**, every group to one **section**.

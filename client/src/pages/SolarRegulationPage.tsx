@@ -344,7 +344,7 @@ export default function SolarRegulationPage() {
             <Link href="/">
               <a className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-900/95 px-3 py-2 text-sm text-zinc-100 backdrop-blur hover:bg-zinc-800/95">
                 <ArrowLeft className="h-4 w-4" />
-                Back To Main Map
+                Back To Map
               </a>
             </Link>
 
@@ -391,7 +391,7 @@ export default function SolarRegulationPage() {
                   <div>
                     <h1 className="text-xl font-semibold">Building Solar Regulation</h1>
                     <p className="text-sm text-zinc-400">
-                      Standalone IPTU Sustentável demo. Existing app flows are untouched.
+                      IPTU Sustentável demo alongside the main geospatial map.
                     </p>
                   </div>
                   <Badge className="border-blue-500/30 bg-blue-500/20 text-blue-100">

@@ -4,6 +4,7 @@ export const MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_TIERS = [
   "high",
   "medium",
   "low",
+  "unscored",
 ] as const;
 
 export type MunicipalBuildingsSolarPriorityTier =
@@ -16,15 +17,18 @@ export const MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS: Record<
   high: "High Priority",
   medium: "Medium Priority",
   low: "Low Priority",
+  unscored: "Unscored",
 };
 
 export const MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_DESCRIPTIONS: Record<
   MunicipalBuildingsSolarPriorityTier,
   string
 > = {
-  high: "Top 20% by composite score: largest rooftops and highest yearly generation.",
-  medium: "Next 40%: strong solar candidates with moderate rooftop constraints.",
-  low: "Remaining 40%: lower-return or data-poor sites retained for full portfolio coverage.",
+  high: "Top 20% by maximum PV panel count.",
+  medium: "Next 50% by maximum PV panel count.",
+  low: "Remaining 30% of scored buildings by maximum PV panel count.",
+  unscored:
+    "Municipal registry records with no current Google Building Insights enrichment, so no panel-count tier can be computed.",
 };
 
 export const MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS: Record<
@@ -34,10 +38,11 @@ export const MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_COLORS: Record<
   high: "#ef4444",
   medium: "#f59e0b",
   low: "#38bdf8",
+  unscored: "#71717a",
 };
 
 const HIGH_SHARE = 0.2;
-const HIGH_PLUS_MEDIUM_SHARE = 0.6;
+const HIGH_PLUS_MEDIUM_SHARE = 0.7;
 
 interface MunicipalBuildingsSolarPriorityBucket {
   count: number;
@@ -53,11 +58,13 @@ export interface MunicipalBuildingsSolarPrioritySummary {
   high: MunicipalBuildingsSolarPriorityBucket;
   medium: MunicipalBuildingsSolarPriorityBucket;
   low: MunicipalBuildingsSolarPriorityBucket;
+  unscored: MunicipalBuildingsSolarPriorityBucket;
 }
 
 interface RankedMunicipalSolarFeature {
   feature: any;
   score: number;
+  panelCount: number | null;
   annualEnergyKwh: number | null;
   roofAreaM2: number | null;
   tier?: MunicipalBuildingsSolarPriorityTier;
@@ -89,12 +96,6 @@ function compareNumberDesc(a: number | null, b: number | null): number {
   if (a === null) return 1;
   if (b === null) return -1;
   return b - a;
-}
-
-function normalize(value: number | null, minValue: number, maxValue: number): number | null {
-  if (!isFiniteNumber(value)) return null;
-  if (maxValue <= minValue) return 1;
-  return (value - minValue) / (maxValue - minValue);
 }
 
 function getGeoJson(data: any): any {
@@ -157,10 +158,7 @@ export function getMunicipalBuildingsSolarRoofAreaM2(properties: any): number | 
 }
 
 export function getMunicipalBuildingsSolarCapacityKw(properties: any): number | null {
-  const panelCount = firstFiniteNumber(
-    properties?.maxArrayPanelsCount,
-    properties?.googleBuildingInsights?.solarPotential?.maxArrayPanelsCount
-  );
+  const panelCount = getMunicipalBuildingsSolarPanelCount(properties);
   const panelCapacityWatts = firstFiniteNumber(
     properties?.panelCapacityWatts,
     properties?.googleBuildingInsights?.solarPotential?.panelCapacityWatts
@@ -168,6 +166,14 @@ export function getMunicipalBuildingsSolarCapacityKw(properties: any): number | 
 
   if (panelCount === null || panelCapacityWatts === null) return null;
   return (panelCount * panelCapacityWatts) / 1000;
+}
+
+export function getMunicipalBuildingsSolarPanelCount(properties: any): number | null {
+  return firstFiniteNumber(
+    properties?.priorityPanelCount,
+    properties?.maxArrayPanelsCount,
+    properties?.googleBuildingInsights?.solarPotential?.maxArrayPanelsCount
+  );
 }
 
 export function getMunicipalBuildingsSolarInvestmentAmount(properties: any): number | null {
@@ -310,6 +316,10 @@ function summarizeBucket(
   };
 }
 
+function hasPriorityPanelCount(panelCount: number | null): boolean {
+  return panelCount !== null;
+}
+
 export function buildMunicipalBuildingsSolarLayerData(
   geocodedSource: any,
   solarSource: any
@@ -346,49 +356,23 @@ export function buildMunicipalBuildingsSolarLayerData(
     )
     .filter(Boolean);
 
-  const annualEnergyValues = mergedFeatures
-    .map((feature: any) => getMunicipalBuildingsSolarAnnualEnergyKwh(feature?.properties))
-    .filter(isFiniteNumber);
-  const roofAreaValues = mergedFeatures
-    .map((feature: any) => getMunicipalBuildingsSolarRoofAreaM2(feature?.properties))
-    .filter(isFiniteNumber);
-
-  const minAnnualEnergy =
-    annualEnergyValues.length > 0 ? Math.min(...annualEnergyValues) : 0;
-  const maxAnnualEnergy =
-    annualEnergyValues.length > 0 ? Math.max(...annualEnergyValues) : 0;
-  const minRoofArea = roofAreaValues.length > 0 ? Math.min(...roofAreaValues) : 0;
-  const maxRoofArea = roofAreaValues.length > 0 ? Math.max(...roofAreaValues) : 0;
-
   const ranked = mergedFeatures
     .map((feature: any): RankedMunicipalSolarFeature => {
+      const panelCount = getMunicipalBuildingsSolarPanelCount(feature?.properties);
       const annualEnergyKwh = getMunicipalBuildingsSolarAnnualEnergyKwh(
         feature?.properties
       );
       const roofAreaM2 = getMunicipalBuildingsSolarRoofAreaM2(feature?.properties);
-      const normalizedEnergy = normalize(
-        annualEnergyKwh,
-        minAnnualEnergy,
-        maxAnnualEnergy
-      );
-      const normalizedRoofArea = normalize(roofAreaM2, minRoofArea, maxRoofArea);
-      const availableComponents = [normalizedEnergy, normalizedRoofArea].filter(
-        isFiniteNumber
-      );
-      const score =
-        availableComponents.length > 0
-          ? (availableComponents.reduce((sum, value) => sum + value, 0) /
-              availableComponents.length) *
-            100
-          : 0;
 
       return {
         feature,
-        score,
+        score: panelCount ?? 0,
+        panelCount,
         annualEnergyKwh,
         roofAreaM2,
       };
     })
+    .filter((feature) => hasPriorityPanelCount(feature.panelCount))
     .sort((a, b) => {
       const byScore = compareNumberDesc(a.score, b.score);
       if (byScore !== 0) return byScore;
@@ -405,9 +389,9 @@ export function buildMunicipalBuildingsSolarLayerData(
     })
     .map((rankedFeature, index, rankedFeatures) => {
       const rank = index + 1;
-      const totalBuildings = rankedFeatures.length;
-      const highCutoff = Math.ceil(totalBuildings * HIGH_SHARE);
-      const mediumCutoff = Math.ceil(totalBuildings * HIGH_PLUS_MEDIUM_SHARE);
+      const totalRankedBuildings = rankedFeatures.length;
+      const highCutoff = Math.ceil(totalRankedBuildings * HIGH_SHARE);
+      const mediumCutoff = Math.ceil(totalRankedBuildings * HIGH_PLUS_MEDIUM_SHARE);
       const tier: MunicipalBuildingsSolarPriorityTier =
         rank <= highCutoff ? "high" : rank <= mediumCutoff ? "medium" : "low";
       const properties = rankedFeature.feature?.properties || {};
@@ -423,8 +407,9 @@ export function buildMunicipalBuildingsSolarLayerData(
             priorityLabel: MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS[tier],
             priorityDescription: MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_DESCRIPTIONS[tier],
             priorityRank: rank,
-            priorityScore: roundTo(rankedFeature.score),
-            priorityPercentile: roundTo((rank / totalBuildings) * 100),
+            priorityScore: rankedFeature.panelCount,
+            priorityPercentile: roundTo((rank / totalRankedBuildings) * 100),
+            priorityPanelCount: rankedFeature.panelCount,
             priorityAnnualEnergyKwh: rankedFeature.annualEnergyKwh,
             priorityRoofAreaM2: rankedFeature.roofAreaM2,
             priorityCapacityKw: getMunicipalBuildingsSolarCapacityKw(properties),
@@ -436,17 +421,49 @@ export function buildMunicipalBuildingsSolarLayerData(
       };
     });
 
-  const enrichedBuildings = ranked.filter(
-    (feature) => feature.feature?.properties?.importStatus !== "seed_only"
+  const rankedIds = new Set(
+    ranked.map((feature) => String(getMunicipalBuildingId(feature.feature)))
+  );
+
+  const unscored = mergedFeatures
+    .filter((feature: any) => !rankedIds.has(String(getMunicipalBuildingId(feature))))
+    .map((feature: any) => {
+      const properties = feature?.properties || {};
+      return {
+        feature: {
+          ...feature,
+          properties: {
+            ...properties,
+            priorityTier: "unscored" as MunicipalBuildingsSolarPriorityTier,
+            priorityLabel: MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_LABELS.unscored,
+            priorityDescription:
+              MUNICIPAL_BUILDINGS_SOLAR_PRIORITY_DESCRIPTIONS.unscored,
+            priorityRank: null,
+            priorityScore: null,
+            priorityPercentile: null,
+            priorityPanelCount: null,
+            priorityAnnualEnergyKwh: null,
+            priorityRoofAreaM2: null,
+            priorityCapacityKw: getMunicipalBuildingsSolarCapacityKw(properties),
+            priorityInvestmentBrl: getMunicipalBuildingsSolarInvestmentAmount(properties),
+            priorityCarbonOffsetKgPerYear:
+              getMunicipalBuildingsSolarCarbonOffsetKgPerYear(properties),
+          },
+        },
+      };
+    });
+
+  const enrichedBuildings = mergedFeatures.filter(
+    (feature: any) => feature?.properties?.importStatus !== "seed_only"
   ).length;
-  const geocodedOnlyBuildings = ranked.length - enrichedBuildings;
+  const geocodedOnlyBuildings = mergedFeatures.length - enrichedBuildings;
 
   const summary: MunicipalBuildingsSolarPrioritySummary = {
-    totalBuildings: ranked.length,
+    totalBuildings: mergedFeatures.length,
     enrichedBuildings,
     geocodedOnlyBuildings,
     scoreMethod:
-      "Priority score = 0.5 × normalized maxYearlyEnergyDcKwh + 0.5 × normalized roof area, ranked descending into 20/40/40 tiers.",
+      "Tiering uses maxArrayPanelsCount only. Buildings are ranked descending by the number of PV panels they can host: top 20% High, next 50% Medium, remaining 30% Low. Records without panel counts remain unscored.",
     high: summarizeBucket(ranked as Array<
       RankedMunicipalSolarFeature & { tier: MunicipalBuildingsSolarPriorityTier }
     >, "high"),
@@ -456,6 +473,11 @@ export function buildMunicipalBuildingsSolarLayerData(
     low: summarizeBucket(ranked as Array<
       RankedMunicipalSolarFeature & { tier: MunicipalBuildingsSolarPriorityTier }
     >, "low"),
+    unscored: {
+      count: unscored.length,
+      minScore: null,
+      maxScore: null,
+    },
   };
 
   const baseWrapper =
@@ -477,7 +499,18 @@ export function buildMunicipalBuildingsSolarLayerData(
     priorityTierSummary: summary,
     geoJson: {
       type: "FeatureCollection",
-      features: ranked.map((feature) => feature.feature),
+      features: [
+        ...unscored.map((feature) => feature.feature),
+        ...ranked
+          .filter((feature) => feature.tier === "low")
+          .map((feature) => feature.feature),
+        ...ranked
+          .filter((feature) => feature.tier === "medium")
+          .map((feature) => feature.feature),
+        ...ranked
+          .filter((feature) => feature.tier === "high")
+          .map((feature) => feature.feature),
+      ],
     },
   };
 }
